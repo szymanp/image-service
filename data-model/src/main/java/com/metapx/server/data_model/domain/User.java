@@ -2,48 +2,45 @@ package com.metapx.server.data_model.domain;
 
 import org.jooq.DSLContext;
 
-import com.metapx.server.data_model.jooq.Tables;
 import com.metapx.server.data_model.jooq.tables.records.UsersRecord;
 
 public class User {
-  private Integer id;
-  private String handle;
-  private String displayName;
-  private String emailAddress;
+  private UsersRecord record;
 
-  public User() {}
+  public User() {
+    record = new UsersRecord();
+  }
 
   public User(UsersRecord record) {
-    id = record.getId();
-    handle = record.getHandle();
-    displayName = record.getDisplayName();
-    emailAddress = record.getEmailAddress();
-  }
-  
-  public Integer getId() { return id; }
-
-  public String getHandle() { return handle; }
-  public void setHandle(String handle) { this.handle = handle; }
-
-  public String getDisplayName() { return displayName; }
-  public void setDisplayName(String displayName) { this.displayName = displayName; }
-
-  public String getEmailAddress() { return emailAddress; }
-  public void setEmailAddress(String emailAddress) { this.emailAddress = emailAddress; }
-  
-  public void update(DSLContext dslContext) {
-    UsersRecord record = dslContext.newRecord(Tables.USERS, this);
-    dslContext.executeUpdate(record);
+    this.record = record;
   }
 
-  public void create(DSLContext dslContext) {
-    UsersRecord record = dslContext.newRecord(Tables.USERS, this);
-    dslContext.executeInsert(record);
-    this.id = record.getId();
+  public Integer getId() { return record.getId(); }
+
+  public String getHandle() { return record.getHandle(); }
+  public void setHandle(String handle) { record.setHandle(handle); }
+
+  public String getDisplayName() { return record.getDisplayName(); }
+  public void setDisplayName(String displayName) { record.setDisplayName(displayName); }
+
+  public String getEmailAddress() { return record.getEmailAddress(); }
+  public void setEmailAddress(String emailAddress) { record.setEmailAddress(emailAddress); }
+
+  public boolean isNew() {
+    return (record.key().get(0) == null);
+  }
+
+  public void save(DSLContext dslContext) {
+    record.attach(dslContext.configuration());
+    record.store();
+  }
+  
+  public void delete(DSLContext dslContext) {
+    dslContext.executeDelete(record);
   }
 
   @Override
   public String toString() {
-    return "[" + User.class.getSimpleName() + ": " + handle + "]";
+    return "[" + this.getClass().getSimpleName() + ": " + getHandle() + "]";
   }
 }

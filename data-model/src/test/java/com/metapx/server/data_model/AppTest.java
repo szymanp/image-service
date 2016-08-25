@@ -38,10 +38,15 @@ public class AppTest extends TestCase {
     user.create(dslContext);
     */
     
-    List<User> into = dslContext.select()
+    User user = new User();
+    assertTrue(user.isNew());
+    
+    List<User> users = dslContext.select()
         .from(Tables.USERS)
         .fetchStream()
         .map(r -> new User((UsersRecord)r)).collect(Collectors.toList());
-    System.out.println(into);
+    
+    assertFalse(users.get(0).isNew());
+    System.out.println(users);
   }
 }

@@ -104,6 +104,7 @@
 							<name>org.jooq.util.postgres.PostgresDatabase</name>
 							<includes>.*</includes>
 							<excludes />
+							<recordVersionFields>rec_version</recordVersionFields>
 							<inputSchema>${jdbc.database.schema}</inputSchema>
 						</database>
 						<generate>
