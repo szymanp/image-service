@@ -3,15 +3,11 @@ package com.metapx.server.ImageService;
 import static com.metapx.server.data_model.jooq.Tables.*;
 
 import java.net.HttpURLConnection;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 
 import javax.sql.DataSource;
 
 import org.jooq.DSLContext;
-import org.jooq.SQLDialect;
-import org.jooq.impl.DSL;
 
 import com.metapx.server.data_model.domain.User;
 import com.metapx.server.data_model.jooq.tables.records.UsersRecord;

@@ -11,11 +11,12 @@ import io.vertx.ext.web.Router;
 
 public class RestVerticle extends AbstractVerticle {
 
+  final private ApplicationContext context = new ClassPathXmlApplicationContext("services.xml");
+
   @Override
   public void start() throws Exception {
     super.start();
     
-    ApplicationContext context = new ClassPathXmlApplicationContext("services.xml");
     DataSource dataSource = context.getBean("dataSource", DataSource.class);
     
     System.out.println("Hello World from RestVerticle!");
