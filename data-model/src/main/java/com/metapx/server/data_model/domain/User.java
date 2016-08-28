@@ -2,6 +2,7 @@ package com.metapx.server.data_model.domain;
 
 import org.jooq.DSLContext;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.metapx.server.data_model.jooq.tables.records.UsersRecord;
 
 public class User {
@@ -26,6 +27,7 @@ public class User {
   public String getEmailAddress() { return record.getEmailAddress(); }
   public void setEmailAddress(String emailAddress) { record.setEmailAddress(emailAddress); }
 
+  @JsonIgnore
   public boolean isNew() {
     return (record.key().get(0) == null);
   }
