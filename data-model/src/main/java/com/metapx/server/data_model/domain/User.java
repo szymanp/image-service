@@ -36,7 +36,8 @@ public class User {
   }
   
   public void delete(DSLContext dslContext) {
-    dslContext.executeDelete(record);
+    record.attach(dslContext.configuration());
+    record.delete();
   }
 
   @Override

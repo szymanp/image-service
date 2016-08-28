@@ -28,4 +28,22 @@ public class ModelTest extends BaseDatabaseTest {
     assertEquals(user.getId(), fetchedUser.getId());
     assertEquals(user.getDisplayName(), fetchedUser.getDisplayName());
   }
+  
+  @Test
+  public void testDeleteUser() {
+    User fetchedUser = dslContext.select()
+      .from(Tables.USERS)
+      .where(Tables.USERS.HANDLE.eq("Administrator"))
+      .fetchOne(r -> new User((UsersRecord)r));
+    
+    assertNotNull(fetchedUser);
+    fetchedUser.delete(dslContext);
+    
+    int count = dslContext.fetchCount(
+        dslContext.select()
+        .from(Tables.USERS)
+        .where(Tables.USERS.HANDLE.eq("Administrator")));
+    
+    assertEquals(0, count);
+  }
 }
