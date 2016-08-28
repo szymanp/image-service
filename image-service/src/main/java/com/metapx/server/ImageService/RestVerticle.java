@@ -30,6 +30,6 @@ public class RestVerticle extends AbstractVerticle {
     
     new UserEndpoint(dataSource).register(router);
     
-    httpServer.requestHandler(router::accept).listen(8080);
+    httpServer.requestHandler(router::accept).listen(config().getInteger("http.port", 8080));
   }
 }
