@@ -35,7 +35,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Users extends TableImpl<UsersRecord> {
 
-    private static final long serialVersionUID = -1625802072;
+    private static final long serialVersionUID = 1185310929;
 
     /**
      * The reference instance of <code>public.users</code>
@@ -79,6 +79,21 @@ public class Users extends TableImpl<UsersRecord> {
      * The column <code>public.users.salt</code>.
      */
     public final TableField<UsersRecord, String> SALT = createField("salt", org.jooq.impl.SQLDataType.VARCHAR.length(10), this, "");
+
+    /**
+     * The column <code>public.users.verified</code>.
+     */
+    public final TableField<UsersRecord, Boolean> VERIFIED = createField("verified", org.jooq.impl.SQLDataType.BOOLEAN.nullable(false).defaultValue(org.jooq.impl.DSL.field("false", org.jooq.impl.SQLDataType.BOOLEAN)), this, "");
+
+    /**
+     * The column <code>public.users.active</code>.
+     */
+    public final TableField<UsersRecord, Boolean> ACTIVE = createField("active", org.jooq.impl.SQLDataType.BOOLEAN.nullable(false).defaultValue(org.jooq.impl.DSL.field("false", org.jooq.impl.SQLDataType.BOOLEAN)), this, "");
+
+    /**
+     * The column <code>public.users.token</code>.
+     */
+    public final TableField<UsersRecord, String> TOKEN = createField("token", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
 
     /**
      * Create a <code>public.users</code> table reference
@@ -131,7 +146,7 @@ public class Users extends TableImpl<UsersRecord> {
      */
     @Override
     public List<UniqueKey<UsersRecord>> getKeys() {
-        return Arrays.<UniqueKey<UsersRecord>>asList(Keys.USERS_PKEY, Keys.USERS_U_HANDLE);
+        return Arrays.<UniqueKey<UsersRecord>>asList(Keys.USERS_PKEY, Keys.USERS_U_HANDLE, Keys.USERS_U_EMAIL);
     }
 
     /**

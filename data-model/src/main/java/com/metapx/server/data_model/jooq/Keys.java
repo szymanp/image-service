@@ -40,6 +40,7 @@ public class Keys {
 
     public static final UniqueKey<UsersRecord> USERS_PKEY = UniqueKeys0.USERS_PKEY;
     public static final UniqueKey<UsersRecord> USERS_U_HANDLE = UniqueKeys0.USERS_U_HANDLE;
+    public static final UniqueKey<UsersRecord> USERS_U_EMAIL = UniqueKeys0.USERS_U_EMAIL;
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions
@@ -57,5 +58,6 @@ public class Keys {
     private static class UniqueKeys0 extends AbstractKeys {
         public static final UniqueKey<UsersRecord> USERS_PKEY = createUniqueKey(Users.USERS, "users_pkey", Users.USERS.ID);
         public static final UniqueKey<UsersRecord> USERS_U_HANDLE = createUniqueKey(Users.USERS, "users_u_handle", Users.USERS.HANDLE);
+        public static final UniqueKey<UsersRecord> USERS_U_EMAIL = createUniqueKey(Users.USERS, "users_u_email", Users.USERS.EMAIL_ADDRESS);
     }
 }

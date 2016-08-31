@@ -1,2 +1,2 @@
-INSERT INTO users (handle, display_name) VALUES 
-  ('Administrator', 'System Administrator');
+INSERT INTO users (handle, display_name, active) VALUES 
+  ('Administrator', 'System Administrator', true);
