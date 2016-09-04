@@ -7,6 +7,8 @@ import com.metapx.server.data_model.jooq.tables.records.UsersRecord;
 
 public class User {
   private UsersRecord record;
+  
+  private String password;
 
   public User() {
     record = new UsersRecord();
@@ -27,6 +29,10 @@ public class User {
 
   public String getEmailAddress() { return record.getEmailAddress(); }
   public void setEmailAddress(String emailAddress) { record.setEmailAddress(emailAddress); }
+  
+  @JsonIgnore
+  public String getPassowrd() { return password; }
+  public void setPassword(String password) { this.password = password; }
 
   @JsonIgnore
   public boolean isNew() {

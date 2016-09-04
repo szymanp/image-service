@@ -35,5 +35,5 @@ public class UserEndpointTest extends EndpointTest {
         async.complete();
       });
     });
-}
+  }
 }
