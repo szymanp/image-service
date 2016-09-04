@@ -20,20 +20,6 @@ public class AuthenticationTest extends EndpointTest {
   protected List<String> getVerticles() {
     return Arrays.asList(RestVerticle.class.getName());
   }
-  
-  @Before
-  public void createUser() {
-    // TODO This user is not visible in the RestVerticle due to transaction handling.
-    //      The verticle is using another connection than the test.
-    final UsersRecord user = new UsersRecord();
-    user.setHandle("TestUser");
-    user.setDisplayName("Test User");
-    user.setEmailAddress("test@user.com");
-    user.setActive(true);
-    user.setSalt("salt");
-    user.setPassword(new PasswordManager.Default().computeHash("123456", user.getSalt()));
-    dsl.executeInsert(user);
-  }
 
   @Test
   public void testAuthenticationRequired(TestContext context) {
@@ -51,13 +37,13 @@ public class AuthenticationTest extends EndpointTest {
   public void testAuthenticated(TestContext context) {
     final Async async = context.async();
     HttpClientRequest request = vertx.createHttpClient().get(port, "localhost", "/auth", response -> {
-      String header = response.headers().get("WWW-Authenticate");
-      context.assertNotNull(header);
-      context.assertEquals("Basic realm=\"image-service\"", header);
       context.assertEquals(200, response.statusCode());
-      async.complete();
+      response.bodyHandler(body -> {
+        context.assertEquals("Authenticated", body.toString());
+        async.complete();
+      });
     });
-    request.putHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString("TestUser:123456".getBytes()));
+    request.putHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString("test-user:123456".getBytes()));
     request.end();
   } 
 }

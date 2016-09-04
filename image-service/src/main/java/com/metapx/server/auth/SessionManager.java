@@ -34,9 +34,6 @@ public class SessionManager implements AuthProvider {
           .where(Tables.USERS.HANDLE.equal(username))
           .fetchOne();
 
-      System.out.println(username);
-      System.out.println(user);
-    
       if (user == null) {
         future.fail("User does not exist");
         return;
