@@ -31,7 +31,7 @@ public class User {
   public void setEmailAddress(String emailAddress) { record.setEmailAddress(emailAddress); }
   
   @JsonIgnore
-  public String getPassowrd() { return password; }
+  public String getPassword() { return password; }
   public void setPassword(String password) { this.password = password; }
 
   @JsonIgnore
@@ -47,6 +47,10 @@ public class User {
   public void delete(DSLContext dslContext) {
     record.attach(dslContext.configuration());
     record.delete();
+  }
+  
+  public UsersRecord record() {
+    return this.record;
   }
 
   @Override
