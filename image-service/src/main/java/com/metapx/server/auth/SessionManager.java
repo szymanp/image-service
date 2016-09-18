@@ -89,6 +89,22 @@ public class SessionManager implements AuthProvider {
     });
   }
   
+  public void terminate(Session session, Handler<AsyncResult<Void>> result) {
+    ClusterWideMap.<String, JsonObject>get(ctx.vertx(), SESSION_MAP, resMap -> {
+      if (resMap.succeeded()) {
+        resMap.result().remove(session.getKey(), resSession -> {
+          if (resSession.succeeded()) {
+            result.handle(Future.succeededFuture());
+          } else {
+            result.handle(Future.failedFuture(resSession.cause()));
+          }
+        });
+      } else {
+        result.handle(Future.failedFuture(resMap.cause()));
+      }
+    });
+  }
+  
   private void createSession(UsersRecord user, AsyncMap<String, JsonObject> map, Handler<AsyncResult<Session>> result) {
     Session session = Session.create(user);
     

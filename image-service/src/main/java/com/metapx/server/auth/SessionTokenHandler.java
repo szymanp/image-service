@@ -9,7 +9,7 @@ import io.vertx.ext.web.RoutingContext;
  * Adds a session token header after initial login.
  *
  */
-public class SessionTokenHandler implements Handler<RoutingContext>{
+public class SessionTokenHandler implements Handler<RoutingContext> {
   
   public static final String HEADER = "X-SessionToken";
   

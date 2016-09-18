@@ -5,13 +5,13 @@ import javax.sql.DataSource;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.metapx.server.auth.LogoutHandler;
 import com.metapx.server.auth.SessionManager;
 import com.metapx.server.auth.SessionTokenHandler;
 import com.metapx.server.util.DataContext;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.http.HttpServer;
-import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BasicAuthHandler;
 
@@ -31,14 +31,15 @@ public class RestVerticle extends AbstractVerticle {
     HttpServer httpServer = vertx.createHttpServer();
     Router router = Router.router(vertx);
     
-    AuthProvider authProvider = new SessionManager(dataContext);
-    router.route("/auth").handler(BasicAuthHandler.create(authProvider, "image-service"));
-    router.route("/auth").handler(SessionTokenHandler.create());
+    SessionManager sessionManager = new SessionManager(dataContext);
+    router.route("/auth/*").handler(BasicAuthHandler.create(sessionManager, "image-service"));
+    router.route("/auth/*").handler(SessionTokenHandler.create());
+    router.route("/auth/logout").handler(new LogoutHandler(sessionManager));
     
     router.route("/hello").handler(routingContext -> {
       routingContext.response().end("Hello world");
     });
-    router.route("/auth").handler(routingContext -> {
+    router.route("/auth/*").handler(routingContext -> {
       routingContext.response().end("Authenticated");
     });
 

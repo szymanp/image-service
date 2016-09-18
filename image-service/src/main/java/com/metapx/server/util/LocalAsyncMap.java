@@ -46,8 +46,7 @@ public class LocalAsyncMap<K, V> implements AsyncMap<K, V> {
 
   @Override
   public void remove(K k, Handler<AsyncResult<V>> resultHandler) {
-    // TODO Auto-generated method stub
-    
+    resultHandler.handle(Future.succeededFuture(map.remove(k)));
   }
 
   @Override
