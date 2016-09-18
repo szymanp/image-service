@@ -4,11 +4,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
-
-import com.metapx.server.auth.PasswordManager;
-import com.metapx.server.data_model.jooq.tables.records.UsersRecord;
 
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.ext.unit.Async;
@@ -34,7 +30,7 @@ public class AuthenticationTest extends EndpointTest {
   }
 
   @Test
-  public void testAuthenticated(TestContext context) {
+  public void testAuthenticatedViaPassword(TestContext context) {
     final Async async = context.async();
     HttpClientRequest request = vertx.createHttpClient().get(port, "localhost", "/auth", response -> {
       context.assertEquals(200, response.statusCode());
@@ -43,6 +39,31 @@ public class AuthenticationTest extends EndpointTest {
         async.complete();
       });
     });
+    request.putHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString("test-user:123456".getBytes()));
+    request.end();
+  } 
+  
+  @Test
+  public void testAuthenticatedViaSession(TestContext context) {
+    final Async async = context.async();
+    
+
+    HttpClientRequest request = vertx.createHttpClient().get(port, "localhost", "/auth", response -> {
+      context.assertEquals(200, response.statusCode());
+      // This header should be available on the first login only.
+      String sessionToken = response.headers().get("X-SessionToken");
+      context.assertNotNull(sessionToken);
+
+      HttpClientRequest request2 = vertx.createHttpClient().get(port, "localhost", "/auth", response2 -> {
+        context.assertEquals(200, response2.statusCode());
+        context.assertNull(response2.headers().get("X-SessionToken"));
+        async.complete();
+      });
+      
+      request2.putHeader("Authorization", "Basic " + sessionToken);
+      request2.end();
+    });
+    
     request.putHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString("test-user:123456".getBytes()));
     request.end();
   } 

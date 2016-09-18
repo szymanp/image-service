@@ -6,6 +6,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.metapx.server.auth.SessionManager;
+import com.metapx.server.auth.SessionTokenHandler;
 import com.metapx.server.util.DataContext;
 
 import io.vertx.core.AbstractVerticle;
@@ -32,6 +33,7 @@ public class RestVerticle extends AbstractVerticle {
     
     AuthProvider authProvider = new SessionManager(dataContext);
     router.route("/auth").handler(BasicAuthHandler.create(authProvider, "image-service"));
+    router.route("/auth").handler(SessionTokenHandler.create());
     
     router.route("/hello").handler(routingContext -> {
       routingContext.response().end("Hello world");
