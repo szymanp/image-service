@@ -12,7 +12,6 @@ public class ClusterWideMap {
    * Returns a cluster-wide map or a instance-wide map, depending on whether the cluster configuration is enabled. 
    * @param vertx
    * @param name
-   * @param handler
    */
   public static <K, V> Single<AsyncMap<K, V>> get(Vertx vertx, String name) {
     if (vertx.isClustered()) {

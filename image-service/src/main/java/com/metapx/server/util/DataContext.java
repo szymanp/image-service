@@ -55,32 +55,38 @@ public class DataContext {
     }, result);
   }
   
+  /**
+   * Returns an observable providing DSLContext.
+   * The subscription on this observable executes in a separate thread from the main event-loop.
+   * 
+   * @return an observable providing a DSLContext.
+   */
   public Single<DSLContext> getDslContext() {
     return Single.<DSLContext, Connection>using(
-        () -> {
+      () -> {
+        try {
+          System.out.println("connection.get");
+          return this.dataSource.getConnection();
+        } catch (Exception e) {
+          throw Exceptions.propagate(e);
+        }
+      }, 
+      (connection) -> {
+        if (connection != null) {
+          return Single.just(DSL.using(connection, SQLDialect.POSTGRES));
+        } else {
+          return Single.error(new Exception("Cannot obtain connection"));
+        }
+      },
+      (connection) -> {
+        if (connection != null)
+          System.out.println("connection.close");
           try {
-            System.out.println("connection.get");
-            return this.dataSource.getConnection();
+            connection.close();
           } catch (Exception e) {
             throw Exceptions.propagate(e);
           }
-        }, 
-        (connection) -> {
-          if (connection != null) {
-            return Single.just(DSL.using(connection, SQLDialect.POSTGRES));
-          } else {
-            return Single.error(new Exception("Cannot obtain connection"));
-          }
-        },
-        (connection) -> {
-          if (connection != null)
-            System.out.println("connection.close");
-            try {
-              connection.close();
-            } catch (Exception e) {
-              throw Exceptions.propagate(e);
-            }
-        })
+      })
     .subscribeOn(RxHelper.blockingScheduler(vertx));
   }
   
