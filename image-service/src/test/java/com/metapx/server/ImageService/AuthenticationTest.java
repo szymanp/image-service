@@ -41,6 +41,17 @@ public class AuthenticationTest extends EndpointTest {
     });
     request.putHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString("test-user:123456".getBytes()));
     request.end();
+  }
+  
+  @Test
+  public void testInvalidPassword(TestContext context) {
+    final Async async = context.async();
+    HttpClientRequest request = vertx.createHttpClient().get(port, "localhost", "/auth", response -> {
+      context.assertEquals(401, response.statusCode());
+      async.complete();
+    });
+    request.putHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString("test-user:bla".getBytes()));
+    request.end();
   } 
   
   @Test
