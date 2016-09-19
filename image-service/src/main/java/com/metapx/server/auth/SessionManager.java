@@ -49,58 +49,47 @@ public class SessionManager implements AuthProvider {
         throw new RuntimeException("Invalid password");
       }
     }).subscribe(
-        (user) -> {
-          ClusterWideMap.<String, JsonObject>get(ctx.vertx(), SESSION_MAP, resMap -> {
-            if (resMap.succeeded()) {
-              createSession(user, resMap.result())
-              .subscribe(
-                  (session) -> result.handle(Future.succeededFuture(new AuthenticatedUser(session))),
-                  (error) -> result.handle(Future.failedFuture(error))
-              );
-            } else {
-              result.handle(Future.failedFuture(resMap.cause()));
-            }
-          });
-        }, 
-        (error) -> {
-          result.handle(Future.failedFuture(error));
-        });
+      (user) -> 
+        ClusterWideMap.<String, JsonObject>get(ctx.vertx(), SESSION_MAP)
+        .flatMap(map -> createSession(user, map))
+        .subscribe(
+          (session) -> result.handle(Future.succeededFuture(new AuthenticatedUser(session))),
+          (error) -> result.handle(Future.failedFuture(error))
+        ),
+      (error) -> result.handle(Future.failedFuture(error))
+    );
   }
   
   public void authenticate(String token, Handler<AsyncResult<User>> result) {
-    ClusterWideMap.<String, JsonObject>get(ctx.vertx(), SESSION_MAP, resMap -> {
-      if (resMap.succeeded()) {
-        resMap.result().get(token, resSession -> {
-          if (resSession.succeeded() && resSession.result() != null) {
-            result.handle(Future.succeededFuture(new AuthenticatedUser(new Session(resSession.result()))));
-          } else {
-            result.handle(Future.failedFuture("Session does not exist"));
-          }
-        });
-      } else {
-        result.handle(Future.failedFuture(resMap.cause()));
-      }
-    });
+    ClusterWideMap.<String, JsonObject>get(ctx.vertx(), SESSION_MAP)
+    .subscribe(
+      (map) -> map.get(token, resSession -> {
+        if (resSession.succeeded() && resSession.result() != null) {
+          result.handle(Future.succeededFuture(new AuthenticatedUser(new Session(resSession.result()))));
+        } else {
+          result.handle(Future.failedFuture("Session does not exist"));
+        }
+      }),
+      (error) -> result.handle(Future.failedFuture(error))
+    );
   }
   
   public void terminate(Session session, Handler<AsyncResult<Void>> result) {
-    ClusterWideMap.<String, JsonObject>get(ctx.vertx(), SESSION_MAP, resMap -> {
-      if (resMap.succeeded()) {
-        resMap.result().remove(session.getKey(), resSession -> {
-          if (resSession.succeeded()) {
-            result.handle(Future.succeededFuture());
-          } else {
-            result.handle(Future.failedFuture(resSession.cause()));
-          }
-        });
-      } else {
-        result.handle(Future.failedFuture(resMap.cause()));
-      }
-    });
+    ClusterWideMap.<String, JsonObject>get(ctx.vertx(), SESSION_MAP)
+    .subscribe(
+      (map) -> map.remove(session.getKey(), resSession -> {
+        if (resSession.succeeded()) {
+          result.handle(Future.succeededFuture());
+        } else {
+          result.handle(Future.failedFuture(resSession.cause()));
+        }
+      }),
+      (error) -> result.handle(Future.failedFuture(error))
+    );
   }
   
   private Single<Session> createSession(UsersRecord user, AsyncMap<String, JsonObject> map) {
-    AsyncSubject<Session> result = AsyncSubject.create();
+    final AsyncSubject<Session> result = AsyncSubject.create();
     Session session = Session.create(user);
     
     map.putIfAbsent(session.getKey(), session.toJson(), (existing) -> {
