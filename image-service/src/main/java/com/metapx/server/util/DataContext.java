@@ -9,6 +9,9 @@ import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 
 import io.vertx.core.Vertx;
+import io.vertx.rx.java.RxHelper;
+import rx.Single;
+import rx.exceptions.Exceptions;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -50,6 +53,35 @@ public class DataContext {
         future.fail(e);
       }
     }, result);
+  }
+  
+  public Single<DSLContext> getDslContext() {
+    return Single.<DSLContext, Connection>using(
+        () -> {
+          try {
+            System.out.println("connection.get");
+            return this.dataSource.getConnection();
+          } catch (Exception e) {
+            throw Exceptions.propagate(e);
+          }
+        }, 
+        (connection) -> {
+          if (connection != null) {
+            return Single.just(DSL.using(connection, SQLDialect.POSTGRES));
+          } else {
+            return Single.error(new Exception("Cannot obtain connection"));
+          }
+        },
+        (connection) -> {
+          if (connection != null)
+            System.out.println("connection.close");
+            try {
+              connection.close();
+            } catch (Exception e) {
+              throw Exceptions.propagate(e);
+            }
+        })
+    .subscribeOn(RxHelper.blockingScheduler(vertx));
   }
   
   @FunctionalInterface

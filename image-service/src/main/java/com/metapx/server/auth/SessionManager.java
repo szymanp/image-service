@@ -12,6 +12,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.AsyncMap;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
+import rx.Single;
+import rx.subjects.AsyncSubject;
 
 public class SessionManager implements AuthProvider {
   private static final String SESSION_MAP = SessionManager.class.getCanonicalName(); 
@@ -35,42 +37,34 @@ public class SessionManager implements AuthProvider {
   }
   
   public void authenticate(String username, String password, Handler<AsyncResult<User>> result) {
-    ctx.<UsersRecord>executeBlocking((dsl, future) -> {
-      final UsersRecord user = dsl.selectFrom(Tables.USERS)
-          .where(Tables.USERS.HANDLE.equal(username))
-          .fetchOne();
-
-      if (user == null) {
-        future.fail("User does not exist");
-      } else {
-        future.complete(user);
+    ctx.getDslContext()
+    .map(dsl -> dsl.selectFrom(Tables.USERS)
+        .where(Tables.USERS.HANDLE.equal(username))
+        .fetchOne())
+    .doOnSuccess(user -> {
+      if (user == null) throw new RuntimeException("User does not exist");
+    })
+    .doOnSuccess(user -> {
+      if (!passwordManager.computeHash(password, user.getSalt()).equals(user.getPassword())) {
+        throw new RuntimeException("Invalid password");
       }
-    }, (resUser) -> {
-      if (!resUser.succeeded()) {
-        result.handle(Future.failedFuture(resUser.cause()));
-        return;
-      }
-      final UsersRecord user = resUser.result();
-      
-      if (passwordManager.computeHash(password, user.getSalt()).equals(user.getPassword())) {
-        ClusterWideMap.<String, JsonObject>get(ctx.vertx(), SESSION_MAP, resMap -> {
-          if (resMap.succeeded()) {
-            createSession(user, resMap.result(), (resSession) -> {
-              if (resSession.succeeded()) {
-                result.handle(Future.succeededFuture(new AuthenticatedUser(resSession.result())));
-              } else {
-                result.handle(Future.failedFuture(resSession.cause()));
-              }
-            });
-          } else {
-            result.handle(Future.failedFuture(resMap.cause()));
-          }
-          
+    }).subscribe(
+        (user) -> {
+          ClusterWideMap.<String, JsonObject>get(ctx.vertx(), SESSION_MAP, resMap -> {
+            if (resMap.succeeded()) {
+              createSession(user, resMap.result())
+              .subscribe(
+                  (session) -> result.handle(Future.succeededFuture(new AuthenticatedUser(session))),
+                  (error) -> result.handle(Future.failedFuture(error))
+              );
+            } else {
+              result.handle(Future.failedFuture(resMap.cause()));
+            }
+          });
+        }, 
+        (error) -> {
+          result.handle(Future.failedFuture(error));
         });
-      } else {
-        result.handle(Future.failedFuture("Invalid password"));
-      }
-    });
   }
   
   public void authenticate(String token, Handler<AsyncResult<User>> result) {
@@ -105,18 +99,22 @@ public class SessionManager implements AuthProvider {
     });
   }
   
-  private void createSession(UsersRecord user, AsyncMap<String, JsonObject> map, Handler<AsyncResult<Session>> result) {
+  private Single<Session> createSession(UsersRecord user, AsyncMap<String, JsonObject> map) {
+    AsyncSubject<Session> result = AsyncSubject.create();
     Session session = Session.create(user);
     
     map.putIfAbsent(session.getKey(), session.toJson(), (existing) -> {
       if (existing.failed()) {
-        result.handle(Future.failedFuture(existing.cause()));
+        result.onError(existing.cause());
       } else if (existing.result() == null) {
-        result.handle(Future.succeededFuture(session));
+        result.onNext(session);
+        result.onCompleted();
       } else {
         // TODO: Here we could retry with a different session key. 
-        result.handle(Future.failedFuture("Session key is already in use"));
+        result.onError(new Exception("Session key is already in use"));
       }
     });
+    
+    return result.toSingle();
   }
 }
