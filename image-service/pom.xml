@@ -47,6 +47,11 @@
       <version>3.3.2</version>
     </dependency>
     <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-hazelcast</artifactId>
+      <version>3.3.3</version>
+    </dependency>
+    <dependency>
       <groupId>com.metapx.server</groupId>
       <artifactId>data-model</artifactId>
       <version>0.0.1-SNAPSHOT</version>
