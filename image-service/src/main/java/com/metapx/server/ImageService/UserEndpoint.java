@@ -11,6 +11,7 @@ import org.jooq.DSLContext;
 
 import com.metapx.server.data_model.domain.User;
 import com.metapx.server.data_model.jooq.tables.records.UsersRecord;
+import com.metapx.server.workflow.UserKey;
 
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.Json;
@@ -33,16 +34,14 @@ public class UserEndpoint {
   }
   
   public User getUser(RoutingContext ctx, DSLContext dsl) {
-    final int id;
-    try {
-      id = Integer.parseInt(ctx.request().getParam("id"));
-    } catch (NumberFormatException e) {
+    final UserKey key = new UserKey(ctx.request().getParam("id"));
+    if (!key.isValid()) {
       throw new HttpException(HttpURLConnection.HTTP_NOT_FOUND);
     }
 
     List<User> users = dsl.select()
       .from(USERS)
-      .where(USERS.ID.eq(id))
+      .where(USERS.ID.eq(key.getValue()))
       .fetch(r -> new User((UsersRecord)r));
     
     return users.size() == 1 ? users.get(0) : null;
