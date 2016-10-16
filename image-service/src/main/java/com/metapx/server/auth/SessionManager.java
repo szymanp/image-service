@@ -2,6 +2,7 @@ package com.metapx.server.auth;
 
 import com.metapx.server.data_model.jooq.Tables;
 import com.metapx.server.data_model.jooq.tables.records.UsersRecord;
+import com.metapx.server.data_model.resource.PasswordManager;
 import com.metapx.server.util.ClusterWideMap;
 import com.metapx.server.util.DataContext;
 

@@ -1,4 +1,4 @@
-package com.metapx.server.auth;
+package com.metapx.server.data_model.resource;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
