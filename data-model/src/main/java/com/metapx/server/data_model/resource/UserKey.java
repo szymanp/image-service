@@ -1,7 +1,7 @@
 package com.metapx.server.data_model.resource;
 
-public class UserKey {
-
+public class UserKey implements Key<Integer> {
+  
   final private boolean valid;
   final private int key;
   
@@ -32,7 +32,7 @@ public class UserKey {
     return Integer.toString(key);
   }
   
-  public int getValue() {
+  public Integer getValue() {
     return key;
   }
 }
