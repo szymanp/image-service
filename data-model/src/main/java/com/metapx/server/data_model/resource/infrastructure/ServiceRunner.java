@@ -1,10 +1,11 @@
-package com.metapx.server.data_model.resource;
+package com.metapx.server.data_model.resource.infrastructure;
 
 import org.jooq.DSLContext;
 
 import com.metapx.server.data_model.domain.User;
-import com.metapx.server.data_model.resource.ReaderService.ReadParameters;
-import com.metapx.server.data_model.resource.impl.UserService;
+import com.metapx.server.data_model.resource.UserKey;
+import com.metapx.server.data_model.resource.UserService;
+import com.metapx.server.data_model.resource.infrastructure.ReaderService.ReadParameters;
 
 /**
  * @param <T> representation class

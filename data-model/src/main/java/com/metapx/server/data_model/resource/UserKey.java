@@ -1,5 +1,7 @@
 package com.metapx.server.data_model.resource;
 
+import com.metapx.server.data_model.resource.infrastructure.Key;
+
 public class UserKey implements Key<Integer> {
   
   final private boolean valid;

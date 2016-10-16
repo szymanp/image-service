@@ -1,4 +1,4 @@
-package com.metapx.server.data_model.resource;
+package com.metapx.server.data_model.resource.infrastructure;
 
 public class ETag {
   private final int versionNumber;

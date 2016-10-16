@@ -7,6 +7,8 @@ import org.junit.Test;
 
 import com.metapx.server.data_model.BaseDatabaseTest;
 import com.metapx.server.data_model.domain.User;
+import com.metapx.server.data_model.resource.infrastructure.Resource;
+import com.metapx.server.data_model.resource.infrastructure.ServiceRunner;
 
 public class ServiceRunnerTest extends BaseDatabaseTest {
   

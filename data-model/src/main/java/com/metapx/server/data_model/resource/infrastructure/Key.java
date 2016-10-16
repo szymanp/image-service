@@ -1,4 +1,4 @@
-package com.metapx.server.data_model.resource;
+package com.metapx.server.data_model.resource.infrastructure;
 
 public interface Key<T> {
   /** @return true, if the key is in the valid format; otherwise, false */ 

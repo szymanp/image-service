@@ -1,4 +1,4 @@
-package com.metapx.server.data_model.resource;
+package com.metapx.server.data_model.resource.infrastructure;
 
 /**
  * @param <T> representation class
