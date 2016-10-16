@@ -1,4 +1,4 @@
-package com.metapx.server.workflow;
+package com.metapx.server.data_model.resource;
 
 public class UserKey {
 

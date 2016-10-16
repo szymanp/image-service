@@ -11,7 +11,7 @@ import org.jooq.DSLContext;
 
 import com.metapx.server.data_model.domain.User;
 import com.metapx.server.data_model.jooq.tables.records.UsersRecord;
-import com.metapx.server.workflow.UserKey;
+import com.metapx.server.data_model.resource.UserKey;
 
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.Json;
