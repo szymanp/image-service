@@ -6,9 +6,20 @@ package com.metapx.server.data_model.resource.infrastructure;
  */
 public interface WriterService<T, K> {
 
-  Resource<T> create(T value);
+  public interface CreateParameters extends RequestParameters {
+  }
+
+  public interface UpdateParameters extends RequestParameters {
+    ResourceIdentifier getResourceIdentifier();
+  }
+
+  public interface DeleteParameters extends RequestParameters {
+    ResourceIdentifier getResourceIdentifier();
+  }
   
-  Resource<T> update(K key, T value);
+  Resource<T> create(T value, CreateParameters parameters);
   
-  void delete(K key);
+  Resource<T> update(K key, T value, UpdateParameters parameters);
+  
+  void delete(K key, DeleteParameters parameters);
 }

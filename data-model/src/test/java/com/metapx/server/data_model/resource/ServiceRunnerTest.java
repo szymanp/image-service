@@ -11,6 +11,8 @@ import com.metapx.server.data_model.resource.infrastructure.CrudError;
 import com.metapx.server.data_model.resource.infrastructure.Resource;
 import com.metapx.server.data_model.resource.infrastructure.ServiceRunner;
 
+import io.vertx.core.json.JsonObject;
+
 public class ServiceRunnerTest extends BaseDatabaseTest {
   
   private ServiceRunner runner;
@@ -35,6 +37,27 @@ public class ServiceRunnerTest extends BaseDatabaseTest {
 
   @Test(expected = CrudError.class)
   public void testReadNotFound() {
-    runner.read("234", this.dslContext);
+    runner.read("234", dslContext);
+  }
+  
+  @Test(expected = CrudError.class)
+  public void testCreateWithValidationFailure() {
+    String user = "{ \"handle\": \"Administrator\" }";
+    runner.create(user, dslContext);
+  }
+  
+  @Test
+  public void testCreate() {
+    JsonObject user = new JsonObject();
+    user.put("handle", "JohnDoe");
+    user.put("displayName", "John Doe");
+    user.put("emailAddress", "john@example.org");
+    user.put("password", "123456");
+    
+    Resource<User> result = runner.create(user.encode(), dslContext);
+    
+    assertNotNull(result.getRepresentation());
+    assertNotNull(result.getRepresentation().getId());
+    assertEquals("http://example.org/user/" + result.getRepresentation().getId(), result.getCanonicalUrl());
   }
 }
