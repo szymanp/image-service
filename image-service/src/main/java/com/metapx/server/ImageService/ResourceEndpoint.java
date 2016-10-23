@@ -2,6 +2,7 @@ package com.metapx.server.ImageService;
 
 import java.net.HttpURLConnection;
 
+import com.metapx.server.data_model.resource.infrastructure.CrudError;
 import com.metapx.server.data_model.resource.infrastructure.Resource;
 import com.metapx.server.data_model.resource.infrastructure.ResourceIdentifier;
 import com.metapx.server.data_model.resource.infrastructure.ResourceService;
@@ -60,6 +61,21 @@ public class ResourceEndpoint {
   }
   
   private void sendError(Throwable e, RoutingContext ctx) {
+    if (e instanceof CrudError) {
+      switch (((CrudError) e).getErrorType()) {
+      case NOT_FOUND: 
+        ctx.response().setStatusCode(HttpURLConnection.HTTP_NOT_FOUND);
+        break;
+      case VALIDATION_FAILURE:
+        ctx.response().setStatusCode(HttpURLConnection.HTTP_BAD_REQUEST);
+        break;
+
+      default:
+        break;
+      }
+    } else {
+      ctx.response().setStatusCode(HttpURLConnection.HTTP_INTERNAL_ERROR);
+    }
     ctx.response().end();
   }
   
