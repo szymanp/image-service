@@ -66,9 +66,6 @@ public class User {
   public UsersRecord record() {
     return this.record;
   }
-
-  public void transferTo(UsersRecord target) {
-  }
   
   @Override
   public String toString() {
