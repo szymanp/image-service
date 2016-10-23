@@ -8,6 +8,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import com.metapx.server.auth.LogoutHandler;
 import com.metapx.server.auth.SessionManager;
 import com.metapx.server.auth.SessionTokenHandler;
+import com.metapx.server.data_model.resource.UserService;
 import com.metapx.server.util.DataContext;
 
 import io.vertx.core.AbstractVerticle;
@@ -42,8 +43,8 @@ public class RestVerticle extends AbstractVerticle {
     router.route("/auth/*").handler(routingContext -> {
       routingContext.response().end("Authenticated");
     });
-
-    new UserEndpoint(dataSource).register(router);
+    
+    new ResourceEndpoint(dataContext, new UserService(), "user").register(router);
     
     httpServer.requestHandler(router::accept).listen(config().getInteger("http.port", 8080));
   }

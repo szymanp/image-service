@@ -65,15 +65,23 @@ public class ServiceRunner<T, K> {
     }
   }
   
+  public boolean isReadable() {
+    return this.service instanceof ReaderService;
+  }
+  
+  public boolean isWritable() {
+    return this.service instanceof WriterService;
+  }
+  
   private ReaderService<T, K> reader() {
-    if (this.service instanceof ReaderService) {
+    if (isReadable()) {
       return (ReaderService<T, K>) this.service;
     }
     throw new RuntimeException("Resources of this type cannot be read");
   }
   
   private WriterService<T, K> writer() {
-    if (this.service instanceof WriterService) {
+    if (isWritable()) {
       return (WriterService<T, K>) this.service;
     }
     throw new RuntimeException("Resources of this type are not writable");
