@@ -15,11 +15,11 @@ import io.vertx.core.json.JsonObject;
 
 public class ServiceRunnerTest extends BaseDatabaseTest {
   
-  private ServiceRunner runner;
+  private ServiceRunner<User, Integer> runner;
   
   @Before
   public void createServiceRunner() {
-    runner = new ServiceRunner(new MockUrlResolver());
+    runner = ServiceRunner.create(new UserService(), new MockUrlResolver());
   }
 
   @Test

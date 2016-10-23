@@ -2,9 +2,6 @@ package com.metapx.server.data_model.resource.infrastructure;
 
 import org.jooq.DSLContext;
 
-import com.metapx.server.data_model.domain.User;
-import com.metapx.server.data_model.resource.UserKey;
-import com.metapx.server.data_model.resource.UserService;
 import com.metapx.server.data_model.resource.infrastructure.ReaderService.ReadParameters;
 import com.metapx.server.data_model.resource.infrastructure.WriterService.CreateParameters;
 import com.metapx.server.data_model.resource.infrastructure.WriterService.UpdateParameters;
@@ -15,55 +12,71 @@ import io.vertx.core.json.Json;
  * @param <T> representation class
  * @param <K> key class, e.g. Integer
  */
-public class ServiceRunner {
+public class ServiceRunner<T, K> {
   
-  private final UserService reader;
-  private final UserService writer;
+  private final ResourceService<T, K> service;
   private final UrlResolver urlResolver;
   
-  public ServiceRunner(UrlResolver urlResolver) {
-    reader = new UserService();
-    writer = reader;
+  public static <T, K> ServiceRunner<T, K> create(ResourceService<T, K> service, UrlResolver urlResolver) {
+    return new ServiceRunner<T, K>(service, urlResolver);
+  }
+  
+  public ServiceRunner(ResourceService<T, K> service, UrlResolver urlResolver) {
+    this.service = service;
     this.urlResolver = urlResolver;
   }
   
-  public Resource<User> read(String key, DSLContext dslContext) throws CrudError {
-    final Key<Integer> keyObject = new UserKey(key);
+  public Resource<T> read(String key, DSLContext dslContext) throws CrudError {
+    final Key<K> keyObject = service.createKey(key);
     if (keyObject.isValid()) {
       final ReadParametersImpl parameters = new ReadParametersImpl();
       parameters.dslContext = dslContext;
       parameters.urlResolver = this.urlResolver;
-      parameters.resourceIdentifier = new ResourceIdentifier(User.class, keyObject);
+      parameters.resourceIdentifier = new ResourceIdentifier(service.getRepresentationClass(), keyObject);
       
-      return reader.read(keyObject.getValue(), parameters);
+      return reader().read(keyObject.getValue(), parameters);
     } else {
       throw CrudError.notFound(keyObject);
     }
   }
   
-  public Resource<User> create(String jsonString, DSLContext dslContext) throws CrudError {
+  public Resource<T> create(String jsonString, DSLContext dslContext) throws CrudError {
     final CreateParametersImpl parameters = new CreateParametersImpl();
     parameters.dslContext = dslContext;
     parameters.urlResolver = this.urlResolver;
     
-    final User user = Json.decodeValue(jsonString, User.class);
+    final T representation = Json.decodeValue(jsonString, service.getRepresentationClass());
     
-    return writer.create(user, parameters);
+    return writer().create(representation, parameters);
   }
   
-  public Resource<User> update(String key, String jsonString, DSLContext dslContext) throws CrudError {
-    final Key<Integer> keyObject = new UserKey(key);
+  public Resource<T> update(String key, String jsonString, DSLContext dslContext) throws CrudError {
+    final Key<K> keyObject = service.createKey(key);
     if (keyObject.isValid()) {
       final UpdateParametersImpl parameters = new UpdateParametersImpl();
       parameters.dslContext = dslContext;
       parameters.urlResolver = this.urlResolver;
-      parameters.resourceIdentifier = new ResourceIdentifier(User.class, keyObject);
+      parameters.resourceIdentifier = new ResourceIdentifier(service.getRepresentationClass(), keyObject);
       
-      final User user = Json.decodeValue(jsonString, User.class);
-      return writer.update(keyObject.getValue(), user, parameters);
+      final T representation = Json.decodeValue(jsonString, service.getRepresentationClass());
+      return writer().update(keyObject.getValue(), representation, parameters);
     } else {
       throw CrudError.notFound(keyObject);
     }
+  }
+  
+  private ReaderService<T, K> reader() {
+    if (this.service instanceof ReaderService) {
+      return (ReaderService<T, K>) this.service;
+    }
+    throw new RuntimeException("Resources of this type cannot be read");
+  }
+  
+  private WriterService<T, K> writer() {
+    if (this.service instanceof WriterService) {
+      return (WriterService<T, K>) this.service;
+    }
+    throw new RuntimeException("Resources of this type are not writable");
   }
   
   private static class RequestParametersImpl implements RequestParameters {

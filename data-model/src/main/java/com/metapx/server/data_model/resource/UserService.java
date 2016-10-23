@@ -6,12 +6,21 @@ import com.metapx.server.data_model.domain.User;
 import com.metapx.server.data_model.jooq.tables.records.UsersRecord;
 import com.metapx.server.data_model.resource.PasswordManager.Default;
 import com.metapx.server.data_model.resource.infrastructure.CrudError;
+import com.metapx.server.data_model.resource.infrastructure.Key;
 import com.metapx.server.data_model.resource.infrastructure.ReaderService;
 import com.metapx.server.data_model.resource.infrastructure.Resource;
 import com.metapx.server.data_model.resource.infrastructure.ResourceIdentifier;
 import com.metapx.server.data_model.resource.infrastructure.WriterService;
 
 public class UserService implements ReaderService<User, Integer>, WriterService<User, Integer> {
+  
+  public Class<User> getRepresentationClass() {
+    return User.class;
+  }
+  
+  public Key<Integer> createKey(String key) {
+    return new UserKey(key);
+  }
   
   public Resource<User> read(Integer key, ReadParameters params) {
     final UsersRecord userRecord = params.getDslContext()

@@ -4,7 +4,7 @@ package com.metapx.server.data_model.resource.infrastructure;
  * @param <T> representation class
  * @param <K> key class, e.g. Integer
  */
-public interface ReaderService<T, K> {
+public interface ReaderService<T, K> extends ResourceService<T, K> {
   
   public interface ReadParameters extends RequestParameters {
     ResourceIdentifier getResourceIdentifier();
