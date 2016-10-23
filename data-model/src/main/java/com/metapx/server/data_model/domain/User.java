@@ -34,7 +34,6 @@ public class User {
   }
 
   public Integer getId() { return record.getId(); }
-  public void setId(Integer id) { record.setId(id); }
 
   public String getHandle() { return record.getHandle(); }
   public void setHandle(String handle) { record.setHandle(handle); }
