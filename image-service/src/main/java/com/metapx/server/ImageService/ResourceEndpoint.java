@@ -48,7 +48,18 @@ public class ResourceEndpoint {
   }
   
   protected void createResource(RoutingContext routingContext) {
+    if (!routingContext.request().getHeader("content-type").equalsIgnoreCase("application/json")) {
+      this.sendError(new HttpException(HttpURLConnection.HTTP_UNSUPPORTED_TYPE), routingContext);
+      return;
+    }
     
+    this.dataContext.getDslContext()
+    .map(dslContext -> serviceRunner.create(routingContext.getBodyAsString(), dslContext))
+    .doOnSuccess(resource -> routingContext.response().putHeader("Location", resource.getCanonicalUrl()))
+    .subscribe(
+        (resource) -> this.sendResource(resource, routingContext),
+        (error) -> this.sendError(error, routingContext)
+        );
   }
   
   private void sendResource(Resource<?> resource, RoutingContext ctx) {
@@ -73,10 +84,14 @@ public class ResourceEndpoint {
       default:
         break;
       }
+      ctx.response().end();
+    } else if (e instanceof HttpException) {
+      ((HttpException) e).sendResponse(ctx.response());
+      
     } else {
       ctx.response().setStatusCode(HttpURLConnection.HTTP_INTERNAL_ERROR);
+      ctx.response().end();
     }
-    ctx.response().end();
   }
   
   private class LocalUrlResolver implements UrlResolver {
