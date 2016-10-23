@@ -1,6 +1,9 @@
 package com.metapx.server.data_model.domain;
 
+import java.util.Arrays;
+
 import org.jooq.DSLContext;
+import org.jooq.Field;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.metapx.server.data_model.jooq.tables.records.UsersRecord;
@@ -16,6 +19,18 @@ public class User {
 
   public User(UsersRecord record) {
     this.record = record;
+  }
+  
+  public User(UsersRecord originalRecord, User updatedValues) {
+    this.record = originalRecord;
+
+    Arrays.stream(updatedValues.record.fields())
+    .filter((field) -> updatedValues.record.changed(field))
+    .forEach((field) -> {
+      @SuppressWarnings("unchecked")
+      Field<Object> _field = (Field<Object>) field;
+      record.set(_field, updatedValues.record.get(field));
+    });
   }
 
   public Integer getId() { return record.getId(); }
@@ -38,7 +53,7 @@ public class User {
   public boolean isNew() {
     return (record.key().get(0) == null);
   }
-
+  
   public void save(DSLContext dslContext) {
     record.attach(dslContext.configuration());
     record.store();
@@ -53,6 +68,9 @@ public class User {
     return this.record;
   }
 
+  public void transferTo(UsersRecord target) {
+  }
+  
   @Override
   public String toString() {
     return "[" + this.getClass().getSimpleName() + ": " + getHandle() + "]";

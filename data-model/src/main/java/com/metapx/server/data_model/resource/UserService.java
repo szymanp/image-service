@@ -67,15 +67,17 @@ public class UserService implements ReaderService<User, Integer>, WriterService<
   
   public Resource<User> update(Integer key, User user, UpdateParameters params) {
     final UsersRecord userRecord = params.getDslContext().selectFrom(USERS)
-    .where(USERS.ID.equal(key))
-    .forUpdate()
-    .fetchOne();
+      .where(USERS.ID.equal(key))
+      .forUpdate()
+      .fetchOne();
     
     if (userRecord == null) throw CrudError.notFound();
     
-    // TODO
+    final User updatedUser = new User(userRecord, user);
+    this.modify(updatedUser);
+    updatedUser.save(params.getDslContext());
     
-    return new Resource<User>(new User(userRecord), params.getUrlResolver().getUrl(params.getResourceIdentifier())); 
+    return new Resource<User>(updatedUser, params.getUrlResolver().getUrl(params.getResourceIdentifier())); 
   }
   
   public void delete(Integer key, DeleteParameters params) {

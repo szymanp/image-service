@@ -7,9 +7,9 @@ import com.metapx.server.data_model.resource.UserKey;
 import com.metapx.server.data_model.resource.UserService;
 import com.metapx.server.data_model.resource.infrastructure.ReaderService.ReadParameters;
 import com.metapx.server.data_model.resource.infrastructure.WriterService.CreateParameters;
+import com.metapx.server.data_model.resource.infrastructure.WriterService.UpdateParameters;
 
 import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
 
 /**
  * @param <T> representation class
@@ -51,6 +51,21 @@ public class ServiceRunner {
     return writer.create(user, parameters);
   }
   
+  public Resource<User> update(String key, String jsonString, DSLContext dslContext) throws CrudError {
+    final Key<Integer> keyObject = new UserKey(key);
+    if (keyObject.isValid()) {
+      final UpdateParametersImpl parameters = new UpdateParametersImpl();
+      parameters.dslContext = dslContext;
+      parameters.urlResolver = this.urlResolver;
+      parameters.resourceIdentifier = new ResourceIdentifier(User.class, keyObject);
+      
+      final User user = Json.decodeValue(jsonString, User.class);
+      return writer.update(keyObject.getValue(), user, parameters);
+    } else {
+      throw CrudError.notFound(keyObject);
+    }
+  }
+  
   private static class RequestParametersImpl implements RequestParameters {
     public DSLContext dslContext;
     public UrlResolver urlResolver;
@@ -76,5 +91,14 @@ public class ServiceRunner {
   }
   
   private static class CreateParametersImpl extends RequestParametersImpl implements CreateParameters {
+  }
+
+  private static class UpdateParametersImpl extends RequestParametersImpl implements UpdateParameters {
+    public ResourceIdentifier resourceIdentifier;
+
+    @Override
+    public ResourceIdentifier getResourceIdentifier() {
+      return resourceIdentifier;
+    }
   }
 }

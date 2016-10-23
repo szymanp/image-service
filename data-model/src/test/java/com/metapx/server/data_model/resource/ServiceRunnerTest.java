@@ -60,4 +60,17 @@ public class ServiceRunnerTest extends BaseDatabaseTest {
     assertNotNull(result.getRepresentation().getId());
     assertEquals("http://example.org/user/" + result.getRepresentation().getId(), result.getCanonicalUrl());
   }
+  
+  @Test
+  public void testUpdate() {
+    JsonObject user = new JsonObject();
+    user.put("displayName", "John Doe");
+    
+    Resource<User> result = runner.update("1", user.encode(), dslContext);
+    
+    assertNotNull(result.getRepresentation());
+    assertEquals(1, result.getRepresentation().getId().intValue());
+    assertEquals("John Doe", result.getRepresentation().getDisplayName());
+    assertEquals("http://example.org/user/1", result.getCanonicalUrl());
+  }
 }
