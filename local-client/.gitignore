@@ -1,0 +1,6 @@
+target/
+src/main/java/com/metapx/local_client/database/jooq
+.project
+.classpath
+.settings
+*.db
