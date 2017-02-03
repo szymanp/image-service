@@ -39,8 +39,9 @@ public final class DatabaseBuilder {
       + "id int auto_increment primary key,"
       + "folder_id int,"
       + "name varchar(255),"
+      + "size int,"
       + "file_id varchar(64),"  // git-metadata ID of the file
-      + "hash varchar(64))");
+      + "hash varchar(250))");
     stmt.execute("CREATE UNIQUE INDEX FILE_01 ON FILE (folder_id, name)");
     stmt.execute("INSERT INTO SYSTEM(id, schema_version) VALUES(1, 1)");
 
