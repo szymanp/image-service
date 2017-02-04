@@ -101,11 +101,8 @@ public class Client {
     public void run() {
       Repository repo = new Repository(conn);
 
-      String[] patternsArray = new String[patterns.size()];
-      patterns.toArray(patternsArray);
-
       DirectoryScanner scanner = new DirectoryScanner();
-      scanner.setIncludes(patternsArray);
+      scanner.setIncludes(patterns.toArray(new String[0]));
       scanner.setBasedir(conf.getWorkingDirectory());
       scanner.setCaseSensitive(false);
       scanner.scan();
