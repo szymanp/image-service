@@ -43,6 +43,8 @@ public final class Repository {
       )
       .fetchOne();
 
+    final String hash = defaultHashCalculator.calculateStringDigest(fileToAdd);
+
     if (file == null) {
       // The file does not exist in the repository yet.
       file = new FileRecord();
@@ -50,10 +52,16 @@ public final class Repository {
       file.setFolderId(folder.getId());
       file.setName(fileToAdd.getName());
       file.setSize(new Long(fileToAdd.length()).intValue());
-      file.setHash(defaultHashCalculator.getAlgorithm() + ":" + defaultHashCalculator.calculateStringDigest(fileToAdd));
-      file.insert();      
+      file.setHash(hash);
+      file.insert();   
     } else {
-
+      // The file exists, update the hash if needed.
+      if (hash != file.getHash()) {
+        // TODO If the hash differes, we might need to clear the reference to the git-metadata file.
+        file.setHash(hash);
+        file.setSize(new Long(fileToAdd.length()).intValue());
+        file.update();
+      }
     }
 
     System.out.println(file);
