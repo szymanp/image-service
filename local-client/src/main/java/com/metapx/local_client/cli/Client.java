@@ -1,13 +1,9 @@
 package com.metapx.local_client.cli;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
-
-import org.codehaus.plexus.util.DirectoryScanner;
 
 import com.beust.jcommander.*;
 import com.metapx.local_client.database.ConnectionFactory;

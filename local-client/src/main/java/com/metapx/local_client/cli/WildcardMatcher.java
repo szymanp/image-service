@@ -1,68 +1,79 @@
 package com.metapx.local_client.cli;
 
 import java.io.File;
-import java.util.Arrays;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-import org.codehaus.plexus.util.DirectoryScanner;
-
 public class WildcardMatcher {
   public List<File> files;
 
-  public WildcardMatcher(List<String> patterns) {
-    // ../somedir/*.jpg
-    // d:\somedir\hello\*.jpg
-    // somedir/*.jpg
+  public WildcardMatcher(List<String> paths) {
+    // c:/path/to/dir - add all files in directory and subdirectories
+    // c:/path/to/dir/*.jpg - add all jpg files in directory
+    // c:/path/to/dir/file.jpg - add specific file
 
-    files = patterns.stream().map(pattern -> {
-      final int wildcard1 = pattern.indexOf('*');
-      final int wildcard2 = pattern.indexOf('?');
-      final int wildcard = wildcard1 >= 0 && wildcard2 >= 0 ?
-        Math.min(wildcard1, wildcard2) : (wildcard1 >= 0 ? wildcard1 : wildcard2);
-
-      if (wildcard < 0) {
-        return new String[] { pattern, "" };
+    files = paths.stream().map(path -> {
+      final File pathFile = new File(path);
+      if (pathFile.getName().contains("*")) {
+        return new Object[] { pathFile.getParentFile(), pathFile.getName() };
       } else {
-        String directory = pattern.substring(0, wildcard);
-        int lastSeparator = getLastSeparatorIndex(directory);
-        if (lastSeparator < 0) {
-          return new String[] { "", pattern };
-        } else {
-          directory = directory.substring(0, lastSeparator+1);
-          return new String[] { directory, pattern.substring(directory.length()) };
-        }
+        return new Object[] { pathFile, "" };
       }
     }).map(pair -> {
-      System.out.println(pair[0] + ";" + pair[1]);
-      if (pair[1].equals("")) {
-        final List<File> result = new ArrayList<File>();
-        final File file = new File(pair[0]).getAbsoluteFile();
-        if (file.isFile()) {
-          result.add(file);
-        }
-        return result;
-      } else {
-        DirectoryScanner scanner = new DirectoryScanner();
-        scanner.setIncludes(new String[] { pair[1] });
-        scanner.setBasedir(new File(pair[0].equals("") ? "." : pair[0]));
-        scanner.setCaseSensitive(false);
-        System.out.println("base=" + scanner.getBasedir());
-        scanner.scan();
+      final File path = (File) pair[0];
+      final String pattern = (String) pair[1];
+      final List<File> result = new ArrayList<File>();
 
-        return Arrays.stream(scanner.getIncludedFiles())
-          .map(file -> new File(scanner.getBasedir(), file).getAbsoluteFile())
-          .collect(Collectors.toList());
+      if (path.isDirectory()) {
+        // The path references a directory.
+        try {
+          if (pattern.equals("")) {
+            walkDirectoryRecursively(path, result);
+          } else {
+            walkDirectoryWithPattern(path, result, pattern);
+          }
+        } catch (IOException e) {
+          // Do nothing. Ignore the files.
+        }
+      } else if (path.isFile() && pattern.equals("")) {
+        // The path references a file
+        result.add(path);
       }
+      return result;
     })
     .flatMap(Collection::stream)
     .collect(Collectors.toList());
   }
 
-  private int getLastSeparatorIndex(String path) {
-    String unified = path.replace(File.separatorChar, '/');
-    return unified.lastIndexOf('/');
+  private void walkDirectoryRecursively(File rootDir, List<File> accumulator) throws IOException {
+    try(DirectoryStream<Path> stream = Files.newDirectoryStream(rootDir.toPath())) {
+      for (Path path : stream) {
+        if (path.toFile().isDirectory()) {
+          walkDirectoryRecursively(path.toFile(), accumulator);
+        } else if (path.toFile().isFile()) {
+          accumulator.add(path.toAbsolutePath().toFile());
+        }
+      }
+    }
+  }
+
+  private void walkDirectoryWithPattern(File rootDir, List<File> accumulator, String pattern) throws IOException {
+    PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
+
+    try(DirectoryStream<Path> stream = Files.newDirectoryStream(rootDir.toPath())) {
+      for (Path path : stream) {
+        if (path.toFile().isFile() && matcher.matches(path.getFileName())) {
+          accumulator.add(path.toAbsolutePath().toFile());
+        }
+      }
+    }
   }
 }
