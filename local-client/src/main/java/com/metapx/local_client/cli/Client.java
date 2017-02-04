@@ -1,12 +1,17 @@
 package com.metapx.local_client.cli;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
+
+import org.codehaus.plexus.util.DirectoryScanner;
 
 import com.beust.jcommander.*;
 import com.metapx.local_client.database.ConnectionFactory;
 import com.metapx.local_client.database.DatabaseBuilder;
+import com.metapx.local_client.picture_repo.Repository;
 
 public class Client {
   public static void main(String args[]) {
@@ -15,6 +20,7 @@ public class Client {
     try {
       cli = new Client(args);
       cli.run();
+      cli.conn.commit();
     } catch (Exception e) {
       e.printStackTrace();
     } finally {
@@ -66,7 +72,7 @@ public class Client {
           }
           break;
         case "add":
-          System.out.println(addCommand.patterns);
+          addCommand.run();
           break;
         default:
           jc.usage();
@@ -91,6 +97,25 @@ public class Client {
   private class CommandAdd {
     @Parameter(description = "File patterns to add to repository")
     List<String> patterns;
+
+    public void run() {
+      Repository repo = new Repository(conn);
+
+      String[] patternsArray = new String[patterns.size()];
+      patterns.toArray(patternsArray);
+
+      DirectoryScanner scanner = new DirectoryScanner();
+      scanner.setIncludes(patternsArray);
+      scanner.setBasedir(conf.getWorkingDirectory());
+      scanner.setCaseSensitive(false);
+      scanner.scan();
+
+      Arrays.stream(scanner.getIncludedFiles())
+        .forEach(relativePath -> {
+          final File targetFile = new File(conf.getWorkingDirectory(), relativePath);
+          repo.addFile(targetFile);
+        });
+    }
   }
 
 }
