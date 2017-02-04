@@ -1,6 +1,7 @@
 package com.metapx.local_client.cli;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -12,6 +13,7 @@ import com.beust.jcommander.*;
 import com.metapx.local_client.database.ConnectionFactory;
 import com.metapx.local_client.database.DatabaseBuilder;
 import com.metapx.local_client.picture_repo.Repository;
+import com.metapx.local_client.picture_repo.HashCalculator;
 
 public class Client {
   public static void main(String args[]) {
@@ -36,6 +38,7 @@ public class Client {
 
   Configuration conf;
   Connection conn;
+  HashCalculator defaultHashCalculator;
   JCommander jc;
 
   CommandMain mainCommand;
@@ -56,6 +59,7 @@ public class Client {
     // Setup the enivornment
     conf = Configuration.getDefaultConfiguration();
     conn = configureDatabaseConnection(conf);
+    defaultHashCalculator = new HashCalculator();
   }
 
   void run() {
@@ -99,18 +103,21 @@ public class Client {
     List<String> patterns;
 
     public void run() {
-      Repository repo = new Repository(conn);
+      Repository repo = new Repository(conn, defaultHashCalculator);
 
-      DirectoryScanner scanner = new DirectoryScanner();
-      scanner.setIncludes(patterns.toArray(new String[0]));
-      scanner.setBasedir(conf.getWorkingDirectory());
-      scanner.setCaseSensitive(false);
-      scanner.scan();
+      WildcardMatcher matcher = new WildcardMatcher(patterns);
 
-      Arrays.stream(scanner.getIncludedFiles())
-        .forEach(relativePath -> {
-          final File targetFile = new File(conf.getWorkingDirectory(), relativePath);
-          repo.addFile(targetFile);
+      matcher.files.stream()
+        .forEach(targetFile -> {
+          System.out.println(targetFile);
+          try {
+            repo.addFile(targetFile);
+          } catch (Repository.RepositoryException e) {
+            // TODO This should just show the message to the console
+            e.printStackTrace();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
         });
     }
   }

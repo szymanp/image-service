@@ -17,7 +17,7 @@ public final class HashCalculator {
 	private final MessageDigest md;
 
 	public HashCalculator() throws NoSuchAlgorithmException {
-		this("SHA1");
+		this("SHA-256");
 	}
 
 	public HashCalculator(String algorithm) throws NoSuchAlgorithmException {
@@ -32,7 +32,7 @@ public final class HashCalculator {
 	 * @throws IOException
 	 * @throws NoSuchAlgorithmException
 	 */
-	public byte[] calculateByteDigest(File file) throws IOException, NoSuchAlgorithmException {
+	public byte[] calculateByteDigest(File file) throws IOException {
 		try (final InputStream is = Files.newInputStream(file.toPath(), StandardOpenOption.READ);
 				final DigestInputStream dis = new DigestInputStream(is, md)) {
 			final byte[] buf = new byte[1024];
@@ -51,7 +51,7 @@ public final class HashCalculator {
 	 * @throws NoSuchAlgorithmException
 	 * @throws IOException
 	 */
-	public String calculateStringDigest(File file) throws NoSuchAlgorithmException, IOException {
+	public String calculateStringDigest(File file) throws IOException {
 		final byte[] b = calculateByteDigest(file);
 		String result = "";
 
@@ -62,6 +62,6 @@ public final class HashCalculator {
 	}
 
 	public String getAlgorithm() {
-		return algorithm;
+		return algorithm.toLowerCase();
 	}
 }
