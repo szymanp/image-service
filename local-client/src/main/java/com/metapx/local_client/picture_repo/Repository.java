@@ -99,6 +99,7 @@ public final class Repository {
   }
 
   public static class RepositoryException extends Exception {
+    static final long serialVersionUID = 0;
     RepositoryException(String message) {
       super(message);
     }

@@ -38,7 +38,7 @@ public interface Console {
     }
 
     private String relativize(File file) {
-      String relative = conf.getWorkingDirectory().toPath().relativize(file.toPath()).toString();
+      final String relative = conf.getWorkingDirectory().toPath().relativize(file.toPath()).toString();
       if (relative.startsWith(".." + File.separator + ".." + File.separator + ".." + File.separator)) {
         return file.toString();
       } else {
