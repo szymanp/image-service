@@ -63,11 +63,6 @@
         <artifactId>jcommander</artifactId>
         <version>1.60</version>
     </dependency>
-    <dependency>
-        <groupId>org.codehaus.plexus</groupId>
-        <artifactId>plexus-utils</artifactId>
-        <version>3.0.24</version>
-    </dependency>
   </dependencies>
 
   <build>
