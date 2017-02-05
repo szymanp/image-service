@@ -1,0 +1,6 @@
+target/
+src/main/java/com/metapx/git_metadata/snapshotdb/jooq
+.project
+.classpath
+.settings
+*.db
