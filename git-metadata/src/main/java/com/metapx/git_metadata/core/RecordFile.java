@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 import com.google.common.base.Splitter;
 
-class RecordFile<T extends RecordFile.Record> {
+class RecordFile<T extends RecordFile.Record> implements TransactionElement {
   private final Path file;
   private final RecordReader<T> reader;
   private final List<String[]> transaction = new ArrayList<String[]>();
@@ -42,14 +42,18 @@ class RecordFile<T extends RecordFile.Record> {
     ).findFirst();
   }
 
-  void commit() throws IOException {
+  public void commit() throws IOException {
     List<String> lines = transaction.stream()
       .map(fields -> Arrays.asList(fields))
       .map(fields -> String.join("\t", fields))
       .collect(Collectors.toList());
     Files.write(file, lines, UTF_8, APPEND, CREATE);
 
-    lines.clear();
+    transaction.clear();
+  }
+
+  public void rollback() {
+    transaction.clear();
   }
 
   private Stream<Iterable<String>> getLines() throws IOException {
@@ -67,7 +71,19 @@ class RecordFile<T extends RecordFile.Record> {
   }
 
   public static class StringRecord implements Record {
-    final public List<String> fields = new ArrayList<String>();
+    final public List<String> fields;
+
+    public StringRecord() {
+      fields = new ArrayList<String>();
+    }
+
+    public StringRecord(List<String> fields) {
+      this.fields = fields;
+    }
+
+    public StringRecord(String[] fields) {
+      this.fields = Arrays.asList(fields);
+    }
 
     public String[] toArray() {
       return fields.toArray(new String[0]);
@@ -81,9 +97,7 @@ class RecordFile<T extends RecordFile.Record> {
       }
 
       public StringRecord read(String[] fields) {
-        final StringRecord result = new StringRecord();
-        result.fields.addAll(Arrays.asList(fields));
-        return result;
+        return new StringRecord(fields);
       }
     }
   }
