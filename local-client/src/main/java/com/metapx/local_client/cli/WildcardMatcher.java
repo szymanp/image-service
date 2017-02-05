@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
+import javax.activation.MimetypesFileTypeMap;
 
 public class WildcardMatcher {
   public List<File> files;
@@ -59,7 +60,8 @@ public class WildcardMatcher {
         if (path.toFile().isDirectory()) {
           walkDirectoryRecursively(path.toFile(), accumulator);
         } else if (path.toFile().isFile()) {
-          accumulator.add(path.toAbsolutePath().toFile());
+          final File target = path.toAbsolutePath().toFile();
+          accumulator.add(target);
         }
       }
     }
@@ -71,9 +73,16 @@ public class WildcardMatcher {
     try(DirectoryStream<Path> stream = Files.newDirectoryStream(rootDir.toPath())) {
       for (Path path : stream) {
         if (path.toFile().isFile() && matcher.matches(path.getFileName())) {
-          accumulator.add(path.toAbsolutePath().toFile());
+          final File target = path.toAbsolutePath().toFile();
+          accumulator.add(target);
         }
       }
     }
+  }
+
+  public static boolean isImage(File file) {
+    final String mimetype = new MimetypesFileTypeMap().getContentType(file);
+    final String type = mimetype.split("/")[0];
+    return type.equals("image");
   }
 }

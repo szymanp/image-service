@@ -34,6 +34,7 @@ public class Client {
 
   Configuration conf;
   Connection conn;
+  Console console;
   HashCalculator defaultHashCalculator;
   JCommander jc;
 
@@ -56,6 +57,7 @@ public class Client {
     conf = Configuration.getDefaultConfiguration();
     conn = configureDatabaseConnection(conf);
     defaultHashCalculator = new HashCalculator();
+    console = new Console.DefaultConsole(conf);
   }
 
   void run() {
@@ -105,17 +107,20 @@ public class Client {
 
       matcher.files.stream()
         .forEach(targetFile -> {
-          System.out.println(targetFile);
-          try {
-            repo.addFile(targetFile);
-          } catch (Repository.RepositoryException e) {
-            // TODO This should just show the message to the console
-            e.printStackTrace();
-          } catch (IOException e) {
-            e.printStackTrace();
+          Console.ProcessedFileStatus status = console.startProcessingFile(targetFile);
+
+          if (WildcardMatcher.isImage(targetFile)) {
+            try {
+              status.success(repo.addFile(targetFile));
+            } catch (Repository.RepositoryException e) {
+              status.fail(e.getMessage());
+            } catch (IOException e) {
+              e.printStackTrace();
+            }
+          } else {
+            status.fail("Skipping - not an image");
           }
         });
     }
   }
-
 }

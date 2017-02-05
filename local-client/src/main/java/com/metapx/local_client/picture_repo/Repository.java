@@ -25,7 +25,7 @@ public final class Repository {
     rootFolder = new FolderRecord();
   }
 
-  public void addFile(File fileToAdd) throws RepositoryException, IOException {
+  public FileRecord addFile(File fileToAdd) throws RepositoryException, IOException {
     if (!fileToAdd.exists()) {
       throw new RepositoryException("File does not exist on disk");
     }
@@ -64,7 +64,7 @@ public final class Repository {
       }
     }
 
-    System.out.println(file);
+    return file;
   }
 
   /**
