@@ -1,11 +1,7 @@
 package com.metapx.git_metadata.core;
 
-import static java.nio.file.StandardOpenOption.APPEND;
-
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Optional;
 
 import org.junit.After;
 import org.junit.Before;
