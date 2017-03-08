@@ -13,14 +13,14 @@ import org.junit.Test;
 
 import org.junit.Assert;
 
-public class RecordFileTest {
+public class AppendableRecordFileTest {
   File file;
   RecordFile<StringRecord> rf;
 
   @Before
   public void setUp() throws IOException {
     file = File.createTempFile("recordfile", "test");
-    rf = new RecordFile<StringRecord>(file, new StringRecord.Reader());
+    rf = new AppendableRecordFile<StringRecord>(file, new StringRecord.Reader());
   }
 
   @After

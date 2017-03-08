@@ -7,8 +7,8 @@ import java.util.UUID;
 public class IdService {
   private final RecordFile<StringRecord> file;
 
-  IdService(File listFile, TransactionControl transaction) {
-    file = new RecordFile<StringRecord>(
+  public IdService(File listFile, TransactionControl transaction) {
+    file = new AppendableRecordFile<StringRecord>(
       listFile,
       new StringRecord.Reader()
     );
@@ -21,11 +21,11 @@ public class IdService {
       if (file.findWithKey(id).isPresent()) {
         throw new RuntimeException("Collision with existing key detected");
       }
+
+      file.append(new StringRecord(new String[] { id, idType }));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-
-    file.append(new StringRecord(new String[] { id, idType }));
 
     return id;
   }
