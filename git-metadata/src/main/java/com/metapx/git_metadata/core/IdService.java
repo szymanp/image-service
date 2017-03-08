@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.util.UUID;
 
 public class IdService {
-  private final RecordFile<RecordFile.StringRecord> file;
+  private final RecordFile<StringRecord> file;
 
   IdService(File listFile, TransactionControl transaction) {
-    file = new RecordFile<RecordFile.StringRecord>(
+    file = new RecordFile<StringRecord>(
       listFile,
-      new RecordFile.StringRecord.Reader()
+      new StringRecord.Reader()
     );
     transaction.addElementToTransaction(file);
   }
@@ -25,7 +25,7 @@ public class IdService {
       throw new RuntimeException(e);
     }
 
-    file.append(new RecordFile.StringRecord(new String[] { id, idType }));
+    file.append(new StringRecord(new String[] { id, idType }));
 
     return id;
   }

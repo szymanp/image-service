@@ -15,12 +15,12 @@ import org.junit.Assert;
 
 public class RecordFileTest {
   File file;
-  RecordFile<RecordFile.StringRecord> rf;
+  RecordFile<StringRecord> rf;
 
   @Before
   public void setUp() throws IOException {
     file = File.createTempFile("recordfile", "test");
-    rf = new RecordFile<RecordFile.StringRecord>(file, new RecordFile.StringRecord.Reader());
+    rf = new RecordFile<StringRecord>(file, new StringRecord.Reader());
   }
 
   @After
@@ -32,7 +32,7 @@ public class RecordFileTest {
 
   @Test
   public void testAppend() throws IOException {
-    final RecordFile.StringRecord record = new RecordFile.StringRecord();
+    final StringRecord record = new StringRecord();
     record.fields.add("hello");
     record.fields.add("world");
     rf.append(record);
@@ -45,7 +45,7 @@ public class RecordFileTest {
   @Test
   public void testFind() throws IOException {
     Files.write(file.toPath(), "hello\tworld\nfrom\there\n".getBytes(), APPEND);
-    Optional<RecordFile.StringRecord> record = rf.findWithKey("from");
+    Optional<StringRecord> record = rf.findWithKey("from");
 
     Assert.assertTrue(record.isPresent());
     Assert.assertEquals("from", record.get().fields.get(0));

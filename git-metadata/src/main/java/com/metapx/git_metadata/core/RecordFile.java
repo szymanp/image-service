@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 import com.google.common.base.Splitter;
 
-public class RecordFile<T extends RecordFile.Record> implements TransactionElement {
+public class RecordFile<T extends Record> implements TransactionElement {
   private final Path file;
   private final RecordReader<T> reader;
   private final List<String[]> transaction = new ArrayList<String[]>();
@@ -59,46 +59,5 @@ public class RecordFile<T extends RecordFile.Record> implements TransactionEleme
   private Stream<Iterable<String>> getLines() throws IOException {
     final Splitter splitter = Splitter.on('\t');
     return Files.lines(file, UTF_8).map(line -> splitter.split(line));
-  }
-
-  public interface Record {
-    String[] toArray();
-  }
-
-  public interface RecordReader<T extends RecordFile.Record> {
-    T read(Iterable<String> fields);
-    T read(String[] fields);
-  }
-
-  public static class StringRecord implements Record {
-    final public List<String> fields;
-
-    public StringRecord() {
-      fields = new ArrayList<String>();
-    }
-
-    public StringRecord(List<String> fields) {
-      this.fields = fields;
-    }
-
-    public StringRecord(String[] fields) {
-      this.fields = Arrays.asList(fields);
-    }
-
-    public String[] toArray() {
-      return fields.toArray(new String[0]);
-    }
-
-    public static class Reader implements RecordReader<StringRecord> {
-      public StringRecord read(Iterable<String> fields) {
-        final StringRecord result = new StringRecord();
-        fields.forEach(field -> result.fields.add(field));
-        return result;
-      }
-
-      public StringRecord read(String[] fields) {
-        return new StringRecord(fields);
-      }
-    }
   }
 }
