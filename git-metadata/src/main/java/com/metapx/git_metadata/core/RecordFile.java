@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 import com.google.common.base.Splitter;
 
-class RecordFile<T extends RecordFile.Record> implements TransactionElement {
+public class RecordFile<T extends RecordFile.Record> implements TransactionElement {
   private final Path file;
   private final RecordReader<T> reader;
   private final List<String[]> transaction = new ArrayList<String[]>();

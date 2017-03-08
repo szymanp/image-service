@@ -34,4 +34,15 @@ public class HashPathTest {
     Assert.assertTrue(folder1.exists());
     Assert.assertFalse(target.exists());
   }
+
+  @Test
+  public void testGetTargetIfExists() throws Exception {
+    final String hash = "75e8694ba0bce5bc36d74216e80b08f4f4734e1d";
+    Assert.assertFalse(hashPath.getTargetIfExists(hash).isPresent());
+
+    final File target = hashPath.getTarget(hash);
+    target.createNewFile();
+
+    Assert.assertTrue(hashPath.getTargetIfExists(hash).isPresent());
+  }
 }

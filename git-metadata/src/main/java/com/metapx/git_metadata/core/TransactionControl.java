@@ -1,5 +1,5 @@
 package com.metapx.git_metadata.core;
 
-interface TransactionControl {
+public interface TransactionControl {
   void addElementToTransaction(TransactionElement element);
 }

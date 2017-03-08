@@ -1,11 +1,12 @@
 package com.metapx.git_metadata.core;
 
 import java.io.File;
+import java.util.Optional;
 
 /**
  * Splits a hash into fragments and uses them to create a multi-level directory structure.
  */
-class HashPath {
+public class HashPath {
   private final File rootDir;
   private final int levels;
   private final int levelLength;
@@ -45,6 +46,21 @@ class HashPath {
       }
     }
     return result;
+  }
+
+  /**
+   * Returns a path corresponding to the given hash, but only if the target exists.
+   */
+  public Optional<File> getTargetIfExists(String hash) {
+    final String[] fragments = getFragments(hash);
+    File result = rootDir;
+    for(int i=0;i<fragments.length;i++) {
+      result = new File(result, fragments[i]);
+      if (!result.exists()) {
+        return Optional.empty();
+      }
+    }
+    return Optional.of(result);
   }
 
   private String[] getFragments(String hash) {
