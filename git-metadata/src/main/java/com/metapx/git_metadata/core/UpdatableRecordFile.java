@@ -57,6 +57,25 @@ public class UpdatableRecordFile<T extends Record> extends RecordFile<T> {
       .map(fields -> reader.read(fields));
   }
 
+  public void set(int index, T record) throws IOException {
+    final List<String[]> lines = getLinesOnDemand();
+    if (index == lines.size()) {
+      lines.add(record.toArray());
+    } else {
+      lines.set(index, record.toArray());
+    }
+    modified = true;
+  }
+
+  public Optional<T> get(int index) throws IOException {
+    final List<String[]> lines = getLinesOnDemand();
+    if (lines.size() > index) {
+      return Optional.of(reader.read(lines.get(index)));
+    } else {
+      return Optional.empty();
+    }
+  }
+
   public void commit() throws IOException {
     if (modified) {
       List<String> outputLines = lines.stream()

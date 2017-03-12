@@ -1,6 +1,6 @@
 package com.metapx.git_metadata.core;
 
-interface TransactionElement {
+public interface TransactionElement {
   void commit() throws Exception;
   void rollback();
 }

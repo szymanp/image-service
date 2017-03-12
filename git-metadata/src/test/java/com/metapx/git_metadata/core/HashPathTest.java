@@ -6,6 +6,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.metapx.git_metadata.core.HashPath.Target;
+
 import org.junit.Assert;
 import org.junit.Before;
 
@@ -22,17 +24,18 @@ public class HashPathTest {
   @Test
   public void testGetTarget() throws Exception {
     final String hash = "75e8694ba0bce5bc36d74216e80b08f4f4734e1d";
-    final File target = hashPath.getTarget(hash);
-    final File folder1 = target.getParentFile();
+    final Target target = hashPath.getTarget(hash);
+    final File folder1 = target.getFile().getParentFile();
     final File folder0 = folder1.getParentFile();
+    target.prepare();
 
     Assert.assertEquals(folder0.getName(), "75");
     Assert.assertEquals(folder1.getName(), "e8");
-    Assert.assertEquals(target.getName(), "694ba0bce5bc36d74216e80b08f4f4734e1d");
+    Assert.assertEquals(target.getFile().getName(), "694ba0bce5bc36d74216e80b08f4f4734e1d");
 
     Assert.assertTrue(folder0.exists());
     Assert.assertTrue(folder1.exists());
-    Assert.assertFalse(target.exists());
+    Assert.assertFalse(target.getFile().exists());
   }
 
   @Test
@@ -40,8 +43,9 @@ public class HashPathTest {
     final String hash = "75e8694ba0bce5bc36d74216e80b08f4f4734e1d";
     Assert.assertFalse(hashPath.getTargetIfExists(hash).isPresent());
 
-    final File target = hashPath.getTarget(hash);
-    target.createNewFile();
+    final Target target = hashPath.getTarget(hash);
+    target.prepare();
+    target.getFile().createNewFile();
 
     Assert.assertTrue(hashPath.getTargetIfExists(hash).isPresent());
   }

@@ -1,6 +1,8 @@
 package com.metapx.git_metadata.core;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -28,24 +30,18 @@ public class HashPath {
 
   /**
    * Returns a path corresponding to the given hash.
-   * 
-   * This method returns a `File` object that points to the last remaining hash fragment.
-   * All fragments before the last one are created as intermediate directories, and this method
-   * makes sure that those directories exists. 
-   * 
-   * The returned file, on the other hand, may or may not exist. It is up to the caller to decide
-   * whether the final fragment will be created as a directory or a regular file.
    */
-  public File getTarget(String hash) {
+  public Target getTarget(String hash) {
     final String[] fragments = getFragments(hash);
     File result = rootDir;
+    List<File> dirs = new ArrayList<File>();
     for(int i=0;i<fragments.length;i++) {
       result = new File(result, fragments[i]);
       if (i < fragments.length-1 && !result.exists()) {
-        result.mkdir();
+        dirs.add(result);
       }
     }
-    return result;
+    return new Target(result, dirs);
   }
 
   /**
@@ -76,5 +72,35 @@ public class HashPath {
     fragments[this.levels] = hash.substring(this.levelLength * this.levels);
 
     return fragments;
+  }
+
+  /**
+   * An object representing the location corresponding to a hash.
+   * 
+   * The `getFile()` method returns a `File` that points to the last remaining hash fragment.
+   * This file may or may not exist, and it is not created by this class.
+   * 
+   * All fragments before the last one are created as intermediate directories when the `prepare()` method is called.
+   */
+  public final static class Target {
+    private final File target;
+    private final List<File> fragments;
+
+    protected Target(File target, List<File> fragments) {
+      this.target = target;
+      this.fragments = fragments;
+    }
+
+    public File getFile() {
+      return target;
+    }
+    
+    public void prepare() {
+      fragments.forEach(fragment -> {
+        if (!fragment.exists()) {
+          fragment.mkdir();
+        }
+      });
+    }
   }
 }

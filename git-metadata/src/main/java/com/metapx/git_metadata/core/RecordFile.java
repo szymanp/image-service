@@ -30,7 +30,11 @@ abstract class RecordFile<T extends Record> implements TransactionElement {
 
   protected Stream<Iterable<String>> getLines() throws IOException {
     final Splitter splitter = Splitter.on('\t');
-    return Files.lines(file, UTF_8).map(line -> splitter.split(line));
+    if (file.toFile().exists()) {
+      return Files.lines(file, UTF_8).map(line -> splitter.split(line));
+    } else {
+      return Stream.empty();
+    }
   }
 
   public static class RecordNotFound extends Exception {
