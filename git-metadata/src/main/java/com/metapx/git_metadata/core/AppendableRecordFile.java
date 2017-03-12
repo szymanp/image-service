@@ -14,6 +14,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.collect.Iterables;
+
 /**
  * A record file that can only be appended to.
  */
@@ -35,7 +37,7 @@ public class AppendableRecordFile<T extends Record> extends RecordFile<T> {
         .map(fields -> reader.read(fields)),
       getLines()
         .filter(fields -> fields.iterator().next().equals(key))
-        .map(fields -> reader.read(fields))
+        .map(fields -> reader.read(Iterables.toArray(fields, String.class)))
     ).findFirst();
   }
 

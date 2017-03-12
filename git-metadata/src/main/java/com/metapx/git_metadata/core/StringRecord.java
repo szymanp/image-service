@@ -24,12 +24,6 @@ public class StringRecord implements Record {
   }
 
   public static class Reader implements RecordReader<StringRecord> {
-    public StringRecord read(Iterable<String> fields) {
-      final StringRecord result = new StringRecord();
-      fields.forEach(field -> result.fields.add(field));
-      return result;
-    }
-
     public StringRecord read(String[] fields) {
       return new StringRecord(fields);
     }
