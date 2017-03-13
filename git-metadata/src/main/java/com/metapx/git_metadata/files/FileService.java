@@ -22,7 +22,7 @@ public class FileService {
   /**
    * Reads a file record for the given file, if it exists.
    */
-  public Optional<FileRecord> read(String hash) throws IOException {
+  public Optional<FileRecord> find(String hash) throws IOException {
     return files.get(hash).get(0);
   }
 

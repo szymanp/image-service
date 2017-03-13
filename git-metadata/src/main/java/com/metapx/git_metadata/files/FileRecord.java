@@ -1,7 +1,5 @@
 package com.metapx.git_metadata.files;
 
-import java.io.IOException;
-
 import com.metapx.git_metadata.core.Record;
 
 public class FileRecord implements Record {
