@@ -2,14 +2,14 @@ package com.metapx.local_client.cli;
 
 import java.io.File;
 
-import com.metapx.local_client.database.jooq.tables.records.FileRecord;
+import com.metapx.local_client.picture_repo.FileInformation;
 
 public interface Console {
 
   ProcessedFileStatus startProcessingFile(File file);
 
   public interface ProcessedFileStatus {
-    void success(FileRecord file);
+    void success(FileInformation file);
     void fail(String message);
   }
 
@@ -27,8 +27,12 @@ public interface Console {
       System.out.print(relativize(file.getAbsoluteFile()));
 
       return new ProcessedFileStatus() {
-        public void success(FileRecord file) {
-         System.out.println(" " + file.getHash().substring(0, 7) + "...");
+        public void success(FileInformation file) {
+          try {
+            System.out.println(" " + file.getHash().substring(0, 7) + "...");
+          } catch (Exception e) {
+            System.out.println(" " + e.getMessage());
+          }
         }
 
         public void fail(String message) {

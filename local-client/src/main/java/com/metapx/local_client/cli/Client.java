@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 import com.beust.jcommander.*;
+import com.metapx.git_metadata.core.MetadataRepository;
 import com.metapx.local_client.database.ConnectionFactory;
 import com.metapx.local_client.database.DatabaseBuilder;
 import com.metapx.local_client.picture_repo.Repository;
@@ -58,7 +60,7 @@ public class Client {
     console = new Console.DefaultConsole(conf);
   }
 
-  void run() {
+  void run() throws Exception {
     System.out.println("hello world");
 
     String command = jc.getParsedCommand();
@@ -98,8 +100,13 @@ public class Client {
     @Parameter(description = "File patterns to add to repository")
     List<String> patterns;
 
-    public void run() {
-      Repository repo = new Repository(conn);
+    public void run() throws Exception {
+      Repository pictureRepo = new Repository(conn);
+      Optional<MetadataRepository> metadataRepo = new MetadataRepositorySelector(conf).getDefault();
+      if (!metadataRepo.isPresent()) {
+        throw new Exception("No metadata repository");
+      }
+      RepositoryActions repoActions = new RepositoryActions(conn, pictureRepo, metadataRepo.get());
 
       WildcardMatcher matcher = new WildcardMatcher(patterns);
 
@@ -110,7 +117,8 @@ public class Client {
 
           if (targetFileInformation.isImage()) {
             try {
-              status.success(repo.addFile(targetFileInformation));
+              repoActions.addFile(targetFileInformation);
+              status.success(targetFileInformation);
             } catch (Repository.RepositoryException e) {
               status.fail(e.getMessage());
             } catch (IOException e) {
@@ -120,6 +128,8 @@ public class Client {
             status.fail("Skipping - not an image");
           }
         });
+
+      repoActions.commit();
     }
   }
 }
