@@ -28,8 +28,8 @@ public class FileRecord implements Record {
     return new String[] {
       Integer.toString(size),
       filetype,
-      Integer.toString(height),
       Integer.toString(width),
+      Integer.toString(height),
       defaultFilename
     };
   }

@@ -61,8 +61,8 @@ public class FileServiceTest {
     record.setHash("75e8694ba0bce5bc36d74216e80b08f4f4734e1d");
     record.setDefaultFilename("my_file.jpg");
     record.setFiletype("jpeg");
-    record.setHeight(1024);
-    record.setWidth(768);
+    record.setHeight(768);
+    record.setWidth(1024);
     record.setSize(123456);
     return record;
   }
