@@ -9,7 +9,7 @@ import com.beust.jcommander.*;
 import com.metapx.local_client.database.ConnectionFactory;
 import com.metapx.local_client.database.DatabaseBuilder;
 import com.metapx.local_client.picture_repo.Repository;
-import com.metapx.local_client.picture_repo.HashCalculator;
+import com.metapx.local_client.picture_repo.FileInformation;
 
 public class Client {
   public static void main(String args[]) {
@@ -35,7 +35,6 @@ public class Client {
   Configuration conf;
   Connection conn;
   Console console;
-  HashCalculator defaultHashCalculator;
   JCommander jc;
 
   CommandMain mainCommand;
@@ -56,7 +55,6 @@ public class Client {
     // Setup the enivornment
     conf = Configuration.getDefaultConfiguration();
     conn = configureDatabaseConnection(conf);
-    defaultHashCalculator = new HashCalculator();
     console = new Console.DefaultConsole(conf);
   }
 
@@ -101,17 +99,18 @@ public class Client {
     List<String> patterns;
 
     public void run() {
-      Repository repo = new Repository(conn, defaultHashCalculator);
+      Repository repo = new Repository(conn);
 
       WildcardMatcher matcher = new WildcardMatcher(patterns);
 
       matcher.files.stream()
         .forEach(targetFile -> {
           Console.ProcessedFileStatus status = console.startProcessingFile(targetFile);
+          FileInformation targetFileInformation = new FileInformation(targetFile);
 
-          if (WildcardMatcher.isImage(targetFile)) {
+          if (targetFileInformation.isImage()) {
             try {
-              status.success(repo.addFile(targetFile));
+              status.success(repo.addFile(targetFileInformation));
             } catch (Repository.RepositoryException e) {
               status.fail(e.getMessage());
             } catch (IOException e) {

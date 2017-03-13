@@ -15,43 +15,41 @@ import com.metapx.local_client.database.jooq.tables.records.FileRecord;
 import com.metapx.local_client.database.jooq.tables.records.FolderRecord;
 
 public final class Repository {
-  private final HashCalculator defaultHashCalculator;
   private final FolderRecord rootFolder;
   private final DSLContext db;
 
-  public Repository(Connection databaseConnection, HashCalculator defaultHashCalculator) {
-    this.defaultHashCalculator = defaultHashCalculator;
+  public Repository(Connection databaseConnection) {
     db = DSL.using(databaseConnection, SQLDialect.H2);
     rootFolder = new FolderRecord();
   }
 
-  public FileRecord addFile(File fileToAdd) throws RepositoryException, IOException {
-    if (!fileToAdd.exists()) {
+  public FileRecord addFile(FileInformation fileToAdd) throws RepositoryException, IOException {
+    if (!fileToAdd.getFile().exists()) {
       throw new RepositoryException("File does not exist on disk");
     }
-    if (!fileToAdd.isFile()) {
-      throw new RepositoryException("The specified path does not denote a regular file");
+    if (!fileToAdd.isImage()) {
+      throw new RepositoryException("The specified path does not denote an image file");
     }
 
-    final FolderRecord folder = createFolderForPath(fileToAdd.getParentFile());
+    final FolderRecord folder = createFolderForPath(fileToAdd.getFile().getParentFile());
 
     FileRecord file =
       db.selectFrom(FILE)
       .where(
         FILE.FOLDER_ID.eq(folder.getId())
-        .and(FILE.NAME.eq(fileToAdd.getName()))
+        .and(FILE.NAME.eq(fileToAdd.getFile().getName()))
       )
       .fetchOne();
 
-    final String hash = defaultHashCalculator.calculateStringDigest(fileToAdd);
+    final String hash = fileToAdd.getHash();
 
     if (file == null) {
       // The file does not exist in the repository yet.
       file = new FileRecord();
       file.attach(db.configuration());
       file.setFolderId(folder.getId());
-      file.setName(fileToAdd.getName());
-      file.setSize(new Long(fileToAdd.length()).intValue());
+      file.setName(fileToAdd.getFile().getName());
+      file.setSize(new Long(fileToAdd.getFile().length()).intValue());
       file.setHash(hash);
       file.insert();   
     } else {
@@ -59,7 +57,7 @@ public final class Repository {
       if (hash != file.getHash()) {
         // TODO If the hash differes, we might need to clear the reference to the git-metadata file.
         file.setHash(hash);
-        file.setSize(new Long(fileToAdd.length()).intValue());
+        file.setSize(new Long(fileToAdd.getFile().length()).intValue());
         file.update();
       }
     }
