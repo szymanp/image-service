@@ -9,6 +9,7 @@ import com.metapx.git_metadata.files.FileService;
 public class MetadataRepository {
   private final File root;
   private final TransactionControlImpl transactionControl;
+  private final IdService idService;
   private final FileService fileService;
 
   public MetadataRepository(File repositoryRoot) throws RepositoryException {
@@ -19,6 +20,7 @@ public class MetadataRepository {
     }
 
     transactionControl = new TransactionControlImpl();
+    idService = new IdService(new File(root, "ids"), transactionControl);
     fileService = new FileService(getSubdirectory("files"), transactionControl);
   }
 
@@ -31,6 +33,10 @@ public class MetadataRepository {
 
   public FileService files() {
     return fileService;
+  }
+
+  public IdService identifiers() {
+    return idService;
   }
 
   public void commit() throws Exception {

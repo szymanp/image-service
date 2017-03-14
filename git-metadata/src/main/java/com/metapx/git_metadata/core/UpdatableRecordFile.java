@@ -7,10 +7,12 @@ import static java.nio.file.StandardOpenOption.CREATE;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.common.collect.Iterators;
 
@@ -52,6 +54,11 @@ public class UpdatableRecordFile<T extends Record> extends RecordFile<T> {
     }
   }
 
+  public void clear() {
+    lines = new ArrayList<String[]>();
+    modified = true;
+  }
+
   public Optional<T> findWithKey(String key) throws IOException {
     return findWithKeyInternal(key)
       .map(fields -> reader.read(fields));
@@ -74,6 +81,12 @@ public class UpdatableRecordFile<T extends Record> extends RecordFile<T> {
     } else {
       return Optional.empty();
     }
+  }
+
+  public Stream<T> all() throws IOException {
+    return getLinesOnDemand()
+      .stream()
+      .<T>map(line -> reader.read(line));
   }
 
   public void commit() throws IOException {

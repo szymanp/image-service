@@ -47,7 +47,7 @@ public class HashPath {
   /**
    * Returns a path corresponding to the given hash, but only if the target exists.
    */
-  public Optional<File> getTargetIfExists(String hash) {
+  public Optional<Target> getTargetIfExists(String hash) {
     final String[] fragments = getFragments(hash);
     File result = rootDir;
     for(int i=0;i<fragments.length;i++) {
@@ -56,7 +56,7 @@ public class HashPath {
         return Optional.empty();
       }
     }
-    return Optional.of(result);
+    return Optional.of(new Target(result, new ArrayList<File>()));
   }
 
   private String[] getFragments(String hash) {

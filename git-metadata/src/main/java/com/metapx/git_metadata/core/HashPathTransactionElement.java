@@ -2,6 +2,7 @@ package com.metapx.git_metadata.core;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import com.metapx.git_metadata.core.HashPath.Target;
 
@@ -24,6 +25,20 @@ public class HashPathTransactionElement<T extends TransactionElement> implements
       existing.put(hash, new Entry<T>(transactionElement, target));
       return transactionElement;
     }
+  }
+
+  public Optional<T> getIfExists(String hash) {
+    if (existing.containsKey(hash)) {
+      return Optional.of(existing.get(hash).transactionElement);
+    } else {
+      final Optional<Target> target = hashPath.getTargetIfExists(hash);
+      if (target.isPresent()) {
+        final T transactionElement = builder.createTransactionElement(target.get());
+        existing.put(hash, new Entry<T>(transactionElement, target.get()));
+        return Optional.of(transactionElement);
+      }
+    }
+    return Optional.empty();
   }
 
   public void commit() throws Exception {
