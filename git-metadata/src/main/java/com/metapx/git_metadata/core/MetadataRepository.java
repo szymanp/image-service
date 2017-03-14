@@ -5,12 +5,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.metapx.git_metadata.files.FileService;
+import com.metapx.git_metadata.pictures.PictureService;
 
 public class MetadataRepository {
   private final File root;
   private final TransactionControlImpl transactionControl;
   private final IdService idService;
   private final FileService fileService;
+  private final PictureService pictureService;
 
   public MetadataRepository(File repositoryRoot) throws RepositoryException {
     root = repositoryRoot;
@@ -22,6 +24,7 @@ public class MetadataRepository {
     transactionControl = new TransactionControlImpl();
     idService = new IdService(new File(root, "ids"), transactionControl);
     fileService = new FileService(getSubdirectory("files"), transactionControl);
+    pictureService = new PictureService(getSubdirectory("pictures"), transactionControl, idService);
   }
 
   /**
@@ -37,6 +40,10 @@ public class MetadataRepository {
 
   public IdService identifiers() {
     return idService;
+  }
+
+  public PictureService pictures() {
+    return pictureService;
   }
 
   public void commit() throws Exception {
