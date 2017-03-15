@@ -43,4 +43,12 @@ public class IdServiceTest {
       + id2 + "\timage" + System.lineSeparator(),
       contents);
   }
+
+ @Test
+  public void testIdFormat() throws Exception {
+    final String id = idService.createId("image");
+
+    Assert.assertEquals(32, id.length());
+    Assert.assertFalse(id, id.contains("-"));
+  }
 }

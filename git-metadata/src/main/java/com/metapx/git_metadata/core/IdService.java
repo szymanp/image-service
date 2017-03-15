@@ -16,7 +16,12 @@ public class IdService {
   }
 
   public String createId(String idType) {
-    final String id = UUID.randomUUID().toString();
+    final String uuid = UUID.randomUUID().toString();
+    final String id = uuid.substring(0, 8)
+      + uuid.substring(9, 13)
+      + uuid.substring(14, 18)
+      + uuid.substring(19, 23)
+      + uuid.substring(24, 36);
     try {
       if (file.findWithKey(id).isPresent()) {
         throw new RuntimeException("Collision with existing key detected");
