@@ -6,7 +6,7 @@ import java.util.List;
 import com.metapx.git_metadata.core.Record;
 
 public class Picture {
-  public enum FileType { 
+  public enum Role { 
     ROOT,
     THUMBNAIL;
   }
@@ -20,24 +20,24 @@ public class Picture {
 
   public static class FileLine implements Record {
     private String hash;
-    private FileType type;
+    private Role role;
 
     public FileLine() {}
-    public FileLine(String hash, FileType type) {
+    public FileLine(String hash, Role role) {
       this.hash = hash;
-      this.type = type;
+      this.role = role;
     }
 
     public String getFileHash() { return hash; }
-    public FileType getFiletype() { return type; }
+    public Role getRole() { return role; }
 
     public void setFileHash(String hash) { this.hash = hash; }
-    public void setFiletype(FileType filetype) { this.type = filetype; }
+    public void setRole(Role role) { this.role = role; }
 
     public String[] toArray() {
       return new String[] {
         hash,
-        type.name().toLowerCase()
+        role.name().toLowerCase()
       };
     }
 
@@ -46,7 +46,7 @@ public class Picture {
 
       final FileLine result = new FileLine();
       result.hash = record[0];
-      result.type = FileType.valueOf(record[1].toUpperCase());
+      result.role = Role.valueOf(record[1].toUpperCase());
       return result;
     }
   }
