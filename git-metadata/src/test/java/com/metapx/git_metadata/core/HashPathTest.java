@@ -73,5 +73,14 @@ public class HashPathTest {
       "13\\ab\\fc493b319610ca32dcb2e7a31c49640dc2bd6169c43f8bd55c586b8fa6a2",
       "25\\82\\e0bc61fa7bbb019c7fc2305e65ce7e9dcff48319cc4f702519749cbd14a7"
     }, actual);
+
+    Object[] actual2 = hashPath.getAllTargets()
+      .map(target -> target.getHash())
+      .collect(Collectors.toList()).toArray();
+
+    Assert.assertArrayEquals(new String[] { 
+      "13abfc493b319610ca32dcb2e7a31c49640dc2bd6169c43f8bd55c586b8fa6a2",
+      "2582e0bc61fa7bbb019c7fc2305e65ce7e9dcff48319cc4f702519749cbd14a7"
+    }, actual2);
   }
 }

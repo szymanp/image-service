@@ -46,7 +46,7 @@ public class HashPath {
         dirs.add(result);
       }
     }
-    return new Target(result, dirs);
+    return new Target(result, dirs, hash);
   }
 
   /**
@@ -61,7 +61,7 @@ public class HashPath {
         return Optional.empty();
       }
     }
-    return Optional.of(new Target(result));
+    return Optional.of(new Target(result, hash));
   }
 
   public Stream<Target> getAllTargets() throws IOException {
@@ -72,7 +72,13 @@ public class HashPath {
         final int depth = path.getNameCount() - startIndex;
         return depth == levels + 1;
       })
-      .map(path -> new Target(path.toFile()));
+      .map(path -> {
+        String hash = "";
+        for(int i=0; i <= levels; i++) {
+          hash += path.getName(startIndex + i).toString();
+        }
+        return new Target(path.toFile(), hash);
+      });
   }
 
   private String[] getFragments(String hash) {
@@ -101,19 +107,26 @@ public class HashPath {
   public final static class Target {
     private final File target;
     private final List<File> fragments;
+    private final String hash;
 
-    protected Target(File target, List<File> fragments) {
+    protected Target(File target, List<File> fragments, String hash) {
       this.target = target;
       this.fragments = fragments;
+      this.hash = hash;
     }
 
-    protected Target(File target) {
+    protected Target(File target, String hash) {
       this.target = target;
       this.fragments = new ArrayList<File>();
+      this.hash = hash;
     }
 
     public File getFile() {
       return target;
+    }
+
+    public String getHash() {
+      return hash;
     }
     
     public void prepare() {
