@@ -1,9 +1,14 @@
 package com.metapx.git_metadata.core;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * Splits a hash into fragments and uses them to create a multi-level directory structure.
@@ -56,7 +61,18 @@ public class HashPath {
         return Optional.empty();
       }
     }
-    return Optional.of(new Target(result, new ArrayList<File>()));
+    return Optional.of(new Target(result));
+  }
+
+  public Stream<Target> getAllTargets() throws IOException {
+    final Path rootPath = rootDir.toPath();
+    final int startIndex = rootPath.getNameCount();
+    return Files.walk(rootPath, levels + 1)
+      .filter(path -> {
+        final int depth = path.getNameCount() - startIndex;
+        return depth == levels + 1;
+      })
+      .map(path -> new Target(path.toFile()));
   }
 
   private String[] getFragments(String hash) {
@@ -89,6 +105,11 @@ public class HashPath {
     protected Target(File target, List<File> fragments) {
       this.target = target;
       this.fragments = fragments;
+    }
+
+    protected Target(File target) {
+      this.target = target;
+      this.fragments = new ArrayList<File>();
     }
 
     public File getFile() {

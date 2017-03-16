@@ -1,6 +1,9 @@
 package com.metapx.git_metadata.core;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -48,5 +51,27 @@ public class HashPathTest {
     target.getFile().createNewFile();
 
     Assert.assertTrue(hashPath.getTargetIfExists(hash).isPresent());
+  }
+
+  @Test
+  public void testGetAllTargets() throws Exception {
+    final List<Target> targets = new ArrayList<Target>();
+    targets.add(hashPath.getTarget("13abfc493b319610ca32dcb2e7a31c49640dc2bd6169c43f8bd55c586b8fa6a2"));
+    targets.add(hashPath.getTarget("2582e0bc61fa7bbb019c7fc2305e65ce7e9dcff48319cc4f702519749cbd14a7"));
+    targets.forEach(target -> {
+      target.prepare();
+      try {
+        target.getFile().createNewFile();
+      } catch (Exception e) {}
+    });
+
+    Object[] actual = hashPath.getAllTargets()
+      .map(target -> folder.getRoot().toPath().relativize(target.getFile().toPath()).toString())
+      .collect(Collectors.toList()).toArray();
+
+    Assert.assertArrayEquals(new String[] { 
+      "13\\ab\\fc493b319610ca32dcb2e7a31c49640dc2bd6169c43f8bd55c586b8fa6a2",
+      "25\\82\\e0bc61fa7bbb019c7fc2305e65ce7e9dcff48319cc4f702519749cbd14a7"
+    }, actual);
   }
 }
