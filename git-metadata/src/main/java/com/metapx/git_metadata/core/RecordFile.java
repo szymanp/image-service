@@ -29,6 +29,10 @@ abstract class RecordFile<T extends Record> implements TransactionElement {
   public abstract void rollback();
 
   protected Stream<Iterable<String>> getLines() throws IOException {
+    return readLines(file);
+  }
+
+  static Stream<Iterable<String>> readLines(Path file) throws IOException {
     final Splitter splitter = Splitter.on('\t');
     if (file.toFile().exists()) {
       return Files.lines(file, UTF_8).map(line -> splitter.split(line));
