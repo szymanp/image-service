@@ -101,18 +101,18 @@ public class ReferenceService {
     private final Operation operation;
     private final List<Reference<?>> refs;
 
-    MessageBuilder(Reference<?> origin, Operation op) {
+    public MessageBuilder(Reference<?> origin, Operation op) {
       this.origin = origin;
       this.operation = op;
       this.refs = new ArrayList<Reference<?>>();
     }
 
-    MessageBuilder references(Reference<?> ref) {
+    public MessageBuilder references(Reference<?> ref) {
       refs.add(ref);
       return this;
     }
 
-    Message build() {
+    public Message build() {
       return new Message(origin, operation, refs);
     }
   }

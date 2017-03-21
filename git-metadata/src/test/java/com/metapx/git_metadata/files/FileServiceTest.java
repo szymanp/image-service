@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.metapx.git_metadata.core.TransactionElement;
+import com.metapx.git_metadata.references.ReferenceService;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -24,7 +25,7 @@ public class FileServiceTest {
   @Before
   public void setUp() throws Exception {
     transactions = new ArrayList<TransactionElement>();
-    fileService = new FileService(folder.getRoot(), txel -> transactions.add(txel));
+    fileService = new FileService(folder.getRoot(), txel -> transactions.add(txel), new ReferenceService());
   }
 
   @Test

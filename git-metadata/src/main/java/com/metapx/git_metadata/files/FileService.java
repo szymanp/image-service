@@ -8,11 +8,14 @@ import com.metapx.git_metadata.core.HashPath;
 import com.metapx.git_metadata.core.HashPathTransactionElement;
 import com.metapx.git_metadata.core.TransactionControl;
 import com.metapx.git_metadata.core.UpdatableRecordFile;
+import com.metapx.git_metadata.references.ReferenceService;
 
 public class FileService {
   private final HashPathTransactionElement<UpdatableRecordFile<FileRecord>> files;
+  private final ReferenceService refService;
 
-  public FileService(File root, TransactionControl transaction) {
+  public FileService(File root, TransactionControl transaction, ReferenceService refService) {
+    this.refService = refService;
     files = new HashPathTransactionElement<UpdatableRecordFile<FileRecord>>(new HashPath(root), target -> {
       return new UpdatableRecordFile<FileRecord>(target.getFile(), fields -> FileRecord.fromArray(fields));
     });

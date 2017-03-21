@@ -6,11 +6,13 @@ import java.util.Set;
 
 import com.metapx.git_metadata.files.FileService;
 import com.metapx.git_metadata.pictures.PictureService;
+import com.metapx.git_metadata.references.ReferenceService;
 
 public class MetadataRepository {
   private final File root;
   private final TransactionControlImpl transactionControl;
   private final IdService idService;
+  private final ReferenceService referenceService;
   private final FileService fileService;
   private final PictureService pictureService;
 
@@ -22,13 +24,14 @@ public class MetadataRepository {
     }
 
     transactionControl = new TransactionControlImpl();
+    referenceService = new ReferenceService();
     idService = new IdService(new File(root, "ids"), transactionControl);
-    fileService = new FileService(getSubdirectory("files"), transactionControl);
-    pictureService = new PictureService(getSubdirectory("pictures"), transactionControl, idService);
+    fileService = new FileService(getSubdirectory("files"), transactionControl, referenceService);
+    pictureService = new PictureService(getSubdirectory("pictures"), transactionControl, idService, referenceService);
   }
 
   /**
-   * @returns the root directory of this repository
+   * @return the root directory of this repository
    */
   public File getRoot() {
     return this.root;
