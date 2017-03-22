@@ -117,7 +117,7 @@ public class ReferenceService {
     }
   }
 
-  public static class OperationException extends Exception {
+  public static class OperationException extends RuntimeException {
     private static final long serialVersionUID = 1;
 
     public OperationException(Throwable e) {
