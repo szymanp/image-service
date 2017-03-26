@@ -49,5 +49,21 @@ public class Picture {
       result.role = Role.valueOf(record[1].toUpperCase());
       return result;
     }
+
+    @Override
+    public boolean equals(Object other) {
+      if (this == other) {
+        return true;
+      } else if (other != null && other instanceof FileLine) {
+        return hash == null ? false : hash.equals(((FileLine) other).hash);
+      } else {
+        return false;
+      }
+    }
+
+    @Override
+    public int hashCode() {
+      return hash == null ? 0 : hash.hashCode();
+    }
   }
 }

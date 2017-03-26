@@ -38,6 +38,7 @@ public class PictureServiceTest {
     refService = new ReferenceService();
     pictureService = new PictureService(folder.getRoot(), txel -> transactions.add(txel), idService, refService);
 
+    refService.register(Picture.class, Operation.UNREFERENCE, message -> messages.add(message));
     refService.register(Picture.class, Operation.REFERENCE, message -> messages.add(message));
   }
 
@@ -62,20 +63,59 @@ public class PictureServiceTest {
 
   @Test
   public void testReferencesOnCreate() throws Exception {
+    final Picture picture = newPicture();
+    pictureService.update(picture);
+
+    for(TransactionElement txel : transactions) txel.commit();
+
+    Assert.assertEquals(2, messages.size());
+    Assert.assertEquals(Operation.UNREFERENCE, messages.get(0).getOperation());
+    Assert.assertEquals(0, messages.get(0).getReferences(FileReference.class).count());
+    Assert.assertEquals(Operation.REFERENCE, messages.get(1).getOperation());
+    final List<FileReference> refs = messages.get(1).getReferences(FileReference.class).collect(Collectors.toList());
+    Assert.assertEquals(3, refs.size());
+    Assert.assertEquals("abcdef", refs.get(0).getObjectId());
+    Assert.assertEquals("qwerty", refs.get(1).getObjectId());
+    Assert.assertEquals("123456", refs.get(2).getObjectId());
+  }
+
+  @Test
+  public void testReferencesOnUpdate() throws Exception {
+    final Picture picture = newPicture();
+    pictureService.update(picture);
+    for(TransactionElement txel : transactions) txel.commit();
+
+    messages.clear();
+
+    // Update the picture
+    picture.getFiles().remove(0);
+    picture.getFiles().add(new Picture.FileLine("987654", Role.THUMBNAIL));
+    pictureService.update(picture);
+
+    Assert.assertEquals("qwerty 123456 987654",
+      picture.getFiles().stream().map(file -> file.getFileHash()).collect(Collectors.joining(" "))
+    );
+
+    Assert.assertEquals(2, messages.size());
+    Assert.assertEquals(Operation.UNREFERENCE, messages.get(0).getOperation());
+    Assert.assertEquals(Operation.REFERENCE, messages.get(1).getOperation());
+
+    final List<FileReference> unref = messages.get(0).getReferences(FileReference.class).collect(Collectors.toList());
+    final List<FileReference> ref = messages.get(1).getReferences(FileReference.class).collect(Collectors.toList());
+
+    Assert.assertEquals(1, unref.size());
+    Assert.assertEquals(1, ref.size());
+
+    Assert.assertEquals("abcdef", unref.get(0).getObjectId());
+    Assert.assertEquals("987654", ref.get(0).getObjectId());
+  }
+
+  private Picture newPicture() {
     final Picture picture = pictureService.create();
     picture.setHash("75e8694ba0bce5bc36d74216e80b08f4f4734e1d");
     picture.getFiles().add(new Picture.FileLine("abcdef", Role.ROOT));
     picture.getFiles().add(new Picture.FileLine("qwerty", Role.THUMBNAIL));
     picture.getFiles().add(new Picture.FileLine("123456", Role.THUMBNAIL));
-    pictureService.update(picture);
-
-    for(TransactionElement txel : transactions) txel.commit();
-
-    Assert.assertEquals(1, messages.size());
-    final List<FileReference> refs = messages.get(0).getReferences(FileReference.class).collect(Collectors.toList());
-    Assert.assertEquals(3, refs.size());
-    Assert.assertEquals("abcdef", refs.get(0).getObjectId());
-    Assert.assertEquals("qwerty", refs.get(1).getObjectId());
-    Assert.assertEquals("123456", refs.get(2).getObjectId());
+    return picture;
   }
 }

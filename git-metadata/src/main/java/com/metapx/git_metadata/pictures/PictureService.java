@@ -2,7 +2,10 @@ package com.metapx.git_metadata.pictures;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.metapx.git_metadata.core.HashPath;
 import com.metapx.git_metadata.core.HashPathTransactionElement;
@@ -50,7 +53,17 @@ public class PictureService {
   public void update(Picture picture) throws IOException, OperationException {
     final UpdatableRecordFile<Picture.FileLine> recordFile = pictures.get(picture.getHash());
 
-    refService.emit(newMessage(picture, Operation.REFERENCE));
+    refService.emit(newMessage(
+      picture.getHash(),
+      recordFile.all()
+      .filter(file -> !picture.getFiles().contains(file)),
+      Operation.UNREFERENCE));
+ 
+    final List<Picture.FileLine> oldFiles = recordFile.all().collect(Collectors.toList());
+    refService.emit(newMessage(
+      picture.getHash(),
+      picture.getFiles().stream().filter(file -> !oldFiles.contains(file)),
+      Operation.REFERENCE));
 
     recordFile.clear();
     picture.getFiles().forEach(file -> {
@@ -62,11 +75,11 @@ public class PictureService {
     });
   }
 
-  private ReferenceService.Message newMessage(Picture picture, Operation op) {
-    final PictureReference pictureRef = new PictureReference(picture.getHash());
+  private ReferenceService.Message newMessage(String pictureHash, Stream<Picture.FileLine> files, Operation op) {
+    final PictureReference pictureRef = new PictureReference(pictureHash);
     final ReferenceService.MessageBuilder builder = ReferenceService.newMessageBuilder(pictureRef, op);
 
-    picture.getFiles().forEach(fileLine -> builder.references(new FileReference(fileLine.getFileHash())));
+    files.forEach(fileLine -> builder.references(new FileReference(fileLine.getFileHash())));
 
     return builder.build();
   }
