@@ -23,7 +23,7 @@ public final class Repository {
     rootFolder = new FolderRecord();
   }
 
-  public FileRecord addFile(FileInformation fileToAdd) throws RepositoryException, IOException {
+  public ObjectWithState<FileRecord> addFile(FileInformation fileToAdd) throws RepositoryException, IOException {
     if (!fileToAdd.getFile().exists()) {
       throw new RepositoryException("File does not exist on disk");
     }
@@ -52,6 +52,8 @@ public final class Repository {
       file.setSize(new Long(fileToAdd.getFile().length()).intValue());
       file.setHash(hash);
       file.insert();   
+
+      return ObjectWithState.newObject(file);
     } else {
       // The file exists, update the hash if needed.
       if (hash != file.getHash()) {
@@ -60,9 +62,8 @@ public final class Repository {
         file.setSize(new Long(fileToAdd.getFile().length()).intValue());
         file.update();
       }
+      return ObjectWithState.existingObject(file);
     }
-
-    return file;
   }
 
   /**

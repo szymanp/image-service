@@ -117,7 +117,7 @@ public class Client {
 
           if (targetFileInformation.isImage()) {
             try {
-              repoActions.addFile(targetFileInformation);
+              repoActions.addFileAsPicture(targetFileInformation);
               status.success(targetFileInformation);
             } catch (Repository.RepositoryException e) {
               status.fail(e.getMessage());
