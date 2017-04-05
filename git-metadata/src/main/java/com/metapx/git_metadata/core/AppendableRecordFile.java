@@ -30,7 +30,7 @@ public class AppendableRecordFile<T extends Record> extends RecordFile<T> {
     transaction.add(record.toArray());
   }
 
-  public Optional<T> findWithKey(String key) throws IOException {
+  public Optional<T> findWithKey(String key) {
     return Stream.concat(
       transaction.stream()
         .filter(fields -> fields[0].equals(key))

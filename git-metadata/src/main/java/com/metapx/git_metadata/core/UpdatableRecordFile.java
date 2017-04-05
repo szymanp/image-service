@@ -27,12 +27,12 @@ public class UpdatableRecordFile<T extends Record> extends RecordFile<T> {
     super(recordFile, reader);
   }
 
-  public void append(T record) throws IOException {
+  public void append(T record) {
     getLinesOnDemand().add(record.toArray());
     modified = true;
   }
 
-  public void update(T record) throws IOException, RecordNotFound {
+  public void update(T record) {
     final String[] line = record.toArray();
     final Optional<String[]> forUpdate = findWithKeyInternal(line[0]);
     if (forUpdate.isPresent()) {
@@ -43,7 +43,7 @@ public class UpdatableRecordFile<T extends Record> extends RecordFile<T> {
     }
   }
 
-  public boolean delete(String key) throws IOException {
+  public boolean delete(String key) {
     final Optional<String[]> forDelete = findWithKeyInternal(key);
     if (forDelete.isPresent()) {
       getLinesOnDemand().remove(forDelete.get());
@@ -59,12 +59,12 @@ public class UpdatableRecordFile<T extends Record> extends RecordFile<T> {
     modified = true;
   }
 
-  public Optional<T> findWithKey(String key) throws IOException {
+  public Optional<T> findWithKey(String key) {
     return findWithKeyInternal(key)
       .map(fields -> reader.read(fields));
   }
 
-  public void set(int index, T record) throws IOException {
+  public void set(int index, T record) {
     final List<String[]> lines = getLinesOnDemand();
     if (index == lines.size()) {
       lines.add(record.toArray());
@@ -74,7 +74,7 @@ public class UpdatableRecordFile<T extends Record> extends RecordFile<T> {
     modified = true;
   }
 
-  public Optional<T> get(int index) throws IOException {
+  public Optional<T> get(int index) {
     final List<String[]> lines = getLinesOnDemand();
     if (lines.size() > index) {
       return Optional.of(reader.read(lines.get(index)));
@@ -83,7 +83,7 @@ public class UpdatableRecordFile<T extends Record> extends RecordFile<T> {
     }
   }
 
-  public Stream<T> all() throws IOException {
+  public Stream<T> all() {
     return getLinesOnDemand()
       .stream()
       .<T>map(line -> reader.read(line));
@@ -106,13 +106,13 @@ public class UpdatableRecordFile<T extends Record> extends RecordFile<T> {
     lines = null;
   }
 
-  private Optional<String[]> findWithKeyInternal(String key) throws IOException {
+  private Optional<String[]> findWithKeyInternal(String key) {
     return getLinesOnDemand().stream()
       .filter(fields -> fields[0].equals(key))
       .findFirst();
   }
 
-  private List<String[]> getLinesOnDemand() throws IOException {
+  private List<String[]> getLinesOnDemand() {
     if (lines == null) {
       lines = getLines()
         .map(fields -> Iterators.toArray(fields.iterator(), String.class))

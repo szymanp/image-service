@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.metapx.git_metadata.core.TransactionElement;
+import com.metapx.git_metadata.core.collections.Collection;
 import com.metapx.git_metadata.pictures.PictureReference;
 import com.metapx.git_metadata.references.ReferenceService;
 import com.metapx.git_metadata.references.ReferenceService.Message;
@@ -22,6 +23,7 @@ public class FileServiceTest {
   public TemporaryFolder folder = new TemporaryFolder();
 
   public FileService fileService;
+  public Collection<FileRecord> files;
   public ReferenceService refService;
   public List<TransactionElement> transactions;
 
@@ -30,12 +32,13 @@ public class FileServiceTest {
     transactions = new ArrayList<TransactionElement>();
     refService = new ReferenceService();
     fileService = new FileService(folder.getRoot(), txel -> transactions.add(txel), refService);
+    files = fileService.files();
   }
 
   @Test
   public void testCreate() throws Exception {
     final FileRecord record = newFileRecord();
-    fileService.create(record);
+    files.append(record);
 
     for(TransactionElement txel : transactions) txel.commit();
 
@@ -48,11 +51,11 @@ public class FileServiceTest {
   @Test
   public void testUpdate() throws Exception {
     final FileRecord record = newFileRecord();
-    fileService.create(record);
+    files.append(record);
     for(TransactionElement txel : transactions) txel.commit();
 
     record.setDefaultFilename("my_other_file.jpg");
-    fileService.update(record);
+    files.update(record);
     for(TransactionElement txel : transactions) txel.commit();
 
     final File expectedFile = new File(folder.getRoot(), "75/e8/694ba0bce5bc36d74216e80b08f4f4734e1d");
@@ -65,7 +68,7 @@ public class FileServiceTest {
   public void testReferencePicture() throws Exception {
     final FileRecord record = newFileRecord();
     record.setPictureId("");
-    fileService.create(record);
+    files.append(record);
     for(TransactionElement txel : transactions) txel.commit();
 
     final Message message = ReferenceService.newMessageBuilder(
@@ -86,7 +89,7 @@ public class FileServiceTest {
   @Test
   public void testUnreferencePicture() throws Exception {
     final FileRecord record = newFileRecord();
-    fileService.create(record);
+    files.append(record);
     for(TransactionElement txel : transactions) txel.commit();
 
     final Message message = ReferenceService.newMessageBuilder(

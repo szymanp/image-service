@@ -4,10 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 
-import com.metapx.git_metadata.core.HashPath;
-import com.metapx.git_metadata.core.HashPathTransactionElement;
 import com.metapx.git_metadata.core.TransactionControl;
-import com.metapx.git_metadata.core.UpdatableRecordFile;
+import com.metapx.git_metadata.core.collections.KeyedCollection;
 import com.metapx.git_metadata.pictures.Picture;
 import com.metapx.git_metadata.pictures.PictureReference;
 import com.metapx.git_metadata.references.ReferenceService;
@@ -15,15 +13,13 @@ import com.metapx.git_metadata.references.ReferenceService.Operation;
 import com.metapx.git_metadata.references.ReferenceService.OperationException;
 
 public class FileService {
-  private final HashPathTransactionElement<UpdatableRecordFile<FileRecord>> files;
+  private final FileCollection coll;
   private final ReferenceService refService;
 
   public FileService(File root, TransactionControl transaction, ReferenceService refService) {
     this.refService = refService;
-    files = new HashPathTransactionElement<UpdatableRecordFile<FileRecord>>(new HashPath(root), target -> {
-      return new UpdatableRecordFile<FileRecord>(target.getFile(), fields -> FileRecord.fromArray(fields));
-    });
-    transaction.addElementToTransaction(files);
+    coll = new FileCollection(root);
+    transaction.addElementToTransaction(coll.files);
 
     refService.register(Picture.class, Operation.REFERENCE, message -> {
       message.getReferences(FileReference.class).forEach(fileRef -> {
@@ -40,39 +36,12 @@ public class FileService {
     });
   }
 
-  /**
-   * Reads a file record for the given file, if it exists.
-   */
-  public Optional<FileRecord> find(String hash) throws IOException {
-    final Optional<FileRecord> result = files.get(hash).get(0);
-
-    // The record reader does not set a hash by itself. We need to do it here.
-    if (result.isPresent() && result.get().getHash() == null) {
-      result.get().setHash(hash);
-    }
-
-    return result;
-  }
-
-  public void create(FileRecord record) throws IOException {
-    final UpdatableRecordFile<FileRecord> recordFile = files.get(record.getHash());
-    if (recordFile.get(0).isPresent()) {
-      throw new IOException("File already exists");
-    } else {
-      recordFile.set(0, record);
-    }
-  }
-
-  public void update(FileRecord record) throws IOException {
-    final UpdatableRecordFile<FileRecord> recordFile = files.get(record.getHash());
-    if (!recordFile.get(0).isPresent()) {
-      throw new IOException("File does not exist");
-    }
-    recordFile.set(0, record);
+  public KeyedCollection<String, FileRecord> files() {
+    return coll;
   }
 
   private FileRecord getFileRecordOrThrow(String hash) throws IOException {
-    final Optional<FileRecord> fileRecordOpt = find(hash);
+    final Optional<FileRecord> fileRecordOpt = coll.findWithKey(hash);
     if (!fileRecordOpt.isPresent()) {
       throw new IOException("File does not exist: " + hash);
     }
@@ -87,8 +56,8 @@ public class FileService {
       }
 
       fileRecord.setPictureId(pictureHash);
-      update(fileRecord);
-    } catch (IOException e) {
+      coll.update(fileRecord);
+    } catch (Exception e) {
       throw new OperationException(e);
     }
   }
@@ -101,8 +70,8 @@ public class FileService {
       }
 
       fileRecord.setPictureId("");
-      update(fileRecord);
-    } catch (IOException e) {
+      coll.update(fileRecord);
+    } catch (Exception e) {
       throw new OperationException(e);
     }
   }

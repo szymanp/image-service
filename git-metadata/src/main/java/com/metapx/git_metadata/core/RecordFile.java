@@ -20,28 +20,32 @@ abstract class RecordFile<T extends Record> implements TransactionElement {
     this.reader = reader;
   }
 
-  public abstract void append(T record) throws IOException;
+  public abstract void append(T record);
 
-  public abstract Optional<T> findWithKey(String key) throws IOException;
+  public abstract Optional<T> findWithKey(String key);
 
   public abstract void commit() throws IOException;
 
   public abstract void rollback();
 
-  protected Stream<Iterable<String>> getLines() throws IOException {
+  protected Stream<Iterable<String>> getLines() {
     return readLines(file);
   }
 
-  static Stream<Iterable<String>> readLines(Path file) throws IOException {
+  static Stream<Iterable<String>> readLines(Path file) {
     final Splitter splitter = Splitter.on('\t');
     if (file.toFile().exists()) {
-      return Files.lines(file, UTF_8).map(line -> splitter.split(line));
+      try {
+        return Files.lines(file, UTF_8).map(line -> splitter.split(line));
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
     } else {
       return Stream.empty();
     }
   }
 
-  public static class RecordNotFound extends Exception {
+  public static class RecordNotFound extends RuntimeException {
     static final long serialVersionUID = 0;
     RecordNotFound(String message) {
       super(message);

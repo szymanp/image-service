@@ -35,11 +35,7 @@ public class PictureService {
     return pictures.getIfExists(hash).map(file -> {
       final Picture picture = new Picture();
       picture.setHash(hash);
-      try {
-        file.all().forEach(line -> picture.getFiles().add(line));
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+      file.all().forEach(line -> picture.getFiles().add(line));
       return picture;
     });
   }
@@ -66,13 +62,7 @@ public class PictureService {
       Operation.REFERENCE));
 
     recordFile.clear();
-    picture.getFiles().forEach(file -> {
-      try {
-        recordFile.append(file);
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    });
+    picture.getFiles().forEach(file -> recordFile.append(file));
   }
 
   private ReferenceService.Message newMessage(String pictureHash, Stream<Picture.FileLine> files, Operation op) {
