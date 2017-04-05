@@ -62,6 +62,40 @@ public class PictureServiceTest {
   }
 
   @Test
+  public void testUpdateOfFiles() throws Exception {
+    final Picture picture = pictureService.create();
+    picture.files().append(new MemberFile("abcdef", Role.ROOT));
+    picture.files().append(new MemberFile("qwerty", Role.THUMBNAIL));
+    picture.files().append(new MemberFile("123456", Role.THUMBNAIL));
+    for(TransactionElement txel : transactions) txel.commit();
+
+    picture.files().remove(picture.files().findWithKey("qwerty").get());
+    for(TransactionElement txel : transactions) txel.commit();
+
+    final File expectedFile = new File(folder.getRoot(), "75/e8/694ba0bce5bc36d74216e80b08f4f4734e1d/files");
+    Assert.assertTrue(expectedFile.exists());
+    final String contents = new String(Files.readAllBytes(expectedFile.toPath()));
+    Assert.assertEquals("abcdef\troot" + System.lineSeparator()
+                       +"123456\tthumbnail" + System.lineSeparator(), contents);
+  }
+
+  @Test
+  public void testList() throws Exception {
+    idService.nextId = "0100000000001";
+    pictureService.pictures().append(pictureService.create());
+    idService.nextId = "0200000000002";
+    pictureService.pictures().append(pictureService.create());
+
+    for(TransactionElement txel : transactions) txel.commit();
+
+    final List<Picture> pictures = pictureService.pictures().list();
+
+    Assert.assertEquals(2, pictures.size());
+    Assert.assertEquals("0100000000001", pictures.get(0).getHash());
+    Assert.assertEquals("0200000000002", pictures.get(1).getHash());
+  }
+
+  @Test
   public void testReferencesOnCreate() throws Exception {
     newPicture();
     for(TransactionElement txel : transactions) txel.commit();
