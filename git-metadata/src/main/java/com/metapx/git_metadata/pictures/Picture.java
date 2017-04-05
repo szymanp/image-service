@@ -1,9 +1,10 @@
 package com.metapx.git_metadata.pictures;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
 
-import com.metapx.git_metadata.core.Record;
+import com.metapx.git_metadata.core.TransactionSubject;
+import com.metapx.git_metadata.core.HashPath.Target;
+import com.metapx.git_metadata.core.collections.KeyedCollection;
 
 public class Picture {
   public enum Role { 
@@ -11,59 +12,59 @@ public class Picture {
     THUMBNAIL;
   }
 
-  private String hash;
-  private List<FileLine> files = new ArrayList<FileLine>();
+  private final PictureService service;
+  private final String hash;
+  private Subject subject;
+  private MemberFileCollection files;
 
-  public void setHash(String hash) { this.hash = hash; }
+  public Picture(PictureService service, String hash) {
+    this.service = service;
+    this.hash = hash;
+  }
+
+  public Picture(PictureService service, Target target) {
+    this.service = service;
+    this.hash = target.getHash();
+    this.subject = new Subject(target);
+  }
+
   public String getHash() { return hash; }
-  public List<FileLine> getFiles() { return files; }
 
-  public static class FileLine implements Record {
-    private String hash;
-    private Role role;
+  public KeyedCollection<String, MemberFile> files() {
+    if (files == null) {
+      final Subject subject = service.coll.attach(this).getSubject();
+      final File source = new File(subject.target.getFile(), "files");
+      files = new MemberFileCollection(hash, source, subject, service.refService);
+    }
+    return files;
+  }
 
-    public FileLine() {}
-    public FileLine(String hash, Role role) {
-      this.hash = hash;
-      this.role = role;
+  // Transaction Control
+  void detach() { subject = null; }
+  boolean isDetached() { return subject == null; }
+  Subject getSubject() { 
+    if (subject == null) throw new RuntimeException("This is a detached picture");
+    return subject;
+  }
+
+  class Subject extends TransactionSubject {
+    final Target target;
+
+    Subject(Target target) {
+      super();
+      this.target = target;
     }
 
-    public String getFileHash() { return hash; }
-    public Role getRole() { return role; }
-
-    public void setFileHash(String hash) { this.hash = hash; }
-    public void setRole(Role role) { this.role = role; }
-
-    public String[] toArray() {
-      return new String[] {
-        hash,
-        role.name().toLowerCase()
-      };
+    Picture getPicture() {
+      return Picture.this; 
     }
-
-    public static FileLine fromArray(String[] record) {
-      if (record.length < 2) throw new RuntimeException("Record is too short");
-
-      final FileLine result = new FileLine();
-      result.hash = record[0];
-      result.role = Role.valueOf(record[1].toUpperCase());
-      return result;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-      if (this == other) {
-        return true;
-      } else if (other != null && other instanceof FileLine) {
-        return hash == null ? false : hash.equals(((FileLine) other).hash);
-      } else {
-        return false;
+    
+    public void commit() throws Exception {
+      final File dir = target.getFile();
+      if (!dir.exists()) {
+        dir.mkdir();
       }
-    }
-
-    @Override
-    public int hashCode() {
-      return hash == null ? 0 : hash.hashCode();
+      super.commit();
     }
   }
 }
