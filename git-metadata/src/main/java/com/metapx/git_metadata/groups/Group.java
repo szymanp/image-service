@@ -39,7 +39,7 @@ public abstract class Group {
 	 * @return the parent group of this group, if any.
 	 */
 	public Optional<Group> getParent() {
-		if (parentId.equals("")) {
+		if (parentId == null || parentId.equals("")) {
 			return Optional.empty();
 		} else {
 			if (parent == null) {

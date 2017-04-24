@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import com.metapx.git_metadata.core.HashPath;
+import com.metapx.git_metadata.core.HashPathTransactionElement;
 import com.metapx.git_metadata.core.IdService;
 import com.metapx.git_metadata.core.TransactionControl;
 import com.metapx.git_metadata.core.collections.Collection;
@@ -16,11 +18,18 @@ public class GroupService {
   private final IdService idService;
   private final ProviderMap providers = new ProviderMap();
   private final TransactionControl transaction;
+  private final HashPathTransactionElement<MemberPictureCollection> pictureCollections;
 
   public GroupService(File root, TransactionControl transactionControl, IdService idService) {
     this.idService = idService;
     transaction = transactionControl;
     tree = new GroupTreeCollection(new File(root, "tree"), transaction);
+
+    pictureCollections = new HashPathTransactionElement<MemberPictureCollection>(
+      new HashPath(root),
+      target -> new MemberPictureCollection(target.getFile())
+    );
+    transaction.addElementToTransaction(pictureCollections);
 
     final Group.Api api = new Group.Api() {
       public KeyedCollection<String, Group> groups() {
@@ -30,13 +39,19 @@ public class GroupService {
         return new GroupCollection.Subgroups(tree, providers, parent);
       }
   		public Collection<PictureReference> pictures(String groupid) {
-        return null;
+        return pictureCollections.get(groupid);
       }
     };
+
+    addProvider(Tag.class, new TagProvider(api));
   }
 
   public <T extends Group> KeyedCollection<String, T> groups(Class<T> clazz) {
     return new GroupCollection.Typed<T>(tree, providers.get(clazz));
+  }
+
+  public KeyedCollection<String, Group> groups() {
+    return new GroupCollection.Complete(tree, providers);
   }
 
   public <T extends Group> T create(Class<T> clazz, String name) {
