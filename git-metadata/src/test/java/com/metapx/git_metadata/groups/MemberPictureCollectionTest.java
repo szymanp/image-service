@@ -17,13 +17,11 @@ import org.junit.Assert;
 public class MemberPictureCollectionTest {
   MemberPictureCollection coll;
   File file;
-  TransactionSubject transaction;
 
   @Before
   public void setUp() throws IOException {
     file = File.createTempFile("recordfile", "test");
-    transaction = new TransactionSubject();
-    coll = new MemberPictureCollection(file, transaction);
+    coll = new MemberPictureCollection(file);
   }
 
   @After
@@ -55,7 +53,7 @@ public class MemberPictureCollectionTest {
     coll.append(new PictureReference("0123456"));
     coll.append(new PictureReference("1231230"));
 
-    transaction.commit();
+    coll.commit();
 
     final String contents = new String(Files.readAllBytes(file.toPath()));
     Assert.assertEquals("0123456" + System.lineSeparator()
