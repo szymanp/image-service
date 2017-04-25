@@ -14,6 +14,7 @@ import org.junit.rules.TemporaryFolder;
 import com.metapx.git_metadata.core.MockIdService;
 import com.metapx.git_metadata.core.TransactionElement;
 import com.metapx.git_metadata.files.FileReference;
+import com.metapx.git_metadata.groups.GroupReference;
 import com.metapx.git_metadata.pictures.Picture.Role;
 import com.metapx.git_metadata.references.ReferenceService;
 import com.metapx.git_metadata.references.ReferenceService.Operation;
@@ -145,6 +146,38 @@ public class PictureServiceTest {
 
     Assert.assertEquals("abcdef", unref.get(0).getObjectId());
     Assert.assertEquals("987654", ref.get(0).getObjectId());
+  }
+
+  @Test
+  public void testAssignGroups() throws Exception {
+    final Picture picture = pictureService.create();
+    pictureService.pictures().append(picture);
+    picture.groups().append(new GroupReference("21302130"));
+    picture.groups().append(new GroupReference("31403130"));
+
+    for(TransactionElement txel : transactions) txel.commit();
+
+    final File expectedFile = new File(folder.getRoot(), "75/e8/694ba0bce5bc36d74216e80b08f4f4734e1d/groups");
+    Assert.assertTrue(expectedFile.exists());
+    final String contents = new String(Files.readAllBytes(expectedFile.toPath()));
+    Assert.assertEquals("21302130" + System.lineSeparator()
+                       +"31403130" + System.lineSeparator(), contents);
+  }
+
+  @Test
+  public void testReadGroupsFromFile() throws Exception {
+    final Picture picture = pictureService.create();
+    pictureService.pictures().append(picture);
+
+    for(TransactionElement txel : transactions) txel.commit();
+
+    final File groupsFile = new File(folder.getRoot(), "75/e8/694ba0bce5bc36d74216e80b08f4f4734e1d/groups");
+    Files.write(groupsFile.toPath(), ("21302130" + System.lineSeparator() + "31403140" + System.lineSeparator()).getBytes());
+
+    final List<GroupReference> groups = picture.groups().list();
+    Assert.assertEquals(2, groups.size());
+    Assert.assertEquals("21302130", groups.get(0).getObjectId());
+    Assert.assertEquals("31403140", groups.get(1).getObjectId());
   }
 
   private Picture newPicture() {

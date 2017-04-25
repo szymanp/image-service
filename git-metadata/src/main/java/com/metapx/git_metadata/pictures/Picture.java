@@ -4,7 +4,9 @@ import java.io.File;
 
 import com.metapx.git_metadata.core.TransactionSubject;
 import com.metapx.git_metadata.core.HashPath.Target;
+import com.metapx.git_metadata.core.collections.Collection;
 import com.metapx.git_metadata.core.collections.KeyedCollection;
+import com.metapx.git_metadata.groups.GroupReference;
 
 public class Picture {
   public enum Role { 
@@ -16,6 +18,7 @@ public class Picture {
   private final String hash;
   private Subject subject;
   private MemberFileCollection files;
+  private MemberGroupCollection groups;
 
   public Picture(PictureService service, String hash) {
     this.service = service;
@@ -37,6 +40,16 @@ public class Picture {
       files = new MemberFileCollection(hash, source, subject, service.refService);
     }
     return files;
+  }
+
+  public Collection<GroupReference> groups() {
+    if (groups == null) {
+      final Subject subject = service.coll.attach(this).getSubject();
+      final File source = new File(subject.target.getFile(), "groups");
+      groups = new MemberGroupCollection(source);
+      subject.addElementToTransaction(groups);
+    }
+    return groups;
   }
 
   // Transaction Control
