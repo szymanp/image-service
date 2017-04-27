@@ -2,6 +2,8 @@ package com.metapx.git_metadata.references;
 
 import org.junit.Test;
 
+import com.metapx.git_metadata.groups.GroupReference;
+import com.metapx.git_metadata.pictures.PictureReference;
 import com.metapx.git_metadata.references.ReferenceService.Message;
 import com.metapx.git_metadata.references.ReferenceService.Operation;
 
@@ -20,37 +22,35 @@ public class ReferenceServiceTest {
   }
 
   @Test
-  public void testReceive() throws Exception {
-    final List<Message> messages = new ArrayList<Message>();
-    refService.register(String.class, Operation.REFERENCE, message -> messages.add(message));
+  public void testReceiveAll() throws Exception {
+    final List<Message<?, ?>> messages = new ArrayList<Message<?, ?>>();
+    refService.messages().subscribe(message -> messages.add(message));
 
-    refService.emit(new Message(Reference.create(String.class, "123"), Operation.REFERENCE));
-    refService.emit(new Message(Reference.create(String.class, "234"), Operation.UNREFERENCE));
+    refService.emit(Message.create(Reference.create(String.class, "123"), Operation.REFERENCE, Reference.create(String.class, "234")));
+    refService.emit(Message.create(Reference.create(Integer.class, 123), Operation.REFERENCE, Reference.create(String.class, "234")));
 
-    Assert.assertEquals(1, messages.size());
-    Assert.assertEquals("123", messages.get(0).getOrigin().getObjectId());
+    Assert.assertEquals(2, messages.size());
+    Assert.assertEquals("123", messages.get(0).source().getObjectId());
+    Assert.assertEquals(123, messages.get(1).source().getObjectId());
   }
 
   @Test
-  public void testMessage() throws Exception {
-    final Message m = ReferenceService
-      .newMessageBuilder(Reference.create(String.class, "123"), Operation.REFERENCE)
-      .references(new StringReference(Integer.class, "123"))
-      .references(new StringReference(Integer.class, "234"))
-      .references(Reference.create(Long.class, 123))
-      .build();
+  public void testReceiveTyped() throws Exception {
+    final List<Message<PictureReference, GroupReference>> messages = new ArrayList<Message<PictureReference, GroupReference>>();
+    refService.messages(PictureReference.class, GroupReference.class).subscribe(message -> messages.add(message));
 
-    Assert.assertEquals(Operation.REFERENCE, m.getOperation());
-    Assert.assertEquals(String.class, m.getOrigin().getObjectClass());
-    Assert.assertEquals("123", m.getOrigin().getObjectId());
-    
-    Assert.assertEquals(2, m.getReferences(StringReference.class).count());
-    Assert.assertEquals(1, m.getReferences(Reference.class).count());
-  }
+    refService.emit(Message.create(new PictureReference("123"), Operation.REFERENCE, new PictureReference("234")));
+    refService.emit(Message.create(new PictureReference("123"), Operation.REFERENCE, new GroupReference("234")));
+    refService.emit(Message.create(new PictureReference("123"), Operation.UNREFERENCE, new GroupReference("345")));
 
-  private static class StringReference extends Reference<String> {
-    StringReference(Class<?> clazz, String id) {
-      super(clazz, id);
-    }
+    Assert.assertEquals(2, messages.size());
+    Assert.assertEquals("123", messages.get(0).source().getObjectId());
+    Assert.assertEquals("123", messages.get(1).source().getObjectId());
+
+    Assert.assertEquals("234", messages.get(0).target().getObjectId());
+    Assert.assertEquals("345", messages.get(1).target().getObjectId());
+
+    Assert.assertEquals(Operation.REFERENCE, messages.get(0).operation());
+    Assert.assertEquals(Operation.UNREFERENCE, messages.get(1).operation());
   }
 }

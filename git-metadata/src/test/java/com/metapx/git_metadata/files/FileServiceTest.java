@@ -71,13 +71,11 @@ public class FileServiceTest {
     files.append(record);
     for(TransactionElement txel : transactions) txel.commit();
 
-    final Message message = ReferenceService.newMessageBuilder(
-        new PictureReference("8a1d540f8aeb1df7dbf34ce60309e935"),
-        ReferenceService.Operation.REFERENCE
-      )
-      .references(new FileReference("75e8694ba0bce5bc36d74216e80b08f4f4734e1d"))
-      .build();
-    refService.emit(message);
+    refService.emit(Message.create(
+      new PictureReference("8a1d540f8aeb1df7dbf34ce60309e935"),
+      ReferenceService.Operation.REFERENCE,
+      new FileReference("75e8694ba0bce5bc36d74216e80b08f4f4734e1d")
+    ));
     for(TransactionElement txel : transactions) txel.commit();
 
     final File expectedFile = new File(folder.getRoot(), "75/e8/694ba0bce5bc36d74216e80b08f4f4734e1d");
@@ -92,13 +90,11 @@ public class FileServiceTest {
     files.append(record);
     for(TransactionElement txel : transactions) txel.commit();
 
-    final Message message = ReferenceService.newMessageBuilder(
-        new PictureReference("7da9b60d0194d61562fedab48092e1b7"),
-        ReferenceService.Operation.UNREFERENCE
-      )
-      .references(new FileReference("75e8694ba0bce5bc36d74216e80b08f4f4734e1d"))
-      .build();
-    refService.emit(message);
+    refService.emit(Message.create(
+      new PictureReference("7da9b60d0194d61562fedab48092e1b7"),
+      ReferenceService.Operation.UNREFERENCE,
+      new FileReference("75e8694ba0bce5bc36d74216e80b08f4f4734e1d")
+    ));
     for(TransactionElement txel : transactions) txel.commit();
 
     final File expectedFile = new File(folder.getRoot(), "75/e8/694ba0bce5bc36d74216e80b08f4f4734e1d");

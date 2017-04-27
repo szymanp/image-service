@@ -6,11 +6,9 @@ import java.util.Optional;
 
 import com.metapx.git_metadata.core.TransactionControl;
 import com.metapx.git_metadata.core.collections.KeyedCollection;
-import com.metapx.git_metadata.pictures.Picture;
 import com.metapx.git_metadata.pictures.PictureReference;
 import com.metapx.git_metadata.references.ReferenceService;
 import com.metapx.git_metadata.references.ReferenceService.Operation;
-import com.metapx.git_metadata.references.ReferenceService.OperationException;
 
 public class FileService {
   private final FileCollection coll;
@@ -21,19 +19,14 @@ public class FileService {
     coll = new FileCollection(root);
     transaction.addElementToTransaction(coll.files);
 
-    refService.register(Picture.class, Operation.REFERENCE, message -> {
-      message.getReferences(FileReference.class).forEach(fileRef -> {
-        final PictureReference pictureRef = (PictureReference) message.getOrigin();
-        this.addPictureReference(fileRef.getObjectId(), pictureRef.getObjectId());
+    refService.messages(PictureReference.class, FileReference.class)
+      .subscribe(m -> {
+        if (m.operation() == Operation.REFERENCE) {
+          this.addPictureReference(m.target().getObjectId(), m.source().getObjectId());
+        } else if (m.operation() == Operation.UNREFERENCE) {
+          this.removePictureReference(m.target().getObjectId(), m.source().getObjectId());
+        }
       });
-    });
-
-    refService.register(Picture.class, Operation.UNREFERENCE, message -> {
-      message.getReferences(FileReference.class).forEach(fileRef -> {
-        final PictureReference pictureRef = (PictureReference) message.getOrigin();
-        this.removePictureReference(fileRef.getObjectId(), pictureRef.getObjectId());
-      });
-    });
   }
 
   public KeyedCollection<String, FileRecord> files() {
@@ -52,13 +45,13 @@ public class FileService {
     try {
       final FileRecord fileRecord = getFileRecordOrThrow(fileHash);
       if (!fileRecord.getPictureId().equals("") && !fileRecord.getPictureId().equals(pictureHash)) {
-        throw new OperationException("File " + fileHash + " is already associated with picture " + fileRecord.getPictureId());
+        throw new RuntimeException("File " + fileHash + " is already associated with picture " + fileRecord.getPictureId());
       }
 
       fileRecord.setPictureId(pictureHash);
       coll.update(fileRecord);
     } catch (Exception e) {
-      throw new OperationException(e);
+      throw new RuntimeException(e);
     }
   }
 
@@ -66,13 +59,13 @@ public class FileService {
     try {
       final FileRecord fileRecord = getFileRecordOrThrow(fileHash);
       if (!fileRecord.getPictureId().equals(pictureHash)) {
-        throw new OperationException("File " + fileHash + " is not associated with picture " + pictureHash);
+        throw new RuntimeException("File " + fileHash + " is not associated with picture " + pictureHash);
       }
 
       fileRecord.setPictureId("");
       coll.update(fileRecord);
     } catch (Exception e) {
-      throw new OperationException(e);
+      throw new RuntimeException(e);
     }
   }
 }
