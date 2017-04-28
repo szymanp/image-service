@@ -13,6 +13,8 @@ import com.metapx.git_metadata.core.TransactionSubject;
 import com.metapx.git_metadata.core.collections.Collection;
 import com.metapx.git_metadata.pictures.PictureReference;
 import com.metapx.git_metadata.references.ReferenceService;
+import com.metapx.git_metadata.references.ReferenceService.Message;
+import com.metapx.git_metadata.references.ReferenceService.Operation;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -104,4 +106,24 @@ public class GroupServiceTest {
     contents = new String(Files.readAllBytes(new File(folder.getRoot(), "75/e8/694ba0bce5bc36d74216e80b08f4f4734e1d").toPath()));
     Assert.assertEquals("2132130" + System.lineSeparator() + "3123120" + System.lineSeparator(), contents);
   }
+
+  @Test
+  public void testAssignPicturesViaReference() throws Exception {
+    idService.nextId = "75e8694ba0bce5bc36d74216e80b08f4f4734e1d";
+    final Tag winter = groupService.create(Tag.class, "winter");
+    final GroupReference ref = new GroupReference(winter.getId());
+
+    groupService.groups().append(winter);
+    winter.pictures().append(new PictureReference("2132130"));
+    winter.pictures().append(new PictureReference("3123120"));
+
+    refService.emit(Message.create(new PictureReference("4560456"), Operation.REFERENCE, ref));
+    refService.emit(Message.create(new PictureReference("3123120"), Operation.UNREFERENCE, ref));
+
+    final List<PictureReference> pictures = winter.pictures().list();
+    Assert.assertEquals(2, pictures.size());
+    Assert.assertEquals("2132130", pictures.get(0).getObjectId());
+    Assert.assertEquals("4560456", pictures.get(1).getObjectId());    
+  }
+
 }

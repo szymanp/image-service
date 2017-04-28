@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import com.metapx.git_metadata.core.TransactionSubject;
 import com.metapx.git_metadata.pictures.PictureReference;
+import com.metapx.git_metadata.references.ReferenceService;
 
 import org.junit.Assert;
 
@@ -21,7 +22,7 @@ public class MemberPictureCollectionTest {
   @Before
   public void setUp() throws IOException {
     file = File.createTempFile("recordfile", "test");
-    coll = new MemberPictureCollection(file);
+    coll = new MemberPictureCollection(file, new ReferenceService(), new GroupReference("0000deadbeef"));
   }
 
   @After

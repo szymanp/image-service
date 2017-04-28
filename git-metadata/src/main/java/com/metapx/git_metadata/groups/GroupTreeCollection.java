@@ -7,7 +7,7 @@ import java.io.File;
 
 class GroupTreeCollection extends RecordFileCollection<GroupTreeRecord> {
   GroupTreeCollection(File treeFile, TransactionControl transaction) {
-    super(treeFile, GroupTreeRecord::fromArray, record -> record.getGroupHash());
+    super(treeFile, GroupTreeRecord::fromArray, record -> record.getGroupHash(), 1);
     transaction.addElementToTransaction(getRecordFile());
   }
 }

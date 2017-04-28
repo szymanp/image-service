@@ -6,13 +6,18 @@ import com.metapx.git_metadata.core.collections.MappingCollection;
 import com.metapx.git_metadata.core.collections.RecordFileCollection;
 import com.metapx.git_metadata.core.collections.SkeletonCollection;
 import com.metapx.git_metadata.pictures.PictureReference;
+import com.metapx.git_metadata.references.ReferenceService;
+import com.metapx.git_metadata.references.ReferenceService.Message;
+import com.metapx.git_metadata.references.ReferenceService.Operation;
 
 import java.io.File;
 
 class MemberPictureCollection extends SkeletonCollection<PictureReference> implements TransactionElement {
   private final TransactionElement transaction;
+  private final ReferenceService refService;
+  private final GroupReference thisGroup;
 
-  MemberPictureCollection(File recordFile) {
+  MemberPictureCollection(File recordFile, ReferenceService refService, GroupReference thisGroup) {
     super();
 
     final RecordFileCollection<OneStringRecord> recordFileCollection =
@@ -26,6 +31,20 @@ class MemberPictureCollection extends SkeletonCollection<PictureReference> imple
 
     inner = mappingCollection;
     transaction = recordFileCollection.getRecordFile();
+    this.refService = refService;
+    this.thisGroup = thisGroup;
+  }
+
+  @Override
+  public void append(PictureReference element) {
+    refService.emit(Message.create(thisGroup, Operation.REFERENCE, element));
+    super.append(element);
+  }
+
+  @Override
+  public void remove(PictureReference element) {
+    refService.emit(Message.create(thisGroup, Operation.UNREFERENCE, element));
+    super.remove(element);
   }
 
   public void commit() throws Exception {

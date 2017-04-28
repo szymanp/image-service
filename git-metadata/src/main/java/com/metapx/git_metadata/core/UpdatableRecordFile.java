@@ -22,9 +22,15 @@ import com.google.common.collect.Iterators;
 public class UpdatableRecordFile<T extends Record> extends RecordFile<T> {
   private boolean modified = false;
   private List<String[]> lines;
+  private final int keyFieldIndex; 
 
-  public UpdatableRecordFile(File recordFile, RecordReader<T> reader) {
+  public UpdatableRecordFile(File recordFile, RecordReader<T> reader, int keyFieldIndex) {
     super(recordFile, reader);
+    this.keyFieldIndex = keyFieldIndex;
+  }
+  
+  public UpdatableRecordFile(File recordFile, RecordReader<T> reader) {
+    this(recordFile, reader, 0);
   }
 
   public void append(T record) {
@@ -108,7 +114,7 @@ public class UpdatableRecordFile<T extends Record> extends RecordFile<T> {
 
   private Optional<String[]> findWithKeyInternal(String key) {
     return getLinesOnDemand().stream()
-      .filter(fields -> fields[0].equals(key))
+      .filter(fields -> fields[keyFieldIndex].equals(key))
       .findFirst();
   }
 

@@ -13,6 +13,7 @@ import com.metapx.git_metadata.core.collections.Collection;
 import com.metapx.git_metadata.core.collections.KeyedCollection;
 import com.metapx.git_metadata.pictures.PictureReference;
 import com.metapx.git_metadata.references.ReferenceService;
+import com.metapx.git_metadata.references.ReferenceService.Operation;
 
 public class GroupService {
   private final GroupTreeCollection tree;
@@ -30,7 +31,7 @@ public class GroupService {
 
     pictureCollections = new HashPathTransactionElement<MemberPictureCollection>(
       new HashPath(root),
-      target -> new MemberPictureCollection(target.getFile())
+      target -> new MemberPictureCollection(target.getFile(), refService, new GroupReference(target.getHash()))
     );
     transaction.addElementToTransaction(pictureCollections);
 
@@ -45,6 +46,19 @@ public class GroupService {
         return pictureCollections.get(groupid);
       }
     };
+
+    refService.messages(PictureReference.class, GroupReference.class)
+      .filter(m -> m.operation() == Operation.REFERENCE || m.operation() == Operation.UNREFERENCE)
+      .subscribe(m -> {
+        groups().findWithKey(m.target().getObjectId())
+          .ifPresent(group -> {
+            if (m.operation() == Operation.REFERENCE) {
+              group.pictures().append(m.source());
+            } else {
+              group.pictures().remove(m.source());
+            }
+          });
+      });
 
     addProvider(Tag.class, new TagProvider(api));
   }

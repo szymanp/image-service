@@ -15,9 +15,9 @@ import com.metapx.git_metadata.references.ReferenceService.Operation;
 class MemberGroupCollection extends SkeletonCollection<GroupReference> implements TransactionElement {
   private final TransactionElement transaction;
   private final ReferenceService refService;
-  private final PictureReference picture;
+  private final PictureReference thisPicture;
 
-  MemberGroupCollection(File file, ReferenceService refService, PictureReference picture) {
+  MemberGroupCollection(File file, ReferenceService refService, PictureReference thisPicture) {
     super();
 
     final RecordFileCollection<OneStringRecord> recordFileCollection =
@@ -33,17 +33,17 @@ class MemberGroupCollection extends SkeletonCollection<GroupReference> implement
     this.inner = mappingCollection;
     this.transaction = recordFileCollection.getRecordFile();
     this.refService = refService;
-    this.picture = picture;
+    this.thisPicture = thisPicture;
   }
 
   @Override
   public void append(GroupReference element) {
-    refService.emit(Message.create(picture, Operation.REFERENCE, element));
+    refService.emit(Message.create(thisPicture, Operation.REFERENCE, element));
     super.append(element);
   }
   @Override
   public void remove(GroupReference element) {
-    refService.emit(Message.create(picture, Operation.UNREFERENCE, element));
+    refService.emit(Message.create(thisPicture, Operation.UNREFERENCE, element));
     super.remove(element);
   }
 

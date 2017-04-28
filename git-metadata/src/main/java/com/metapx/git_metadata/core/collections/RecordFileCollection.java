@@ -14,9 +14,13 @@ public class RecordFileCollection<R extends Record> implements KeyedCollection<S
   private final UpdatableRecordFile<R> recordFile;
   private final KeyReader<R> keyReader;
 
-  public RecordFileCollection(File file, RecordReader<R> reader, KeyReader<R> keyReader) {
-    recordFile = new UpdatableRecordFile<R>(file, fields -> reader.read(fields));
+  public RecordFileCollection(File file, RecordReader<R> reader, KeyReader<R> keyReader, int keyFieldIndex) {
+    recordFile = new UpdatableRecordFile<R>(file, fields -> reader.read(fields), keyFieldIndex);
     this.keyReader = keyReader;
+  }
+
+  public RecordFileCollection(File file, RecordReader<R> reader, KeyReader<R> keyReader) {
+    this(file, reader, keyReader, 0);
   }
 
   public void append(R element) {
