@@ -12,6 +12,7 @@ import com.metapx.git_metadata.core.MockIdService;
 import com.metapx.git_metadata.core.TransactionSubject;
 import com.metapx.git_metadata.core.collections.Collection;
 import com.metapx.git_metadata.pictures.PictureReference;
+import com.metapx.git_metadata.references.ReferenceService;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,6 +23,7 @@ public class GroupServiceTest {
 
   public GroupService groupService;
   public MockIdService idService;
+  public ReferenceService refService;
   public TransactionSubject transactions;
 
   @Before
@@ -29,7 +31,8 @@ public class GroupServiceTest {
     transactions = new TransactionSubject();
     idService = new MockIdService(new File(folder.getRoot(), "ids"), txel -> transactions.addElementToTransaction(txel));
     idService.nextId = "75e8694ba0bce5bc36d74216e80b08f4f4734e1d";
-    groupService = new GroupService(folder.getRoot(), transactions, idService);
+    refService = new ReferenceService();
+    groupService = new GroupService(folder.getRoot(), transactions, idService, refService);
   }
 
   @Test

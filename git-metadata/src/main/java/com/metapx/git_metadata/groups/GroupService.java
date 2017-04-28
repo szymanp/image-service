@@ -12,16 +12,19 @@ import com.metapx.git_metadata.core.TransactionControl;
 import com.metapx.git_metadata.core.collections.Collection;
 import com.metapx.git_metadata.core.collections.KeyedCollection;
 import com.metapx.git_metadata.pictures.PictureReference;
+import com.metapx.git_metadata.references.ReferenceService;
 
 public class GroupService {
   private final GroupTreeCollection tree;
   private final IdService idService;
+  private final ReferenceService refService;
   private final ProviderMap providers = new ProviderMap();
   private final TransactionControl transaction;
   private final HashPathTransactionElement<MemberPictureCollection> pictureCollections;
 
-  public GroupService(File root, TransactionControl transactionControl, IdService idService) {
+  public GroupService(File root, TransactionControl transactionControl, IdService idService, ReferenceService refService) {
     this.idService = idService;
+    this.refService = refService;
     transaction = transactionControl;
     tree = new GroupTreeCollection(new File(root, "tree"), transaction);
 

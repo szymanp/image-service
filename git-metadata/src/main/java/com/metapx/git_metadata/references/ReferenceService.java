@@ -44,5 +44,10 @@ public class ReferenceService {
     public S source() { return source; }
     public Operation operation() { return operation; }
     public T target() { return target; }
+
+    @Override
+    public String toString() {
+      return "Message(" + source.toString() + ", " + operation.toString() + ", " + target.toString() + ")";
+    }
   }
 }

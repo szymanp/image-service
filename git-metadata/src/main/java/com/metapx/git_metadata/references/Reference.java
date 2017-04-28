@@ -29,6 +29,11 @@ public class Reference<T> {
     return 13 + clazz.hashCode() + id.hashCode() * 7;
   }
 
+  @Override
+  public String toString() {
+    return this.getClass().getSimpleName() + "(" + id.toString() + ")";
+  }
+
   public static <T> Reference<T> create(Class<?> clazz, T id) {
     return new Reference<T>(clazz, id);
   }

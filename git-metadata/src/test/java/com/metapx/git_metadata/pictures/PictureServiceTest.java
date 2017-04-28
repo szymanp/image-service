@@ -15,6 +15,7 @@ import com.metapx.git_metadata.core.TransactionElement;
 import com.metapx.git_metadata.groups.GroupReference;
 import com.metapx.git_metadata.pictures.Picture.Role;
 import com.metapx.git_metadata.references.ReferenceService;
+import com.metapx.git_metadata.references.ReferenceService.Message;
 import com.metapx.git_metadata.references.ReferenceService.Operation;
 
 import io.reactivex.subjects.PublishSubject;
@@ -174,6 +175,22 @@ public class PictureServiceTest {
     Assert.assertEquals(2, groups.size());
     Assert.assertEquals("21302130", groups.get(0).getObjectId());
     Assert.assertEquals("31403140", groups.get(1).getObjectId());
+  }
+
+  @Test
+  public void testAssignGroupsViaReference() throws Exception {
+    final Picture picture = pictureService.create();
+    pictureService.pictures().append(picture);
+    picture.groups().append(new GroupReference("21302130"));
+    picture.groups().append(new GroupReference("31403130"));
+
+    refService.emit(Message.create(new GroupReference("21302130"), Operation.UNREFERENCE, picture.getReference()));
+    refService.emit(Message.create(new GroupReference("98709870"), Operation.REFERENCE, picture.getReference()));
+
+    final List<GroupReference> groups = picture.groups().list();
+    Assert.assertEquals(2, groups.size());
+    Assert.assertEquals("31403130", groups.get(0).getObjectId());
+    Assert.assertEquals("98709870", groups.get(1).getObjectId());
   }
 
   private Picture newPicture() {
