@@ -1,6 +1,7 @@
 package com.metapx.local_client.cli;
 
 import java.io.File;
+import java.util.Map;
 
 public class Configuration {
   private static final String DATABASE_FILE_EXTENSION = "h2.db";
@@ -13,6 +14,7 @@ public class Configuration {
   private String jdbcDatabaseName;
   private File workingDirectory;
   private File confDirectory;
+  private String deviceName;
 
   private static Configuration defaultConfiguration;
 
@@ -27,7 +29,8 @@ public class Configuration {
         + File.separatorChar 
         + conf.databaseFile;
       conf.databasePath = new File(conf.jdbcDatabaseName + "." + DATABASE_FILE_EXTENSION);
-
+      conf.deviceName = getComputerName();
+      
       defaultConfiguration = conf;
     }
     return defaultConfiguration;
@@ -37,11 +40,22 @@ public class Configuration {
   public File getDatabasePath() { return databasePath; }
   public File getWorkingDirectory() { return workingDirectory; }
   public String getJdbcDatabaseName() { return jdbcDatabaseName; }
+  public String getDeviceName() { return deviceName; }
 
   @Override
   public String toString() {
     return "databasePath = " + databasePath + "\n"
          + "workingDirectory = " + workingDirectory + "\n"
          + "confDirectory = " + confDirectory + "\n";
+  }
+  
+  private static String getComputerName() {
+    Map<String, String> env = System.getenv();
+    if (env.containsKey("COMPUTERNAME"))
+      return env.get("COMPUTERNAME");
+    else if (env.containsKey("HOSTNAME"))
+      return env.get("HOSTNAME");
+    else
+      return "localhost";
   }
 }

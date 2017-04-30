@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import com.metapx.git_metadata.core.MetadataRepository;
 import com.metapx.git_metadata.files.FileRecord;
+import com.metapx.git_metadata.pictures.MemberFile;
 import com.metapx.git_metadata.pictures.Picture;
 import com.metapx.local_client.picture_repo.FileInformation;
 import com.metapx.local_client.picture_repo.ObjectWithState;
@@ -16,11 +17,15 @@ public class RepositoryActions {
   final private Repository pictures;
   final private MetadataRepository metadata;
   final private Connection conn;
+  
+  final private DeviceFolders deviceFolders;
 
-  public RepositoryActions(Connection conn, Repository pictureRepository, MetadataRepository metadataRepository) {
+  public RepositoryActions(Configuration conf, Connection conn, Repository pictureRepository, MetadataRepository metadataRepository) {
     this.pictures = pictureRepository;
     this.metadata = metadataRepository;
     this.conn = conn;
+    
+    deviceFolders = new DeviceFolders(conf, metadataRepository);
   }
 
   public void addFile(FileInformation file) throws IOException, Repository.RepositoryException {
@@ -33,9 +38,10 @@ public class RepositoryActions {
     final ObjectWithState<FileRecord> fileRecord = addFileToMetadataRepository(file);
 
     if (fileRecord.state() == State.NEW && fileRecord.get().getPictureId().equals("")) {
-      final Picture picture = metadata.pictures().create();
-      picture.getFiles().add(new Picture.FileLine(file.getHash(), Picture.Role.ROOT));
-      metadata.pictures().update(picture);
+      final Picture picture = metadata.pictureApi().create();
+      picture.files().append(new MemberFile(file.getHash(), Picture.Role.ROOT));
+      picture.groups().append(deviceFolders.getDeviceGroup().getReference());
+      metadata.pictureApi().pictures().update(picture);
     }
   }
 
@@ -52,7 +58,7 @@ public class RepositoryActions {
     if (!file.isImage()) {
       throw new RuntimeException("File is not an image");
     }
-    final Optional<FileRecord> fileRecordOpt = metadata.files().find(file.getHash());
+    final Optional<FileRecord> fileRecordOpt = metadata.files().findWithKey(file.getHash());
     if (!fileRecordOpt.isPresent()) {
       FileRecord fileRecord = new FileRecord();
       fileRecord.setDefaultFilename(file.getFile().getName());
@@ -61,7 +67,7 @@ public class RepositoryActions {
       fileRecord.setHeight(file.getHeight());
       fileRecord.setWidth(file.getWidth());
       fileRecord.setSize(new Long(file.getFile().length()).intValue());
-      metadata.files().create(fileRecord);
+      metadata.files().append(fileRecord);
 
       return ObjectWithState.newObject(fileRecord);
     } else {

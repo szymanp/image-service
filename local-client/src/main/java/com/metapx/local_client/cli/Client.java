@@ -106,7 +106,7 @@ public class Client {
       if (!metadataRepo.isPresent()) {
         throw new Exception("No metadata repository");
       }
-      RepositoryActions repoActions = new RepositoryActions(conn, pictureRepo, metadataRepo.get());
+      RepositoryActions repoActions = new RepositoryActions(conf, conn, pictureRepo, metadataRepo.get());
 
       WildcardMatcher matcher = new WildcardMatcher(patterns);
 
