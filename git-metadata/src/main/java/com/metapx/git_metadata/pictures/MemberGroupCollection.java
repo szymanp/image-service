@@ -11,6 +11,7 @@ import com.metapx.git_metadata.groups.GroupReference;
 import com.metapx.git_metadata.references.ReferenceService;
 import com.metapx.git_metadata.references.ReferenceService.Message;
 import com.metapx.git_metadata.references.ReferenceService.Operation;
+import com.metapx.git_metadata.references.Zone;
 
 class MemberGroupCollection extends SkeletonCollection<GroupReference> implements TransactionElement {
   private final TransactionElement transaction;
@@ -38,12 +39,14 @@ class MemberGroupCollection extends SkeletonCollection<GroupReference> implement
 
   @Override
   public void append(GroupReference element) {
-    refService.emit(Message.create(thisPicture, Operation.REFERENCE, element));
+    Zone.getCurrent().fork("picture-zone")
+      .run(() -> refService.emit(Message.create(thisPicture, Operation.REFERENCE, element)));
     super.append(element);
   }
   @Override
   public void remove(GroupReference element) {
-    refService.emit(Message.create(thisPicture, Operation.UNREFERENCE, element));
+    Zone.getCurrent().fork("picture-zone")
+      .run(() -> refService.emit(Message.create(thisPicture, Operation.UNREFERENCE, element)));
     super.remove(element);
   }
 

@@ -11,6 +11,7 @@ public abstract class Group {
 	private String id;
 	private String parentId;
 	private Group parent;
+	private GroupReference ownReference;
 	protected final Api groupApi;
 
 	protected Group(Api api) {
@@ -34,6 +35,16 @@ public abstract class Group {
   public String getName() { return name; }
 	public String getId() { return id; }
 	public abstract String getType();
+
+	public GroupReference getReference() { 
+		if (id == null) {
+			throw new RuntimeException("This group does not have an id.");
+		}
+		if (ownReference == null) {
+			ownReference = new GroupReference(id);
+		}
+		return ownReference;
+	}
 
 	/**
 	 * @return the parent group of this group, if any.

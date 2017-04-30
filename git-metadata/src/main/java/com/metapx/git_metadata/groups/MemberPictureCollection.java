@@ -9,6 +9,7 @@ import com.metapx.git_metadata.pictures.PictureReference;
 import com.metapx.git_metadata.references.ReferenceService;
 import com.metapx.git_metadata.references.ReferenceService.Message;
 import com.metapx.git_metadata.references.ReferenceService.Operation;
+import com.metapx.git_metadata.references.Zone;
 
 import java.io.File;
 
@@ -37,13 +38,15 @@ class MemberPictureCollection extends SkeletonCollection<PictureReference> imple
 
   @Override
   public void append(PictureReference element) {
-    refService.emit(Message.create(thisGroup, Operation.REFERENCE, element));
+    Zone.getCurrent().fork("group-zone")
+      .run(() -> refService.emit(Message.create(thisGroup, Operation.REFERENCE, element)));
     super.append(element);
   }
 
   @Override
   public void remove(PictureReference element) {
-    refService.emit(Message.create(thisGroup, Operation.UNREFERENCE, element));
+    Zone.getCurrent().fork("group-zone")
+      .run(() -> refService.emit(Message.create(thisGroup, Operation.UNREFERENCE, element)));
     super.remove(element);
   }
 

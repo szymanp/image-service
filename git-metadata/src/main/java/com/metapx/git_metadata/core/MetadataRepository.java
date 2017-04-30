@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.metapx.git_metadata.files.FileService;
+import com.metapx.git_metadata.groups.GroupService;
 import com.metapx.git_metadata.pictures.PictureService;
 import com.metapx.git_metadata.references.ReferenceService;
 
@@ -15,6 +16,7 @@ public class MetadataRepository {
   private final ReferenceService referenceService;
   private final FileService fileService;
   private final PictureService pictureService;
+  private final GroupService groupService;
 
   public MetadataRepository(File repositoryRoot) throws RepositoryException {
     root = repositoryRoot;
@@ -28,6 +30,7 @@ public class MetadataRepository {
     idService = new IdService(new File(root, "ids"), transactionControl);
     fileService = new FileService(getSubdirectory("files"), transactionControl, referenceService);
     pictureService = new PictureService(getSubdirectory("pictures"), transactionControl, idService, referenceService);
+    groupService = new GroupService(getSubdirectory("groups"), transactionControl, idService, referenceService);
   }
 
   /**
@@ -47,6 +50,10 @@ public class MetadataRepository {
 
   public PictureService pictures() {
     return pictureService;
+  }
+
+  public GroupService groups() {
+    return groupService;
   }
 
   public void commit() throws Exception {

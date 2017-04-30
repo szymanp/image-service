@@ -7,6 +7,7 @@ import com.metapx.git_metadata.core.TransactionControl;
 import com.metapx.git_metadata.core.collections.KeyedCollection;
 import com.metapx.git_metadata.groups.GroupReference;
 import com.metapx.git_metadata.references.ReferenceService;
+import com.metapx.git_metadata.references.Zone;
 import com.metapx.git_metadata.references.ReferenceService.Operation;
 
 public class PictureService {
@@ -22,6 +23,7 @@ public class PictureService {
 
     refService.messages(GroupReference.class, PictureReference.class)
       .filter(m -> m.operation() == Operation.REFERENCE || m.operation() == Operation.UNREFERENCE)
+      .filter(m -> !Zone.getCurrent().inZone("picture-zone"))
       .subscribe(m -> {
         this.coll.findWithKey(m.target().getObjectId())
           .ifPresent(picture -> {

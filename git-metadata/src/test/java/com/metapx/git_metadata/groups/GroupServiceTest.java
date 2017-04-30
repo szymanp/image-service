@@ -68,8 +68,8 @@ public class GroupServiceTest {
     transactions.commit();
 
     final String contents = new String(Files.readAllBytes(new File(folder.getRoot(), "tree").toPath()));
-    Assert.assertEquals("000000000000000000000000000000000000\t75e8694ba0bce5bc36d74216e80b08f4f4734e1d\ttag\twinter" + System.lineSeparator()
-                       +"000000000000000000000000000000000000\t99e8694ba0bce53c36d742a6e80b08f4f4734e11\ttag\tsummer" + System.lineSeparator(), contents);
+    Assert.assertEquals("00000000000000000000000000000000\t75e8694ba0bce5bc36d74216e80b08f4f4734e1d\ttag\twinter" + System.lineSeparator()
+                       +"00000000000000000000000000000000\t99e8694ba0bce53c36d742a6e80b08f4f4734e11\ttag\tsummer" + System.lineSeparator(), contents);
   }
 
   @Test
@@ -77,8 +77,8 @@ public class GroupServiceTest {
     final File file = new File(folder.getRoot(), "tree");
     Files.write(
       file.toPath(),
-      ("000000000000000000000000000000000000\t75e8694ba0bce5bc36d74216e80b08f4f4734e1d\ttag\twinter" + System.lineSeparator()
-       +"000000000000000000000000000000000000\t99e8694ba0bce53c36d742a6e80b08f4f4734e11\ttag\tsummer" + System.lineSeparator())
+      ("00000000000000000000000000000000\t75e8694ba0bce5bc36d74216e80b08f4f4734e1d\ttag\twinter" + System.lineSeparator()
+       +"00000000000000000000000000000000\t99e8694ba0bce53c36d742a6e80b08f4f4734e11\ttag\tsummer" + System.lineSeparator())
       .getBytes()
     );
 
@@ -101,7 +101,7 @@ public class GroupServiceTest {
     transactions.commit();
 
     String contents = new String(Files.readAllBytes(new File(folder.getRoot(), "tree").toPath()));
-    Assert.assertEquals("000000000000000000000000000000000000\t75e8694ba0bce5bc36d74216e80b08f4f4734e1d\ttag\twinter" + System.lineSeparator(), contents);
+    Assert.assertEquals("00000000000000000000000000000000\t75e8694ba0bce5bc36d74216e80b08f4f4734e1d\ttag\twinter" + System.lineSeparator(), contents);
 
     contents = new String(Files.readAllBytes(new File(folder.getRoot(), "75/e8/694ba0bce5bc36d74216e80b08f4f4734e1d").toPath()));
     Assert.assertEquals("2132130" + System.lineSeparator() + "3123120" + System.lineSeparator(), contents);

@@ -3,7 +3,7 @@ package com.metapx.git_metadata.groups;
 import com.metapx.git_metadata.core.Record;
 
 public class GroupTreeRecord implements Record {
-  private static String emptyHash = new String(new char[36]).replace("\0", "0");
+  private static String emptyHash = new String(new char[32]).replace("\0", "0");
 
   private String parentHash = "";
   private String groupHash;

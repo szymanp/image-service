@@ -14,6 +14,7 @@ import com.metapx.git_metadata.core.collections.KeyedCollection;
 import com.metapx.git_metadata.pictures.PictureReference;
 import com.metapx.git_metadata.references.ReferenceService;
 import com.metapx.git_metadata.references.ReferenceService.Operation;
+import com.metapx.git_metadata.references.Zone;
 
 public class GroupService {
   private final GroupTreeCollection tree;
@@ -49,6 +50,7 @@ public class GroupService {
 
     refService.messages(PictureReference.class, GroupReference.class)
       .filter(m -> m.operation() == Operation.REFERENCE || m.operation() == Operation.UNREFERENCE)
+      .filter(m -> !Zone.getCurrent().inZone("group-zone"))
       .subscribe(m -> {
         groups().findWithKey(m.target().getObjectId())
           .ifPresent(group -> {
@@ -61,6 +63,8 @@ public class GroupService {
       });
 
     addProvider(Tag.class, new TagProvider(api));
+    addProvider(Device.class, new DeviceProvider(api));
+    addProvider(DeviceFolder.class, new DeviceFolderProvider(api));
   }
 
   public <T extends Group> KeyedCollection<String, T> groups(Class<T> clazz) {
