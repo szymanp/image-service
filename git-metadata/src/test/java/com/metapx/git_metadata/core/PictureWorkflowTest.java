@@ -32,16 +32,16 @@ public class PictureWorkflowTest {
 
   @Test
   public void testCreatePictureWithDeviceLocation() throws Exception {
-    final Picture picture = repo.pictures().create();
-    repo.pictures().pictures().append(picture);
+    final Picture picture = repo.pictureApi().create();
+    repo.pictures().append(picture);
 
-    final Device hdx = repo.groups().create(Device.class, "HDX");
-    final DeviceFolder dDrive = repo.groups().create(DeviceFolder.class, "d:");
-    final DeviceFolder work = repo.groups().create(DeviceFolder.class, "work");
+    final Device hdx = repo.groupApi().create(Device.class, "HDX");
+    final DeviceFolder dDrive = repo.groupApi().create(DeviceFolder.class, "d:");
+    final DeviceFolder work = repo.groupApi().create(DeviceFolder.class, "work");
     work.setParent(dDrive);
     dDrive.setParent(hdx);
 
-    final Collection<Group> groups = repo.groups().groups();
+    final Collection<Group> groups = repo.groups();
     groups.append(hdx);
     groups.append(dDrive);
     groups.append(work);

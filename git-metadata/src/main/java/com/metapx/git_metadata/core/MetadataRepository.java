@@ -4,8 +4,12 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.metapx.git_metadata.core.collections.KeyedCollection;
+import com.metapx.git_metadata.files.FileRecord;
 import com.metapx.git_metadata.files.FileService;
+import com.metapx.git_metadata.groups.Group;
 import com.metapx.git_metadata.groups.GroupService;
+import com.metapx.git_metadata.pictures.Picture;
 import com.metapx.git_metadata.pictures.PictureService;
 import com.metapx.git_metadata.references.ReferenceService;
 
@@ -40,22 +44,48 @@ public class MetadataRepository {
     return this.root;
   }
 
-  public FileService files() {
+  // Inner services
+  
+  public FileService fileApi() {
     return fileService;
   }
 
-  public IdService identifiers() {
+  public IdService identifierApi() {
     return idService;
   }
 
-  public PictureService pictures() {
+  public PictureService pictureApi() {
     return pictureService;
   }
 
-  public GroupService groups() {
+  public GroupService groupApi() {
     return groupService;
   }
+  
+  // Convenience methods
+  
+  public KeyedCollection<String, FileRecord> files() {
+    return fileService.files();
+  }
+  
+  public String createId(String idType) {
+    return idService.createId(idType);
+  }
+  
+  public KeyedCollection<String, Picture> pictures() {
+    return pictureService.pictures();
+  }
+  
+  public <T extends Group> KeyedCollection<String, T> groups(Class<T> clazz) {
+    return groupService.groups(clazz);
+  }
 
+  public KeyedCollection<String, Group> groups() {
+    return groupService.groups();
+  }
+
+  // Transaction control
+  
   public void commit() throws Exception {
     transactionControl.commit();
   }
