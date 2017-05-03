@@ -41,6 +41,7 @@ public class RepositoryActions {
       final Picture picture = metadata.pictureApi().create();
       picture.files().append(new MemberFile(file.getHash(), Picture.Role.ROOT));
       picture.groups().append(deviceFolders.getDeviceGroup().getReference());
+      picture.groups().append(deviceFolders.getFolder(file.getFile().getParentFile()).getReference());
       metadata.pictureApi().pictures().update(picture);
     }
   }

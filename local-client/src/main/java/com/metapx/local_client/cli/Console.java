@@ -1,6 +1,7 @@
 package com.metapx.local_client.cli;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import com.metapx.local_client.picture_repo.FileInformation;
 
@@ -42,11 +43,19 @@ public interface Console {
     }
 
     private String relativize(File file) {
-      final String relative = conf.getWorkingDirectory().toPath().relativize(file.toPath()).toString();
-      if (relative.startsWith(".." + File.separator + ".." + File.separator + ".." + File.separator)) {
-        return file.toString();
+      final Path workingDirectory = conf.getWorkingDirectory().toPath();
+      final Path path = file.toPath();
+      
+      if (workingDirectory.getRoot().equals(path.getRoot())) {
+        final String relative = workingDirectory.relativize(path).toString();
+        if (relative.startsWith(".." + File.separator + ".." + File.separator + ".." + File.separator)) {
+          return file.toString();
+        } else {
+          return relative;
+        }
       } else {
-        return relative;
+        // Cannot relativize as they reside on different roots.
+        return file.toString();
       }
     }
   }
