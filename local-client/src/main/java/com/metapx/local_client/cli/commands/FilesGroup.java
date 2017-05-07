@@ -17,7 +17,7 @@ import com.metapx.local_client.picture_repo.Repository;
 @Command(name = "files",
          description = "Manages image files.\n" +
                        "Unless -r is specified, this command adds image files to the repository.")
-public class Files implements CommandRunnable {
+public class FilesGroup implements CommandRunnable {
 
   @Arguments(title = "files", description = "File patterns to add to repository")
   @Required

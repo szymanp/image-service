@@ -20,7 +20,7 @@ public abstract class Group {
 	protected Group(Api api, GroupTreeRecord treeRecord) {
 		this(api);
 		id = treeRecord.getGroupHash();
-		parentId = treeRecord.getGroupHash();
+		parentId = treeRecord.getParentHash();
 		name = treeRecord.getName();
 	}
 
@@ -46,10 +46,17 @@ public abstract class Group {
 	}
 
 	/**
+	 * @return `true` if this group is a child of another group.
+	 */
+	public boolean hasParent() {
+	  return parentId != null && !parentId.equals("");
+	}
+	
+	/**
 	 * @return the parent group of this group, if any.
 	 */
 	public Optional<Group> getParent() {
-		if (parentId == null || parentId.equals("")) {
+		if (!hasParent()) {
 			return Optional.empty();
 		} else {
 			if (parent == null) {

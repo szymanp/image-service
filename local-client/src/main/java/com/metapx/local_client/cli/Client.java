@@ -9,10 +9,14 @@ import com.metapx.local_client.cli.commands.*;
 @Cli(name = "metapx-cli",
      description = "Metapixels client",
      defaultCommand = Help.class,
-     commands = { Files.class, Help.class },
+     commands = { 
+       FilesGroup.class,
+       GroupGroup.CreateCommand.class,
+       GroupGroup.ListCommand.class,
+       Help.class },
      groups = { 
-       @Group(name = "group", description = "Manage picture groups", defaultCommand = com.metapx.local_client.cli.commands.Group.Create.class) }
-    )
+       @Group(name = "group", description = "Manage picture groups") 
+     })
 public class Client {
   public static void main(String args[]) {
     ClientEnvironment env = null;
