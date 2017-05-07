@@ -9,32 +9,65 @@ import java.util.stream.Stream;
 import com.metapx.git_metadata.core.collections.KeyedCollection;
 import com.metapx.git_metadata.groups.GroupService.Providers;
 
-class GroupCollection {
-  final KeyedCollection<String, GroupTreeRecord> tree;
+/**
+ * A collection of groups.
+ *
+ * @param <T> The type of groups available in this collection.
+ */
+public interface GroupCollection<T extends Group> extends KeyedCollection<String, T> {
   
-  private GroupCollection(KeyedCollection<String, GroupTreeRecord> tree) {
-    this.tree = tree;
-  }
-  public void append(Group element) {
-    tree.append(GroupTreeRecord.fromGroup(element));
-  }
-  public void update(Group element) {
-    tree.update(GroupTreeRecord.fromGroup(element));
-  }
-  public void remove(Group element) {
-    tree.remove(GroupTreeRecord.fromGroup(element));
-  }
-  public boolean contains(Group element) {
-    return tree.contains(GroupTreeRecord.fromGroup(element));
+  /**
+   * Finds a group by its name.
+   * @param name
+   */
+  public Optional<T> findByName(String name);
+  
+  static class Base {
+    final KeyedCollection<String, GroupTreeRecord> tree;
+    
+    private Base(KeyedCollection<String, GroupTreeRecord> tree) {
+      this.tree = tree;
+    }
+    public void append(Group element) {
+      validate(element);
+      tree.append(GroupTreeRecord.fromGroup(element));
+    }
+    public void update(Group element) {
+      validate(element);
+      tree.update(GroupTreeRecord.fromGroup(element));
+    }
+    public void remove(Group element) {
+      tree.remove(GroupTreeRecord.fromGroup(element));
+    }
+    public boolean contains(Group element) {
+      return tree.contains(GroupTreeRecord.fromGroup(element));
+    }
+    
+    private void validate(Group element) {
+      // Validate the name
+      if (element.getName().equals("")) {
+        throw new GroupException.InvalidNameException(element.getName());
+      }
+
+      // Make sure that no subgroup with the same name exists.
+      final GroupTreeRecord validated = GroupTreeRecord.fromGroup(element);
+      final Optional<GroupTreeRecord> sameName = tree.stream()
+        .filter(record -> record.getParentHash().equals(validated.getParentHash())
+                          && record.getName().equals(validated.getName()))
+        .findAny();
+      if (sameName.isPresent()) {
+        throw new GroupException.AlreadyExistsException(element.getName());
+      }
+    }
   }
 
-  abstract static class Untyped implements KeyedCollection<String, Group> {
-    final protected GroupCollection inner;
+  abstract static class Untyped implements GroupCollection<Group> {
+    final protected Base inner;
     final protected Providers providers;
     final protected Predicate<GroupTreeRecord> filter;
 
     Untyped(KeyedCollection<String, GroupTreeRecord> tree, Providers providers, Predicate<GroupTreeRecord> filter) {
-      inner = new GroupCollection(tree);
+      inner = new Base(tree);
       this.providers = providers;
       this.filter = filter;
     }
@@ -63,6 +96,13 @@ class GroupCollection {
       return inner.tree.stream()
         .filter(record -> filter.test(record))
         .map(record -> providers.get(record).readInstance(record));
+    }
+    public Optional<Group> findByName(String name) {
+      return inner.tree.stream()
+        .filter(record -> filter.test(record))
+        .filter(record -> record.getName().equals(name))
+        .map(record -> providers.get(record).readInstance(record))
+        .findFirst();
     }
   }
 
@@ -115,12 +155,12 @@ class GroupCollection {
   /**
    * A collection that lists all groups but only of a certain type.
    */
-  static class Typed<T extends Group> implements KeyedCollection<String, T> {
-    final protected GroupCollection inner;
+  static class Typed<T extends Group> implements GroupCollection<T> {
+    final protected Base inner;
     final private GroupProvider<T> provider;
 
     Typed(KeyedCollection<String, GroupTreeRecord> tree, GroupProvider<T> provider) {
-      this.inner = new GroupCollection(tree);
+      this.inner = new Base(tree);
       this.provider = provider;
     }
 
@@ -151,6 +191,13 @@ class GroupCollection {
       return inner.tree.stream()
         .filter(record -> provider.matches(record))
         .map(record -> provider.readInstance(record));
+    }
+    public Optional<T> findByName(String name) {
+      return inner.tree.stream()
+        .filter(record -> provider.matches(record))
+        .filter(record -> record.getName().equals(name))
+        .map(record -> provider.readInstance(record))
+        .findFirst();
     }
   }
 }

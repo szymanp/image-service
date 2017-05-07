@@ -10,7 +10,6 @@ import com.metapx.git_metadata.core.HashPathTransactionElement;
 import com.metapx.git_metadata.core.IdService;
 import com.metapx.git_metadata.core.TransactionControl;
 import com.metapx.git_metadata.core.collections.Collection;
-import com.metapx.git_metadata.core.collections.KeyedCollection;
 import com.metapx.git_metadata.pictures.PictureReference;
 import com.metapx.git_metadata.references.ReferenceService;
 import com.metapx.git_metadata.references.ReferenceService.Operation;
@@ -19,14 +18,12 @@ import com.metapx.git_metadata.references.Zone;
 public class GroupService {
   private final GroupTreeCollection tree;
   private final IdService idService;
-  private final ReferenceService refService;
   private final ProviderMap providers = new ProviderMap();
   private final TransactionControl transaction;
   private final HashPathTransactionElement<MemberPictureCollection> pictureCollections;
 
   public GroupService(File root, TransactionControl transactionControl, IdService idService, ReferenceService refService) {
     this.idService = idService;
-    this.refService = refService;
     transaction = transactionControl;
     tree = new GroupTreeCollection(new File(root, "tree"), transaction);
 
@@ -37,10 +34,10 @@ public class GroupService {
     transaction.addElementToTransaction(pictureCollections);
 
     final Group.Api api = new Group.Api() {
-      public KeyedCollection<String, Group> groups() {
+      public GroupCollection<Group> groups() {
         return new GroupCollection.Complete(tree, providers);
       }
-      public Collection<Group> subgroups(Group parent) {
+      public GroupCollection<Group> subgroups(Group parent) {
         return new GroupCollection.Subgroups(tree, providers, parent);
       }
   		public Collection<PictureReference> pictures(String groupid) {
@@ -67,11 +64,11 @@ public class GroupService {
     addProvider(DeviceFolder.class, new DeviceFolderProvider(api));
   }
 
-  public <T extends Group> KeyedCollection<String, T> groups(Class<T> clazz) {
+  public <T extends Group> GroupCollection<T> groups(Class<T> clazz) {
     return new GroupCollection.Typed<T>(tree, providers.get(clazz));
   }
 
-  public KeyedCollection<String, Group> groups() {
+  public GroupCollection<Group> groups() {
     return new GroupCollection.Complete(tree, providers);
   }
 
@@ -79,6 +76,22 @@ public class GroupService {
     return providers.get(clazz).newInstance(idService.createId("group"), name);
   }
 
+  /**
+   * Finds a group using a path.
+   */
+  public Optional<Group> findGroupByPath(String[] path) {
+    if (path.length == 0) {
+      return Optional.empty();
+    }
+
+    Optional<Group> target = groups().findByName(path[0]);
+    for(int i=1;i<path.length;i++) {
+      if (!target.isPresent()) break;
+      target = target.get().subgroups().findByName(path[i]);
+    }
+    return target;
+  }
+  
   protected <T extends Group> void addProvider(Class<T> clazz, GroupProvider<T> provider) {
     providers.put(clazz, provider);
     transaction.addElementToTransaction(provider);

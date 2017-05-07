@@ -3,7 +3,6 @@ package com.metapx.git_metadata.groups;
 import java.util.Optional;
 
 import com.metapx.git_metadata.core.collections.Collection;
-import com.metapx.git_metadata.core.collections.KeyedCollection;
 import com.metapx.git_metadata.pictures.PictureReference;
 
 public abstract class Group {
@@ -28,10 +27,10 @@ public abstract class Group {
 	protected Group(Api api, String id, String name) {
 		this(api);
 		this.id = id;
-		this.name = name;
+		this.name = name.trim();
 	}
 
-	public void setName(String name) { this.name = name; }
+	public void setName(String name) { this.name = name.trim(); }
   public String getName() { return name; }
 	public String getId() { return id; }
 	public abstract String getType();
@@ -88,7 +87,7 @@ public abstract class Group {
 	/**
 	 * @return a list of all subgroups of this group.
 	 */
-	public Collection<Group> subgroups() {
+	public GroupCollection<Group> subgroups() {
 		return groupApi.subgroups(this);
 	}
 
@@ -114,8 +113,8 @@ public abstract class Group {
 	}
 
 	public interface Api {
-    KeyedCollection<String, Group> groups();
-    Collection<Group> subgroups(Group group);
+	  GroupCollection<Group> groups();
+    GroupCollection<Group> subgroups(Group group);
 		Collection<PictureReference> pictures(String groupid);
 	}
 }

@@ -44,6 +44,13 @@ public class ClientEnvironment {
 		}
     return repo.get();
   }
+  
+  public void commit() throws Exception {
+    connection.commit();
+    if (metadataRepository != null && metadataRepository.isPresent()) {
+      metadataRepository.get().commit();
+    }
+  }
 
   private Connection configureDatabaseConnection(Configuration conf) throws Exception {
     if (!conf.getDatabasePath().exists()) {

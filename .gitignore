@@ -11,4 +11,5 @@ buildNumber.properties
 .project
 image-service/.settings
 data-model/.settings
-
+local-client/*.bat
+.vscode

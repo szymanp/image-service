@@ -8,6 +8,7 @@ import com.metapx.git_metadata.core.collections.KeyedCollection;
 import com.metapx.git_metadata.files.FileRecord;
 import com.metapx.git_metadata.files.FileService;
 import com.metapx.git_metadata.groups.Group;
+import com.metapx.git_metadata.groups.GroupCollection;
 import com.metapx.git_metadata.groups.GroupService;
 import com.metapx.git_metadata.pictures.Picture;
 import com.metapx.git_metadata.pictures.PictureService;
@@ -76,11 +77,11 @@ public class MetadataRepository {
     return pictureService.pictures();
   }
   
-  public <T extends Group> KeyedCollection<String, T> groups(Class<T> clazz) {
+  public <T extends Group> GroupCollection<T> groups(Class<T> clazz) {
     return groupService.groups(clazz);
   }
 
-  public KeyedCollection<String, Group> groups() {
+  public GroupCollection<Group> groups() {
     return groupService.groups();
   }
 
