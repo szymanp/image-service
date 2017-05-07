@@ -11,6 +11,7 @@ import com.metapx.local_client.cli.commands.*;
      defaultCommand = Help.class,
      commands = { 
        FilesGroup.AddCommand.class,
+       FilesGroup.ListCommand.class,
        GroupGroup.CreateCommand.class,
        GroupGroup.ListCommand.class,
        Help.class },

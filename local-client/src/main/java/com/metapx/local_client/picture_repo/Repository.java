@@ -5,7 +5,12 @@ import static com.metapx.local_client.database.jooq.Tables.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -17,13 +22,16 @@ import com.metapx.local_client.database.jooq.tables.records.FolderRecord;
 public final class Repository {
   private final FolderRecord rootFolder;
   private final DSLContext db;
+  private final Map<File, FolderRecord> folders = new HashMap<File, FolderRecord>();
+  /** A mapping between a FolderRecord ID and a file path. */
+  private final Map<Integer, File> paths = new HashMap<Integer, File>();
 
   public Repository(Connection databaseConnection) {
     db = DSL.using(databaseConnection, SQLDialect.H2);
     rootFolder = new FolderRecord();
   }
 
-  public ObjectWithState<FileRecord> addFile(FileInformation fileToAdd) throws RepositoryException, IOException {
+  public ObjectWithState<FileRecord> addFile(FileInformation fileToAdd) throws RepositoryException {
     if (!fileToAdd.getFile().exists()) {
       throw new RepositoryException("File does not exist on disk");
     }
@@ -57,7 +65,7 @@ public final class Repository {
     } else {
       // The file exists, update the hash if needed.
       if (hash != file.getHash()) {
-        // TODO If the hash differes, we might need to clear the reference to the git-metadata file.
+        // TODO If the hash differs, we might need to clear the reference to the git-metadata file.
         file.setHash(hash);
         file.setSize(new Long(fileToAdd.getFile().length()).intValue());
         file.update();
@@ -65,17 +73,52 @@ public final class Repository {
       return ObjectWithState.existingObject(file);
     }
   }
+  
+  /**
+   * Finds a file in the repository corresponding to a disk file.
+   */
+  public Optional<ResolvedFileRecord> findFile(File file) {
+    if (!file.isFile()) {
+      return Optional.empty();
+    }
+    
+    final File normalized = file.getAbsoluteFile();
+    
+    return getFolderForPath(normalized.getParentFile())
+      .flatMap(folderRecord ->
+        db.selectFrom(FILE)
+          .where(FILE.NAME.eq(file.getName()).and(FILE.FOLDER_ID.eq(folderRecord.getId())))
+          .stream()
+          .findAny()
+          .map(fileRecord -> new ResolvedFileRecord(fileRecord, folderRecord, normalized))
+      );
+  }
+  
+  /**
+   * Finds all files in the repository matching the given hash.
+   */
+  public Stream<ResolvedFileRecord> findFiles(String hash) {
+    return db.selectFrom(FILE)
+      .where(FILE.HASH.eq(hash))
+      .fetchStream()
+      .map(fileRecord -> new ResolvedFileRecord(fileRecord));
+  }
 
   /**
    * @return a folder for the given path; if the folder or any intermediate folders do not exist in the repository,
    *         then they are created.
    */
   private FolderRecord createFolderForPath(File folder) {
-    final String[] elements = folder.getAbsolutePath().split("\\" + File.separator);
-
-    return Arrays.stream(elements).reduce(rootFolder, this::getFolderOrCreate, (a, b) -> b);
+    if (folders.containsKey(folder)) {
+      return folders.get(folder);
+    } else {
+      final String[] elements = getPathElements(folder);
+      final FolderRecord target = Arrays.stream(elements).reduce(rootFolder, this::getFolderOrCreate, (a, b) -> b);
+      folders.put(folder, target);
+      return target;
+    }
   }
-
+  
   /**
    * Finds an existing folder or creates a new one.
    */
@@ -96,11 +139,112 @@ public final class Repository {
 
     return folder;
   }
+  
+  /**
+   * @return a <code>FolderRecord</code> corresponding to the given path
+   */
+  private Optional<FolderRecord> getFolderForPath(File folder) {
+    if (folders.containsKey(folder)) {
+      return Optional.of(folders.get(folder));
+    } else {
+      final String[] elements = getPathElements(folder);
+      FolderRecord target = rootFolder;
+      for(String element : elements) {
+        target =
+          db.selectFrom(FOLDER)
+          .where(FOLDER.NAME.eq(element)
+                 .and(target.getId() == null ? FOLDER.PARENT_ID.isNull() : FOLDER.PARENT_ID.eq(target.getId())))
+          .fetchOne();
+        if (target == null) {
+          return Optional.empty();
+        }
+      }
+      folders.put(folder, target);
+      return Optional.of(target);
+    }
+  }
+  
+  private File getPath(FolderRecord folder) {
+    if (paths.containsKey(folder.getId())) {
+      return paths.get(folder.getId());
+    } else {
+      ArrayList<String> elements = new ArrayList<String>();
+      FolderRecord target = folder;
+      while (target.getParentId() != null) {
+        elements.add(0, target.getName());
+
+        target =
+          db.selectFrom(FOLDER)
+          .where(FOLDER.ID.eq(target.getParentId()))
+          .fetchOne();
+        
+        if (target == null) {
+          throw new RuntimeException("Missing folder elements.");
+        }
+      }
+      
+      final String path = String.join(File.pathSeparator, elements);
+      final File file = new File(path);
+      paths.put(folder.getId(), file);
+      return file;
+    }
+  }
+  
+  private String[] getPathElements(File folder) {
+    try {
+      return folder.getCanonicalPath().split("\\" + File.separator);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   public static class RepositoryException extends Exception {
     static final long serialVersionUID = 0;
     RepositoryException(String message) {
       super(message);
+    }
+  }
+  
+  /**
+   * Provides information about a file resolved from a FileRecord.
+   */
+  public class ResolvedFileRecord {
+    final FileRecord fileRecord;
+    final FolderRecord folderRecord;
+    final File containingFolder;
+    final File target;
+
+    public ResolvedFileRecord(FileRecord fileRecord, FolderRecord folderRecord, File targetFile) {
+      this.fileRecord = fileRecord;
+      this.folderRecord = folderRecord;
+      target = targetFile;
+      containingFolder = targetFile.getParentFile();
+    }
+    
+    public ResolvedFileRecord(FileRecord record) {
+      fileRecord = record;
+      folderRecord = db.selectFrom(FOLDER)
+        .where(FOLDER.ID.eq(record.getFolderId()))
+        .fetchOne();
+      
+      containingFolder = getPath(folderRecord);
+      target = new File(containingFolder, record.getName());
+    }
+    
+    public File getFile() {
+      return target;
+    }
+    
+    public File getContainingFolder() {
+      return containingFolder;
+    }
+    
+    public boolean exists() {
+      return target.exists() && target.isFile();
+    }
+    
+    public String getHash() {
+      return fileRecord.getHash();
     }
   }
 }
