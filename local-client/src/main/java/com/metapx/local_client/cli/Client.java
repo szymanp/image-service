@@ -10,11 +10,12 @@ import com.metapx.local_client.cli.commands.*;
      description = "Metapixels client",
      defaultCommand = Help.class,
      commands = { 
-       FilesGroup.class,
+       FilesGroup.AddCommand.class,
        GroupGroup.CreateCommand.class,
        GroupGroup.ListCommand.class,
        Help.class },
-     groups = { 
+     groups = {
+       @Group(name = "files", description = "Track image files in this repository"),
        @Group(name = "group", description = "Manage picture groups") 
      })
 public class Client {
