@@ -3,16 +3,20 @@ package com.metapx.local_client.cli.commands;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import com.github.rvesse.airline.annotations.Arguments;
 import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.metapx.git_metadata.core.MetadataRepository;
 import com.metapx.git_metadata.files.FileRecord;
+import com.metapx.git_metadata.groups.Group;
 import com.metapx.local_client.cli.ClientEnvironment;
 import com.metapx.local_client.cli.Console;
 import com.metapx.local_client.cli.RepositoryActions;
 import com.metapx.local_client.cli.WildcardMatcher;
+import com.metapx.local_client.combined_repo.CombinedRepository;
+import com.metapx.local_client.combined_repo.RepositoryStatusFileInformation;
 import com.metapx.local_client.picture_repo.DiskFileInformation;
 import com.metapx.local_client.picture_repo.FileInformation;
 import com.metapx.local_client.picture_repo.Repository;
@@ -72,25 +76,12 @@ public class FilesGroup {
     private List<String> patterns;
   
     public void run(ClientEnvironment env) throws Exception {
-      final Repository pictureRepo = env.getPictureRepository();
-      final MetadataRepository metadataRepo = env.getMetadataRepositoryOrThrow();
-      RepositoryActions repoActions = new RepositoryActions(env.configuration, env.connection, pictureRepo, metadataRepo);
-  
-      WildcardMatcher matcher = new WildcardMatcher(patterns);
-  
-      matcher.files.stream()
-        .forEach(targetFile -> {
-          final Optional<Repository.ResolvedFileRecord> repoFileOpt = pictureRepo.findFile(targetFile);
-          final FileInformation targetFileInformation = new DiskFileInformation(targetFile);
-          final String hash = repoFileOpt.map(repoFile -> repoFile.getHash()).orElseGet(() -> targetFileInformation.getHash());
-          final Optional<FileRecord> metadataFile = metadataRepo.files().findWithKey(hash);
-          
-          // TODO What class could encompass the properties above?
-
-          System.out.println(targetFile.getAbsolutePath() + " " 
-          + (repoFileOpt.isPresent() ? "Yes" : "No") + " "
-          + (metadataFile.isPresent() ? metadataFile.get().getPictureId() : "No"));
-        });
+      final WildcardMatcher matcher = new WildcardMatcher(patterns);
+      final CombinedRepository repo = env.getCombinedRepository();
+      final Stream<RepositoryStatusFileInformation> files =
+        matcher.files.stream().map(file -> repo.getFile(file));
+      
+      env.console.printFileStatusLines(files, Console.LineFormat.LONG);
     }
   }
 }

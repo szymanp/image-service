@@ -94,7 +94,7 @@ public class GroupGroup {
         : repo.groupApi().findGroupByPath(parts).map(group -> group.subgroups().stream()).orElse(Stream.empty());
 
       final Stream<Group> sorted = groups.sorted((x, y) -> x.getName().compareTo(y.getName()));
-      console.printLines(sorted, longFormat ? Console.LineFormat.LONG : Console.LineFormat.SHORT);
+      console.printGroupLines(sorted, longFormat ? Console.LineFormat.LONG : Console.LineFormat.SHORT);
     }
   }
 }

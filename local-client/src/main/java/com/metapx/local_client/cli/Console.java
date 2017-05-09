@@ -6,13 +6,15 @@ import java.util.stream.Stream;
 
 import com.metapx.git_metadata.groups.Group;
 import com.metapx.local_client.picture_repo.FileInformation;
+import com.metapx.local_client.combined_repo.RepositoryStatusFileInformation;
 
 public interface Console {
   public enum LineFormat { SHORT, LONG };
 
   ProcessedFileStatus startProcessingFile(File file);
   
-  void printLines(Stream<Group> groups, LineFormat format);
+  void printGroupLines(Stream<Group> groups, LineFormat format);
+  void printFileStatusLines(Stream<RepositoryStatusFileInformation> files, LineFormat format);
 
   public interface ProcessedFileStatus {
     void success(FileInformation file);
@@ -47,7 +49,7 @@ public interface Console {
       };
     }
     
-    public void printLines(Stream<Group> groups, LineFormat format) {
+    public void printGroupLines(Stream<Group> groups, LineFormat format) {
       switch (format) {
       case SHORT:
         groups.forEach(group -> System.out.print(group.getName() + "  "));
@@ -61,6 +63,19 @@ public interface Console {
       }
     }
 
+    public void printFileStatusLines(Stream<RepositoryStatusFileInformation> files, LineFormat format) {
+      switch (format) {
+      case SHORT:
+        files.forEach(file -> System.out.println(relativize(file.getFile())));
+        break;
+      case LONG:
+        files.forEach(file ->
+          System.out.println(String.format("%1$-30s %2$-10s", relativize(file.getFile()), file.isKnown() ? file.getHash().substring(0, 7) : "-"))
+        );
+        break;
+      }
+    }
+    
     private String relativize(File file) {
       final Path workingDirectory = conf.getWorkingDirectory().toPath();
       final Path path = file.toPath();

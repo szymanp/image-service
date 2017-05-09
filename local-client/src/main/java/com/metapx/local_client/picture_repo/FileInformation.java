@@ -14,11 +14,6 @@ public interface FileInformation {
   public String getHash();
 
   /**
-   * @return the name of the algorithm used to calculate the digest of this file.
-   */
-  public String getHashAlgorithm();
-  
-  /**
    * @return `true` if this file is an image; otherwise, `false`.
    */
   public boolean isImage();

@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.util.Optional;
 
 import com.metapx.git_metadata.core.MetadataRepository;
+import com.metapx.local_client.combined_repo.CombinedRepository;
 import com.metapx.local_client.database.ConnectionFactory;
 import com.metapx.local_client.database.DatabaseBuilder;
 import com.metapx.local_client.picture_repo.Repository;
@@ -45,6 +46,10 @@ public class ClientEnvironment {
     return repo.get();
   }
   
+  public CombinedRepository getCombinedRepository() throws Exception {
+    return new CombinedRepository(getPictureRepository(), getMetadataRepositoryOrThrow());
+  }
+
   public void commit() throws Exception {
     connection.commit();
     if (metadataRepository != null && metadataRepository.isPresent()) {

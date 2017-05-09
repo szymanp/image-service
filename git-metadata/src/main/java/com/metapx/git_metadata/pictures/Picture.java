@@ -6,7 +6,6 @@ import com.metapx.git_metadata.core.TransactionSubject;
 import com.metapx.git_metadata.core.HashPath.Target;
 import com.metapx.git_metadata.core.collections.Collection;
 import com.metapx.git_metadata.core.collections.KeyedCollection;
-import com.metapx.git_metadata.groups.Group;
 import com.metapx.git_metadata.groups.GroupReference;
 
 public class Picture {

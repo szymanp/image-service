@@ -59,7 +59,7 @@ public final class Repository {
       file.setName(fileToAdd.getFile().getName());
       file.setSize(new Long(fileToAdd.getFile().length()).intValue());
       file.setHash(hash);
-      file.insert();   
+      file.insert();
 
       return ObjectWithState.newObject(file);
     } else {
