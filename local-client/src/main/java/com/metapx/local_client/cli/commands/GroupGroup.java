@@ -15,6 +15,7 @@ import com.metapx.git_metadata.groups.GroupCollection;
 import com.metapx.git_metadata.groups.Tag;
 import com.metapx.local_client.cli.ClientEnvironment;
 import com.metapx.local_client.cli.Console;
+import com.metapx.local_client.cli.GroupPath;
 
 public class GroupGroup {
 
@@ -82,16 +83,12 @@ public class GroupGroup {
     }
     
     private void listGroup(MetadataRepository repo, Console console, String path) {
-      if (path.startsWith("/")) path = path.substring(1);
-      if (path.endsWith("/")) path = path.substring(0, path.length() - 1);
+      final GroupPath groupPath = GroupPath.split(path);
 
-      final String[] parts = path.split("/");
-      final boolean listRoot = parts.length == 1 && parts[0].equals(""); 
-      
       final Stream<Group> groups =
-        listRoot ?
+        groupPath.isRootPath() ?
         repo.groupApi().groups().stream().filter(group -> !group.hasParent())
-        : repo.groupApi().findGroupByPath(parts).map(group -> group.subgroups().stream()).orElse(Stream.empty());
+        : repo.groupApi().findGroupByPath(groupPath.getParts()).map(group -> group.subgroups().stream()).orElse(Stream.empty());
 
       final Stream<Group> sorted = groups.sorted((x, y) -> x.getName().compareTo(y.getName()));
       console.printGroupLines(sorted, longFormat ? Console.LineFormat.LONG : Console.LineFormat.SHORT);

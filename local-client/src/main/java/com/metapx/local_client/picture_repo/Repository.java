@@ -169,10 +169,10 @@ public final class Repository {
       return paths.get(folder.getId());
     } else {
       ArrayList<String> elements = new ArrayList<String>();
+      elements.add(0, folder.getName());
+
       FolderRecord target = folder;
       while (target.getParentId() != null) {
-        elements.add(0, target.getName());
-
         target =
           db.selectFrom(FOLDER)
           .where(FOLDER.ID.eq(target.getParentId()))
@@ -181,9 +181,11 @@ public final class Repository {
         if (target == null) {
           throw new RuntimeException("Missing folder elements.");
         }
+
+        elements.add(0, target.getName());
       }
       
-      final String path = String.join(File.pathSeparator, elements);
+      final String path = String.join(File.separator, elements);
       final File file = new File(path);
       paths.put(folder.getId(), file);
       return file;

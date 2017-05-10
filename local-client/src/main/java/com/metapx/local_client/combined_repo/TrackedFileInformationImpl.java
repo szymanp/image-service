@@ -64,4 +64,14 @@ public class TrackedFileInformationImpl implements TrackedFileInformation {
   public FileRecord getFileRecord() {
     return fileRecord;
   }
+  
+  @Override
+  public boolean isValid() {
+    return exists();  // FIXME
+  }
+  
+  @Override
+  public boolean exists() {
+    return fileInfo.getFile().isFile() && fileInfo.getFile().exists();
+  }
 }

@@ -1,6 +1,7 @@
 package com.metapx.local_client.combined_repo;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,5 +34,12 @@ public class TrackedFileGroupImpl implements TrackedFileGroup {
   @Override
   public FileRecord getFileRecord() {
     return fileRecord;
+  }
+
+  @Override
+  public Optional<TrackedFileInformation> getValidFile() {
+    return getFiles()
+      .filter((file) -> file.isValid())
+      .findAny();
   }
 }
