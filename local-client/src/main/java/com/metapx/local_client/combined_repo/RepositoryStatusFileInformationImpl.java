@@ -11,6 +11,8 @@ public class RepositoryStatusFileInformationImpl implements RepositoryStatusFile
   private final FileInformation fileInfo;
   final Optional<ResolvedFileRecord> resolved;
   final Optional<FileRecord> fileRecord;
+  
+  private Optional<TrackedFileInformation> trackedFile;
 
   public RepositoryStatusFileInformationImpl(CombinedRepository repos, FileInformation fileInfo) {
     this.fileInfo = fileInfo;
@@ -69,8 +71,14 @@ public class RepositoryStatusFileInformationImpl implements RepositoryStatusFile
 
   @Override
   public Optional<TrackedFileInformation> getTrackedFile() {
-    // TODO Auto-generated method stub
-    return null;
+    if (trackedFile == null) {
+      if (resolved.isPresent() && fileRecord.isPresent()) {
+        trackedFile = Optional.of(new TrackedFileInformationImpl(resolved.get(), fileRecord.get()));
+      } else {
+        trackedFile = Optional.empty();
+      }
+    }
+    return trackedFile;
   }
 
   @Override

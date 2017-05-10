@@ -2,6 +2,11 @@ package com.metapx.local_client.cli;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.metapx.git_metadata.groups.Group;
@@ -10,6 +15,7 @@ import com.metapx.local_client.combined_repo.RepositoryStatusFileInformation;
 
 public interface Console {
   public enum LineFormat { SHORT, LONG };
+  public enum HashFormat { SHORT, LONG };
 
   ProcessedFileStatus startProcessingFile(File file);
   
@@ -37,7 +43,7 @@ public interface Console {
       return new ProcessedFileStatus() {
         public void success(FileInformation file) {
           try {
-            System.out.println(" " + file.getHash().substring(0, 7) + "...");
+            System.out.println(" " + hash(file.getHash()));
           } catch (Exception e) {
             System.out.println(" " + e.getMessage());
           }
@@ -66,13 +72,49 @@ public interface Console {
     public void printFileStatusLines(Stream<RepositoryStatusFileInformation> files, LineFormat format) {
       switch (format) {
       case SHORT:
-        files.forEach(file -> System.out.println(relativize(file.getFile())));
-        break;
-      case LONG:
-        files.forEach(file ->
-          System.out.println(String.format("%1$-30s %2$-10s", relativize(file.getFile()), file.isKnown() ? file.getHash().substring(0, 7) : "-"))
+        printGroupedByDir(
+          files, 
+          (f) -> f.getFile().getParentFile(), 
+          (f) -> {
+            final String name = f.getFile().getName();
+            if (f.isTracked()) return "[" + name + "]";
+            else if (f.isKnown()) return "(" + name + ")";
+            else return name;
+          },
+          false
         );
         break;
+      case LONG:
+        printGroupedByDir(
+          files, 
+          (f) -> f.getFile().getParentFile(),
+          (f) -> String.format(
+            "%1$-7s %2$-7s %3$4sx%4$-4s %5$s %6$s",
+            f.isKnown() ? hash(f.getHash()) : "-",
+            f.getTrackedFile().isPresent() ? hash(f.getTrackedFile().get().getFileRecord().getPictureId()) : "-",
+            f.getWidth(),
+            f.getHeight(),
+            f.isTracked() ? "T" : "-",
+            f.getFile().getName()
+          ),
+          true
+        );
+        break;
+      }
+    }
+    
+    private <T> void printGroupedByDir(Stream<T> stream, Function<T, File> classifier, Function<T, String> printer, boolean longFormat) {
+      final Map<File, List<T>> dirs = stream.collect(Collectors.groupingBy(classifier, Collectors.toList()));
+      final Consumer<T> valuePrinter = longFormat ?
+        (value) -> { System.out.println(printer.apply(value)); }
+        : (value) -> { System.out.print(printer.apply((value)) + "  "); };
+      boolean first = true;
+      for(File dir : dirs.keySet()) {
+        if (!first) {
+          System.out.println("");
+        }
+        System.out.println(relativize(dir) + ":");
+        dirs.get(dir).stream().forEach(valuePrinter);
       }
     }
     
@@ -90,6 +132,24 @@ public interface Console {
       } else {
         // Cannot relativize as they reside on different roots.
         return file.toString();
+      }
+    }
+
+    private String hash(String hash) {
+      return hash(hash, HashFormat.SHORT);
+    }
+    
+    private String hash(String hash, HashFormat format) {
+      if (hash.equals("")) {
+        return "-";
+      }
+
+      switch (format) {
+      case LONG:
+        return hash;
+      case SHORT:
+      default:
+        return hash.substring(0, 7);
       }
     }
   }

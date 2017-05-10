@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import com.github.rvesse.airline.annotations.Arguments;
 import com.github.rvesse.airline.annotations.Command;
+import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.metapx.git_metadata.core.MetadataRepository;
 import com.metapx.git_metadata.files.FileRecord;
@@ -74,14 +75,19 @@ public class FilesGroup {
     @Arguments(title = "files", description = "File patterns to list")
     @Required
     private List<String> patterns;
-  
+
+    @Option(name = "-l",
+      title = "longFormat",
+      description = "Use long format for listing files")
+    private boolean longFormat = false;
+    
     public void run(ClientEnvironment env) throws Exception {
       final WildcardMatcher matcher = new WildcardMatcher(patterns);
       final CombinedRepository repo = env.getCombinedRepository();
       final Stream<RepositoryStatusFileInformation> files =
         matcher.files.stream().map(file -> repo.getFile(file));
       
-      env.console.printFileStatusLines(files, Console.LineFormat.LONG);
+      env.console.printFileStatusLines(files, longFormat ? Console.LineFormat.LONG : Console.LineFormat.SHORT);
     }
   }
 }
