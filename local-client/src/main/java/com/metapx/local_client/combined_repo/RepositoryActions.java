@@ -1,4 +1,4 @@
-package com.metapx.local_client.cli;
+package com.metapx.local_client.combined_repo;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -8,6 +8,8 @@ import com.metapx.git_metadata.core.MetadataRepository;
 import com.metapx.git_metadata.files.FileRecord;
 import com.metapx.git_metadata.pictures.MemberFile;
 import com.metapx.git_metadata.pictures.Picture;
+import com.metapx.local_client.cli.Configuration;
+import com.metapx.local_client.cli.DeviceFolders;
 import com.metapx.local_client.picture_repo.FileInformation;
 import com.metapx.local_client.picture_repo.ObjectWithState;
 import com.metapx.local_client.picture_repo.Repository;
