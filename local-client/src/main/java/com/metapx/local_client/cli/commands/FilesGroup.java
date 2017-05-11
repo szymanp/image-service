@@ -1,6 +1,8 @@
 package com.metapx.local_client.cli.commands;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -14,10 +16,12 @@ import com.metapx.git_metadata.files.FileRecord;
 import com.metapx.git_metadata.groups.Group;
 import com.metapx.local_client.cli.ClientEnvironment;
 import com.metapx.local_client.cli.Console;
+import com.metapx.local_client.cli.GroupPath;
 import com.metapx.local_client.cli.WildcardMatcher;
 import com.metapx.local_client.combined_repo.CombinedRepository;
 import com.metapx.local_client.combined_repo.RepositoryActions;
 import com.metapx.local_client.combined_repo.RepositoryStatusFileInformation;
+import com.metapx.local_client.combined_repo.TrackedFileInformation;
 import com.metapx.local_client.picture_repo.DiskFileInformation;
 import com.metapx.local_client.picture_repo.FileInformation;
 import com.metapx.local_client.picture_repo.Repository;
@@ -34,11 +38,14 @@ public class FilesGroup {
     @Arguments(title = "files", description = "File patterns to add to repository")
     @Required
     private List<String> patterns;
+    
+    @Option(name = { "--group" },
+      title = "group",
+      description = "Groups to be associated with the added pictures")
+    private List<String> groups = new ArrayList<String>();
   
     public void run(ClientEnvironment env) throws Exception {
-  		final Repository pictureRepo = env.getPictureRepository();
-      final MetadataRepository metadataRepo = env.getMetadataRepositoryOrThrow();
-  		RepositoryActions repoActions = new RepositoryActions(env.configuration, env.connection, pictureRepo, metadataRepo);
+  		RepositoryActions repoActions = new RepositoryActions(env.getCombinedRepository(), env.configuration);
   
   		WildcardMatcher matcher = new WildcardMatcher(patterns);
   
@@ -49,7 +56,8 @@ public class FilesGroup {
   
   				if (targetFileInformation.isImage()) {
   					try {
-  						repoActions.addFileAsPicture(targetFileInformation);
+  						final TrackedFileInformation trackedFile = repoActions.addFileAsPicture(targetFileInformation);
+  						groups.forEach(group -> repoActions.addFileToGroup(trackedFile, GroupPath.split(group)));
   						status.success(targetFileInformation);
   					} catch (Repository.RepositoryException e) {
   						status.fail(e.getMessage());
@@ -60,8 +68,6 @@ public class FilesGroup {
   					status.fail("Skipping - not an image");
   				}
   			});
-  
-  		repoActions.commit();
   	}
   }
   
