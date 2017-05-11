@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.metapx.git_metadata.files.FileRecord;
+import com.metapx.local_client.picture_repo.Repository;
 
 public class TrackedFileGroupImpl implements TrackedFileGroup {
   private final String hash;
@@ -16,9 +17,13 @@ public class TrackedFileGroupImpl implements TrackedFileGroup {
     this.hash = hash;
     fileRecord = repos.getMetadataRepository().files().findWithKey(getHash())
       .orElseThrow(() -> new RuntimeException("File with hash \"" + hash + "\" is not known by the repository."));
-    files = repos.getPictureRepository().findFiles(hash)
-        .map(resolved -> new TrackedFileInformationImpl(resolved, fileRecord))
-        .collect(Collectors.toList());
+    files = buildFiles(repos.getPictureRepository(), fileRecord, hash);
+  }
+  
+  public TrackedFileGroupImpl(Repository pictureRepo, FileRecord fileRecord) {
+    this.hash = fileRecord.getHash();
+    this.fileRecord = fileRecord;
+    this.files = buildFiles(pictureRepo, fileRecord, this.hash);
   }
 
   @Override
@@ -41,5 +46,11 @@ public class TrackedFileGroupImpl implements TrackedFileGroup {
     return getFiles()
       .filter((file) -> file.isValid())
       .findAny();
+  }
+  
+  private List<TrackedFileInformation> buildFiles(Repository pictureRepo, FileRecord fileRecord, String hash) {
+    return pictureRepo.findFiles(hash)
+      .map(resolved -> new TrackedFileInformationImpl(resolved, fileRecord))
+      .collect(Collectors.toList());    
   }
 }

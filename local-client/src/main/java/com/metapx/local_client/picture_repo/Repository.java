@@ -31,7 +31,7 @@ public final class Repository {
     rootFolder = new FolderRecord();
   }
 
-  public ObjectWithState<FileRecord> addFile(FileInformation fileToAdd) throws RepositoryException {
+  public ObjectWithState<ResolvedFileRecord> addFile(FileInformation fileToAdd) throws RepositoryException {
     if (!fileToAdd.getFile().exists()) {
       throw new RepositoryException("File does not exist on disk");
     }
@@ -61,7 +61,7 @@ public final class Repository {
       file.setHash(hash);
       file.insert();
 
-      return ObjectWithState.newObject(file);
+      return ObjectWithState.newObject(new ResolvedFileRecord(file, folder, fileToAdd.getFile()));
     } else {
       // The file exists, update the hash if needed.
       if (hash != file.getHash()) {
@@ -70,7 +70,7 @@ public final class Repository {
         file.setSize(new Long(fileToAdd.getFile().length()).intValue());
         file.update();
       }
-      return ObjectWithState.existingObject(file);
+      return ObjectWithState.existingObject(new ResolvedFileRecord(file, folder, fileToAdd.getFile()));
     }
   }
   
@@ -245,8 +245,18 @@ public final class Repository {
       return target.exists() && target.isFile();
     }
     
+    /**
+     * @return the hash of the referenced file.
+     */
     public String getHash() {
       return fileRecord.getHash();
+    }
+    
+    /**
+     * @return the repository that this file was obtained from.
+     */
+    public Repository getRepository() {
+      return Repository.this;
     }
   }
 }

@@ -12,6 +12,8 @@ public class TrackedFileInformationImpl implements TrackedFileInformation {
   private final ResolvedFileRecord resolved;
   private final FileRecord fileRecord;
   
+  private TrackedFileGroup fileGroup;
+  
   public TrackedFileInformationImpl(RepositoryStatusFileInformationImpl fileInfo) {
     this.fileInfo = fileInfo;
     this.resolved = fileInfo.resolved.get();
@@ -56,8 +58,10 @@ public class TrackedFileInformationImpl implements TrackedFileInformation {
 
   @Override
   public TrackedFileGroup getFileGroup() {
-    // TODO Auto-generated method stub
-    return null;
+    if (fileGroup == null) {
+      fileGroup = new TrackedFileGroupImpl(resolved.getRepository(), fileRecord);
+    }
+    return fileGroup;
   }
 
   @Override

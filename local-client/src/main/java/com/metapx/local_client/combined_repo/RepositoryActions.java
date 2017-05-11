@@ -13,6 +13,7 @@ import com.metapx.local_client.cli.DeviceFolders;
 import com.metapx.local_client.picture_repo.FileInformation;
 import com.metapx.local_client.picture_repo.ObjectWithState;
 import com.metapx.local_client.picture_repo.Repository;
+import com.metapx.local_client.picture_repo.Repository.ResolvedFileRecord;
 import com.metapx.local_client.picture_repo.ObjectWithState.State;
 
 public class RepositoryActions {
@@ -30,13 +31,14 @@ public class RepositoryActions {
     deviceFolders = new DeviceFolders(conf, metadataRepository);
   }
 
-  public void addFile(FileInformation file) throws IOException, Repository.RepositoryException {
-    pictures.addFile(file);
-    addFileToMetadataRepository(file);
+  public TrackedFileInformation addFile(FileInformation file) throws IOException, Repository.RepositoryException {
+    final ObjectWithState<ResolvedFileRecord> resolved = pictures.addFile(file);
+    final ObjectWithState<FileRecord> fileRecord = addFileToMetadataRepository(file);
+    return new TrackedFileInformationImpl(resolved.get(), fileRecord.get());
   }
 
-  public void addFileAsPicture(FileInformation file) throws IOException, Repository.RepositoryException {
-    pictures.addFile(file);
+  public TrackedFileInformation addFileAsPicture(FileInformation file) throws IOException, Repository.RepositoryException {
+    final ObjectWithState<ResolvedFileRecord> resolved = pictures.addFile(file);
     final ObjectWithState<FileRecord> fileRecord = addFileToMetadataRepository(file);
 
     if (fileRecord.state() == State.NEW && fileRecord.get().getPictureId().equals("")) {
@@ -46,6 +48,8 @@ public class RepositoryActions {
       picture.groups().append(deviceFolders.getFolder(file.getFile().getParentFile()).getReference());
       metadata.pictureApi().pictures().update(picture);
     }
+    
+    return new TrackedFileInformationImpl(resolved.get(), fileRecord.get());
   }
 
   public void commit() throws Exception {
