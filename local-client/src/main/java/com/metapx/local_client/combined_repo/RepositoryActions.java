@@ -41,6 +41,7 @@ public class RepositoryActions {
   public TrackedFileInformation addFileAsPicture(FileInformation file) throws IOException, Repository.RepositoryException {
     final ObjectWithState<ResolvedFileRecord> resolved = pictures.addFile(file);
     final ObjectWithState<FileRecord> fileRecord = addFileToMetadataRepository(file);
+    FileRecord latestFileRecord = fileRecord.get();
 
     if (fileRecord.state() == State.NEW && fileRecord.get().getPictureId().equals("")) {
       final Picture picture = metadata.pictureApi().create();
@@ -48,9 +49,11 @@ public class RepositoryActions {
       picture.groups().append(deviceFolders.getDeviceGroup().getReference());
       picture.groups().append(deviceFolders.getFolder(file.getFile().getParentFile()).getReference());
       metadata.pictureApi().pictures().update(picture);
+      latestFileRecord = metadata.files().findWithKey(fileRecord.get().getHash())
+        .orElseThrow(() -> new IntegrityException("The recently added file is not available."));
     }
     
-    return new TrackedFileInformationImpl(resolved.get(), fileRecord.get());
+    return new TrackedFileInformationImpl(resolved.get(), latestFileRecord);
   }
   
   public void addFileToGroup(TrackedFileInformation file, GroupPath path) {
