@@ -9,12 +9,15 @@ import com.metapx.local_client.picture_repo.Repository.ResolvedFileRecord;
 
 public class RepositoryStatusFileInformationImpl implements RepositoryStatusFileInformation {
   private final FileInformation fileInfo;
+  private final CombinedRepository repos;
   final Optional<ResolvedFileRecord> resolved;
   final Optional<FileRecord> fileRecord;
   
   private Optional<TrackedFileInformation> trackedFile;
+  private Optional<TrackedFileGroup> trackedFileGroup;
 
   public RepositoryStatusFileInformationImpl(CombinedRepository repos, FileInformation fileInfo) {
+    this.repos = repos;
     this.fileInfo = fileInfo;
     
     resolved = repos.getPictureRepository().findFile(fileInfo.getFile());
@@ -83,7 +86,13 @@ public class RepositoryStatusFileInformationImpl implements RepositoryStatusFile
 
   @Override
   public Optional<TrackedFileGroup> getFileGroup() {
-    // TODO Auto-generated method stub
-    return null;
+    if (trackedFileGroup == null) {
+      if (fileRecord.isPresent()) {
+        trackedFileGroup = Optional.of((TrackedFileGroup)new TrackedFileGroupImpl(repos.getPictureRepository(), fileRecord.get()));
+      } else {
+        trackedFileGroup = Optional.empty();
+      }
+    }
+    return trackedFileGroup;
   }
 }

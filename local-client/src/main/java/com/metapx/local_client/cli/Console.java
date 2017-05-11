@@ -91,7 +91,7 @@ public interface Console {
           (f) -> String.format(
             "%1$-7s %2$-7s %3$4sx%4$-4s %5$s %6$s",
             f.isKnown() ? hash(f.getHash()) : "-",
-            f.getTrackedFile().isPresent() ? hash(f.getTrackedFile().get().getFileRecord().getPictureId()) : "-",
+            hash(f.getFileGroup().map((fg) -> fg.getFileRecord().getPictureId()).orElse("")),
             f.getWidth(),
             f.getHeight(),
             f.isTracked() ? "T" : "-",
