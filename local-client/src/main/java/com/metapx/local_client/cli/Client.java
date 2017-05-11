@@ -22,6 +22,7 @@ import com.metapx.local_client.cli.commands.*;
      })
 public class Client {
   public static void main(String args[]) {
+    disableJooqLogo();
     ClientEnvironment env = null;
 
     try {
@@ -43,5 +44,9 @@ public class Client {
         }
       }
     }
+  }
+  
+  private static void disableJooqLogo() {
+    System.setProperty("org.jooq.no-logo", "true");
   }
 }
