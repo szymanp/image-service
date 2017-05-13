@@ -8,6 +8,10 @@ class DeviceFolderProvider implements GroupProvider<DeviceFolder> {
     this.api = api;
   }
 
+  @Override
+  public String getName() {
+    return TYPE;
+  }
   public DeviceFolder readInstance(GroupTreeRecord treeRecord) {
     return new DeviceFolder(api, treeRecord);
   }

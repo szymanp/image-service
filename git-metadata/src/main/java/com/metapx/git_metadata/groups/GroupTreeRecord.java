@@ -42,7 +42,7 @@ public class GroupTreeRecord implements Record {
 
   public static GroupTreeRecord fromGroup(Group group) {
     final GroupTreeRecord result = new GroupTreeRecord();
-    result.parentHash = group.getParent().isPresent() ? group.getParent().get().getId() : emptyHash;
+    result.parentHash = group.getParent().isPresent() ? group.getParent().get().getId() : "";
     result.groupHash = group.getId();
     result.type = group.getType();
     result.name = group.getName();

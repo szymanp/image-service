@@ -1,10 +1,10 @@
 package com.metapx.git_metadata.groups;
 
-class TagProvider implements GroupProvider<Tag> {
-  final public static String TYPE = "tag";
+class EventProvider implements GroupProvider<Event> {
+  final public static String TYPE = "event";
   final private Group.Api api;
 
-  TagProvider(Group.Api api) {
+  EventProvider(Group.Api api) {
     this.api = api;
   }
 
@@ -13,12 +13,12 @@ class TagProvider implements GroupProvider<Tag> {
     return TYPE;
   }
   @Override
-  public Tag readInstance(GroupTreeRecord treeRecord) {
-    return new Tag(api, treeRecord);
+  public Event readInstance(GroupTreeRecord treeRecord) {
+    return new Event(api, treeRecord);
   }
   @Override
-  public Tag newInstance(String id, String name) {
-    return new Tag(api, id, name);
+  public Event newInstance(String id, String name) {
+    return new Event(api, id, name);
   }
   @Override
   public boolean matches(GroupTreeRecord treeRecord) {
@@ -26,24 +26,23 @@ class TagProvider implements GroupProvider<Tag> {
   }
   @Override
   public boolean matches(Group group) {
-    return group instanceof Tag;
+    return group instanceof Event;
   }
 
   @Override
-  public void save(Tag group) {
-    /* do nothing */
+  public void save(Event group) {
+    // TODO
   }
   @Override
-  public void delete(Tag group) {
-    /* do nothing */
+  public void delete(Event group) {
+    // TODO
   }
-
   @Override
   public void commit() throws Exception {
-    /* do nothing */
+    // TODO
   }
   @Override
   public void rollback() {
-    /* do nothing */
+    // TODO
   }
 }

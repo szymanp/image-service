@@ -8,6 +8,10 @@ class DeviceProvider implements GroupProvider<Device> {
     this.api = api;
   }
 
+  @Override
+  public String getName() {
+    return TYPE;
+  }
   public Device readInstance(GroupTreeRecord treeRecord) {
     return new Device(api, treeRecord);
   }

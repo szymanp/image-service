@@ -16,6 +16,8 @@ import com.metapx.git_metadata.groups.Tag;
 import com.metapx.local_client.cli.ClientEnvironment;
 import com.metapx.local_client.cli.Console;
 import com.metapx.local_client.cli.GroupPath;
+import com.metapx.local_client.cli.GroupType;
+import com.metapx.local_client.picture_repo.Repository;
 
 public class GroupGroup {
 
@@ -34,10 +36,11 @@ public class GroupGroup {
 
     public void run(ClientEnvironment env) throws Exception {
       final MetadataRepository repo = env.getMetadataRepositoryOrThrow();
-      groups.forEach(path -> createGroup(repo, path, Optional.ofNullable(type)));
+      final Class<? extends Group> groupType = new GroupType(repo).get(type);
+      groups.forEach(path -> createGroup(repo, path, groupType));
     }
 
-    private void createGroup(MetadataRepository repo, String groupPath, Optional<String> type) {
+    private void createGroup(MetadataRepository repo, String groupPath, Class<? extends Group> type) {
       final String[] parts = groupPath.split("/");
       final String[] path = Arrays.copyOf(parts, Math.max(0, parts.length - 1));
       final String name = parts[parts.length - 1];
@@ -47,8 +50,10 @@ public class GroupGroup {
         : repo.groupApi().findGroupByPath(path).map(group -> group.subgroups());
       
       if (parent.isPresent()) {
-        parent.get().append(repo.groupApi().create(Tag.class, name));
-        System.out.println("Created \"" + String.join("/", parts) + "\"");
+        final Group group = repo.groupApi().create(type, name);
+        parent.get().append(group);
+        
+        System.out.println("Created \"" + String.join("/", parts) + "\" (" + group.getType() + ")");
       } else {
         System.out.println("Parent group not found.");
       }

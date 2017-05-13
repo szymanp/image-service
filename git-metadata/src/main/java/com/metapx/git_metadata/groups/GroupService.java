@@ -62,6 +62,9 @@ public class GroupService {
     addProvider(Tag.class, new TagProvider(api));
     addProvider(Device.class, new DeviceProvider(api));
     addProvider(DeviceFolder.class, new DeviceFolderProvider(api));
+    addProvider(Place.class, new PlaceProvider(api));
+    addProvider(Person.class, new PersonProvider(api));
+    addProvider(Event.class, new EventProvider(api));
   }
 
   public <T extends Group> GroupCollection<T> groups(Class<T> clazz) {
@@ -90,6 +93,16 @@ public class GroupService {
       target = target.get().subgroups().findByName(path[i]);
     }
     return target;
+  }
+  
+  public Map<String, Class<? extends Group>> getGroupTypes() {
+    final Map<String, Class<? extends Group>> types = new HashMap<String, Class<? extends Group>>();
+    providers.map.keySet().forEach(clazz -> {
+      @SuppressWarnings("unchecked")
+      final Class<? extends Group> castClazz = (Class<? extends Group>) clazz;
+      types.put(providers.map.get(clazz).getName(), castClazz);
+    });
+    return types;
   }
   
   protected <T extends Group> void addProvider(Class<T> clazz, GroupProvider<T> provider) {
