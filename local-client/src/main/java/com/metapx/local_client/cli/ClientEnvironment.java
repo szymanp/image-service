@@ -1,6 +1,7 @@
 package com.metapx.local_client.cli;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Optional;
 
 import com.metapx.git_metadata.core.MetadataRepository;
@@ -11,22 +12,22 @@ import com.metapx.local_client.picture_repo.Repository;
 
 public class ClientEnvironment {
   public final Configuration configuration;
-  public final Connection connection;
   public final Console console;
+
+  private Connection connection;
 
   Repository pictureRepository;
   Optional<MetadataRepository> metadataRepository;
 
-  public ClientEnvironment() throws Exception {
+  public ClientEnvironment() {
     // Setup the environment
     configuration = Configuration.getDefaultConfiguration();
-    connection = configureDatabaseConnection(configuration);
     console = new Console.DefaultConsole(configuration);
   }
 
   public Repository getPictureRepository() {
     if (pictureRepository == null) {
-      pictureRepository = new Repository(connection);
+      pictureRepository = new Repository(getConnection());
     }
     return pictureRepository;
   }
@@ -51,9 +52,18 @@ public class ClientEnvironment {
   }
 
   public void commit() throws Exception {
-    connection.commit();
+    if (connection != null) {
+      connection.commit();
+    }
     if (metadataRepository != null && metadataRepository.isPresent()) {
       metadataRepository.get().commit();
+    }
+  }
+  
+  public void closeConnection() throws SQLException {
+    if (connection != null) {
+      connection.close();
+      connection = null;
     }
   }
 
@@ -62,5 +72,16 @@ public class ClientEnvironment {
       DatabaseBuilder.buildFile(conf.getJdbcDatabaseName());
     }
     return ConnectionFactory.newConnection(conf.getJdbcDatabaseName());
+  }
+  
+  private Connection getConnection() {
+    if (connection == null) {
+      try {
+        connection = configureDatabaseConnection(configuration);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return connection;
   }
 }

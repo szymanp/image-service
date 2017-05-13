@@ -38,7 +38,7 @@ public class Client {
     } finally {
       if (env != null) {
         try {
-          env.connection.close();
+          env.closeConnection();
         } catch (SQLException e) {
           // suppress
         }
