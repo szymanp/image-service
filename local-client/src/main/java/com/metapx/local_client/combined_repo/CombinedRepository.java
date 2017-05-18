@@ -4,7 +4,7 @@ import java.io.File;
 
 import com.metapx.git_metadata.core.MetadataRepository;
 import com.metapx.local_picture_repo.PictureRepository;
-import com.metapx.local_picture_repo.picture_repo.DiskFileInformation;
+import com.metapx.local_picture_repo.impl.DiskFileInformation;
 
 /**
  * A container for picture and metadata repository instances. 

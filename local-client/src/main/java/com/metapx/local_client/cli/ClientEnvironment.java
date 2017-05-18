@@ -6,9 +6,10 @@ import java.util.Optional;
 
 import com.metapx.git_metadata.core.MetadataRepository;
 import com.metapx.local_client.combined_repo.CombinedRepository;
+import com.metapx.local_picture_repo.PictureRepository;
 import com.metapx.local_picture_repo.database.ConnectionFactory;
 import com.metapx.local_picture_repo.database.DatabaseBuilder;
-import com.metapx.local_picture_repo.picture_repo.Repository;
+import com.metapx.local_picture_repo.impl.RepositoryImpl;
 
 public class ClientEnvironment {
   public final Configuration configuration;
@@ -16,7 +17,7 @@ public class ClientEnvironment {
 
   private Connection connection;
 
-  Repository pictureRepository;
+  RepositoryImpl pictureRepository;
   Optional<MetadataRepository> metadataRepository;
 
   public ClientEnvironment() {
@@ -25,9 +26,9 @@ public class ClientEnvironment {
     console = new Console.DefaultConsole(configuration);
   }
 
-  public Repository getPictureRepository() {
+  public PictureRepository getPictureRepository() {
     if (pictureRepository == null) {
-      pictureRepository = new Repository(getConnection());
+      pictureRepository = new RepositoryImpl(getConnection());
     }
     return pictureRepository;
   }

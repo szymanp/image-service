@@ -1,4 +1,4 @@
-package com.metapx.local_picture_repo.picture_repo;
+package com.metapx.local_picture_repo.impl;
 
 import static com.metapx.local_picture_repo.database.jooq.Tables.*;
 
@@ -24,14 +24,14 @@ import com.metapx.local_picture_repo.ResolvedFile;
 import com.metapx.local_picture_repo.database.jooq.tables.records.FileRecord;
 import com.metapx.local_picture_repo.database.jooq.tables.records.FolderRecord;
 
-public final class Repository implements PictureRepository {
+public final class RepositoryImpl implements PictureRepository {
   private final FolderRecord rootFolder;
   private final DSLContext db;
   private final Map<File, FolderRecord> folders = new HashMap<File, FolderRecord>();
   /** A mapping between a FolderRecord ID and a file path. */
   private final Map<Integer, File> paths = new HashMap<Integer, File>();
 
-  public Repository(Connection databaseConnection) {
+  public RepositoryImpl(Connection databaseConnection) {
     db = DSL.using(databaseConnection, SQLDialect.H2);
     rootFolder = new FolderRecord();
   }
@@ -254,7 +254,7 @@ public final class Repository implements PictureRepository {
      * @return the repository that this file was obtained from.
      */
     public PictureRepository getRepository() {
-      return Repository.this;
+      return RepositoryImpl.this;
     }
   }
 }

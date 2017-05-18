@@ -5,7 +5,7 @@ import java.io.File;
 import com.metapx.git_metadata.files.FileRecord;
 import com.metapx.local_picture_repo.FileInformation;
 import com.metapx.local_picture_repo.ResolvedFile;
-import com.metapx.local_picture_repo.picture_repo.DiskFileInformation;
+import com.metapx.local_picture_repo.impl.DiskFileInformation;
 
 public class TrackedFileInformationImpl implements TrackedFileInformation {
   private final FileInformation fileInfo;

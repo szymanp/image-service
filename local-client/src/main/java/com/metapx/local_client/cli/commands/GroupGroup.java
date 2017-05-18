@@ -17,7 +17,7 @@ import com.metapx.local_client.cli.ClientEnvironment;
 import com.metapx.local_client.cli.Console;
 import com.metapx.local_client.cli.GroupPath;
 import com.metapx.local_client.cli.GroupType;
-import com.metapx.local_picture_repo.picture_repo.Repository;
+import com.metapx.local_picture_repo.impl.RepositoryImpl;
 
 public class GroupGroup {
 
