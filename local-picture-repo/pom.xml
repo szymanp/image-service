@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.metapx</groupId>
-  <artifactId>local-client</artifactId>
+  <artifactId>local-picture-repo</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>local-client</name>
+  <name>local-picture-repo</name>
   <url>http://maven.apache.org</url>
 
   <properties>
@@ -17,7 +17,7 @@
   
   <profiles>
     <profile>
-      <id>local_client-profile</id>
+      <id>local_repo-profile</id>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
@@ -68,11 +68,6 @@
       <artifactId>git-metadata</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
-    <dependency>
-      <groupId>com.metapx</groupId>
-      <artifactId>local-picture-repo</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
-    </dependency>
   </dependencies>
 
   <build>
@@ -117,7 +112,7 @@
               <relations>true</relations>
             </generate>
             <target>
-              <packageName>com.metapx.local_client.database.jooq</packageName>
+              <packageName>com.metapx.local_picture_repo.database.jooq</packageName>
               <directory>src/main/java</directory>
             </target>
           </generator>
