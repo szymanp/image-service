@@ -16,10 +16,15 @@ import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 
+import com.metapx.local_picture_repo.FileInformation;
+import com.metapx.local_picture_repo.ObjectWithState;
+import com.metapx.local_picture_repo.PictureRepository;
+import com.metapx.local_picture_repo.PictureRepositoryException;
+import com.metapx.local_picture_repo.ResolvedFile;
 import com.metapx.local_picture_repo.database.jooq.tables.records.FileRecord;
 import com.metapx.local_picture_repo.database.jooq.tables.records.FolderRecord;
 
-public final class Repository {
+public final class Repository implements PictureRepository {
   private final FolderRecord rootFolder;
   private final DSLContext db;
   private final Map<File, FolderRecord> folders = new HashMap<File, FolderRecord>();
@@ -31,12 +36,12 @@ public final class Repository {
     rootFolder = new FolderRecord();
   }
 
-  public ObjectWithState<ResolvedFileRecord> addFile(FileInformation fileToAdd) throws RepositoryException {
+  public ObjectWithState<ResolvedFile> addFile(FileInformation fileToAdd) throws PictureRepositoryException {
     if (!fileToAdd.getFile().exists()) {
-      throw new RepositoryException("File does not exist on disk");
+      throw new PictureRepositoryException("File does not exist on disk");
     }
     if (!fileToAdd.isImage()) {
-      throw new RepositoryException("The specified path does not denote an image file");
+      throw new PictureRepositoryException("The specified path does not denote an image file");
     }
 
     final FolderRecord folder = createFolderForPath(fileToAdd.getFile().getParentFile());
@@ -77,7 +82,7 @@ public final class Repository {
   /**
    * Finds a file in the repository corresponding to a disk file.
    */
-  public Optional<ResolvedFileRecord> findFile(File file) {
+  public Optional<ResolvedFile> findFile(File file) {
     if (!file.isFile()) {
       return Optional.empty();
     }
@@ -97,7 +102,7 @@ public final class Repository {
   /**
    * Finds all files in the repository matching the given hash.
    */
-  public Stream<ResolvedFileRecord> findFiles(String hash) {
+  public Stream<ResolvedFile> findFiles(String hash) {
     return db.selectFrom(FILE)
       .where(FILE.HASH.eq(hash))
       .fetchStream()
@@ -200,17 +205,10 @@ public final class Repository {
     }
   }
 
-  public static class RepositoryException extends Exception {
-    static final long serialVersionUID = 0;
-    RepositoryException(String message) {
-      super(message);
-    }
-  }
-  
   /**
    * Provides information about a file resolved from a FileRecord.
    */
-  public class ResolvedFileRecord {
+  public class ResolvedFileRecord implements ResolvedFile {
     final FileRecord fileRecord;
     final FolderRecord folderRecord;
     final File containingFolder;
@@ -255,7 +253,7 @@ public final class Repository {
     /**
      * @return the repository that this file was obtained from.
      */
-    public Repository getRepository() {
+    public PictureRepository getRepository() {
       return Repository.this;
     }
   }

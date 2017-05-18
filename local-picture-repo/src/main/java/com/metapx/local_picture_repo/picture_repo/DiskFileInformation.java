@@ -8,6 +8,8 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
+import com.metapx.local_picture_repo.FileInformation;
+
 public class DiskFileInformation implements FileInformation {
   public static HashCalculator defaultHashCalculator;
 

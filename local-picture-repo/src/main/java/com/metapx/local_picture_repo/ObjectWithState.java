@@ -1,5 +1,8 @@
-package com.metapx.local_picture_repo.picture_repo;
+package com.metapx.local_picture_repo;
 
+/**
+ * Provides state information for another object
+ */
 public class ObjectWithState<T> {
   public enum State { NEW, EXISTING, DELETED };
 

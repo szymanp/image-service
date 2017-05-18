@@ -3,22 +3,22 @@ package com.metapx.local_client.combined_repo;
 import java.io.File;
 
 import com.metapx.git_metadata.core.MetadataRepository;
+import com.metapx.local_picture_repo.PictureRepository;
 import com.metapx.local_picture_repo.picture_repo.DiskFileInformation;
-import com.metapx.local_picture_repo.picture_repo.Repository;
 
 /**
  * A container for picture and metadata repository instances. 
  */
 public class CombinedRepository {
-  final private Repository pictureRepository;
+  final private PictureRepository pictureRepository;
   final private MetadataRepository metadataRepository;
   
-  public CombinedRepository(Repository pictureRepository, MetadataRepository metadataRepository) {
+  public CombinedRepository(PictureRepository pictureRepository, MetadataRepository metadataRepository) {
     this.pictureRepository = pictureRepository;
     this.metadataRepository = metadataRepository;
   }
   
-  public Repository getPictureRepository() {
+  public PictureRepository getPictureRepository() {
     return pictureRepository;
   }
 

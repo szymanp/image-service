@@ -3,13 +3,13 @@ package com.metapx.local_client.combined_repo;
 import java.io.File;
 
 import com.metapx.git_metadata.files.FileRecord;
+import com.metapx.local_picture_repo.FileInformation;
+import com.metapx.local_picture_repo.ResolvedFile;
 import com.metapx.local_picture_repo.picture_repo.DiskFileInformation;
-import com.metapx.local_picture_repo.picture_repo.FileInformation;
-import com.metapx.local_picture_repo.picture_repo.Repository.ResolvedFileRecord;
 
 public class TrackedFileInformationImpl implements TrackedFileInformation {
   private final FileInformation fileInfo;
-  private final ResolvedFileRecord resolved;
+  private final ResolvedFile resolved;
   private final FileRecord fileRecord;
   
   private TrackedFileGroup fileGroup;
@@ -20,7 +20,7 @@ public class TrackedFileInformationImpl implements TrackedFileInformation {
     this.fileRecord = fileInfo.fileRecord.get();
   }
   
-  public TrackedFileInformationImpl(ResolvedFileRecord resolved, FileRecord fileRecord) {
+  public TrackedFileInformationImpl(ResolvedFile resolved, FileRecord fileRecord) {
     this.fileInfo = new DiskFileInformation(resolved.getFile());
     this.resolved = resolved;
     this.fileRecord = fileRecord;

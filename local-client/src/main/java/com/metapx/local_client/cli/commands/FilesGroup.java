@@ -2,18 +2,13 @@ package com.metapx.local_client.cli.commands;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.github.rvesse.airline.annotations.Arguments;
 import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.restrictions.Required;
-import com.metapx.git_metadata.core.MetadataRepository;
-import com.metapx.git_metadata.files.FileRecord;
-import com.metapx.git_metadata.groups.Group;
 import com.metapx.local_client.cli.ClientEnvironment;
 import com.metapx.local_client.cli.Console;
 import com.metapx.local_client.cli.GroupPath;
@@ -22,9 +17,9 @@ import com.metapx.local_client.combined_repo.CombinedRepository;
 import com.metapx.local_client.combined_repo.RepositoryActions;
 import com.metapx.local_client.combined_repo.RepositoryStatusFileInformation;
 import com.metapx.local_client.combined_repo.TrackedFileInformation;
+import com.metapx.local_picture_repo.FileInformation;
+import com.metapx.local_picture_repo.PictureRepositoryException;
 import com.metapx.local_picture_repo.picture_repo.DiskFileInformation;
-import com.metapx.local_picture_repo.picture_repo.FileInformation;
-import com.metapx.local_picture_repo.picture_repo.Repository;
 
 public class FilesGroup {
 
@@ -59,7 +54,7 @@ public class FilesGroup {
   						final TrackedFileInformation trackedFile = repoActions.addFileAsPicture(targetFileInformation);
   						groups.forEach(group -> repoActions.addFileToGroup(trackedFile, GroupPath.split(group)));
   						status.success(targetFileInformation);
-  					} catch (Repository.RepositoryException e) {
+  					} catch (PictureRepositoryException e) {
   						status.fail(e.getMessage());
   					} catch (IOException e) {
   						e.printStackTrace();

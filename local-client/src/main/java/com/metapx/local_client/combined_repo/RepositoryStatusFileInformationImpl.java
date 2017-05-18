@@ -4,13 +4,13 @@ import java.io.File;
 import java.util.Optional;
 
 import com.metapx.git_metadata.files.FileRecord;
-import com.metapx.local_picture_repo.picture_repo.FileInformation;
-import com.metapx.local_picture_repo.picture_repo.Repository.ResolvedFileRecord;
+import com.metapx.local_picture_repo.FileInformation;
+import com.metapx.local_picture_repo.ResolvedFile;
 
 public class RepositoryStatusFileInformationImpl implements RepositoryStatusFileInformation {
   private final FileInformation fileInfo;
   private final CombinedRepository repos;
-  final Optional<ResolvedFileRecord> resolved;
+  final Optional<ResolvedFile> resolved;
   final Optional<FileRecord> fileRecord;
   
   private Optional<TrackedFileInformation> trackedFile;

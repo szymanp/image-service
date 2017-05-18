@@ -1,7 +1,7 @@
 package com.metapx.local_client.combined_repo;
 
 import com.metapx.git_metadata.files.FileRecord;
-import com.metapx.local_picture_repo.picture_repo.FileInformation;
+import com.metapx.local_picture_repo.FileInformation;
 
 public interface TrackedFileInformation extends FileInformation {
   /**

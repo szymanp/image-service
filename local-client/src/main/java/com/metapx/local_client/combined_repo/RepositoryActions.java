@@ -13,14 +13,15 @@ import com.metapx.git_metadata.pictures.PictureReference;
 import com.metapx.local_client.cli.Configuration;
 import com.metapx.local_client.cli.DeviceFolders;
 import com.metapx.local_client.cli.GroupPath;
-import com.metapx.local_picture_repo.picture_repo.FileInformation;
-import com.metapx.local_picture_repo.picture_repo.ObjectWithState;
-import com.metapx.local_picture_repo.picture_repo.Repository;
-import com.metapx.local_picture_repo.picture_repo.ObjectWithState.State;
-import com.metapx.local_picture_repo.picture_repo.Repository.ResolvedFileRecord;
+import com.metapx.local_picture_repo.FileInformation;
+import com.metapx.local_picture_repo.ObjectWithState;
+import com.metapx.local_picture_repo.ObjectWithState.State;
+import com.metapx.local_picture_repo.PictureRepository;
+import com.metapx.local_picture_repo.PictureRepositoryException;
+import com.metapx.local_picture_repo.ResolvedFile;
 
 public class RepositoryActions {
-  final private Repository pictures;
+  final private PictureRepository pictures;
   final private MetadataRepository metadata;
   
   final private DeviceFolders deviceFolders;
@@ -32,14 +33,14 @@ public class RepositoryActions {
     deviceFolders = new DeviceFolders(conf, metadata);
   }
 
-  public TrackedFileInformation addFile(FileInformation file) throws IOException, Repository.RepositoryException {
-    final ObjectWithState<ResolvedFileRecord> resolved = pictures.addFile(file);
+  public TrackedFileInformation addFile(FileInformation file) throws IOException, PictureRepositoryException {
+    final ObjectWithState<ResolvedFile> resolved = pictures.addFile(file);
     final ObjectWithState<FileRecord> fileRecord = addFileToMetadataRepository(file);
     return new TrackedFileInformationImpl(resolved.get(), fileRecord.get());
   }
 
-  public TrackedFileInformation addFileAsPicture(FileInformation file) throws IOException, Repository.RepositoryException {
-    final ObjectWithState<ResolvedFileRecord> resolved = pictures.addFile(file);
+  public TrackedFileInformation addFileAsPicture(FileInformation file) throws IOException, PictureRepositoryException {
+    final ObjectWithState<ResolvedFile> resolved = pictures.addFile(file);
     final ObjectWithState<FileRecord> fileRecord = addFileToMetadataRepository(file);
     FileRecord latestFileRecord = fileRecord.get();
 

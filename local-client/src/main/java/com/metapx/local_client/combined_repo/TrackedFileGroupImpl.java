@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.metapx.git_metadata.files.FileRecord;
-import com.metapx.local_picture_repo.picture_repo.Repository;
+import com.metapx.local_picture_repo.PictureRepository;
 
 public class TrackedFileGroupImpl implements TrackedFileGroup {
   private final String hash;
@@ -20,7 +20,7 @@ public class TrackedFileGroupImpl implements TrackedFileGroup {
     files = buildFiles(repos.getPictureRepository(), fileRecord, hash);
   }
   
-  public TrackedFileGroupImpl(Repository pictureRepo, FileRecord fileRecord) {
+  public TrackedFileGroupImpl(PictureRepository pictureRepo, FileRecord fileRecord) {
     this.hash = fileRecord.getHash();
     this.fileRecord = fileRecord;
     this.files = buildFiles(pictureRepo, fileRecord, this.hash);
@@ -48,7 +48,7 @@ public class TrackedFileGroupImpl implements TrackedFileGroup {
       .findAny();
   }
   
-  private List<TrackedFileInformation> buildFiles(Repository pictureRepo, FileRecord fileRecord, String hash) {
+  private List<TrackedFileInformation> buildFiles(PictureRepository pictureRepo, FileRecord fileRecord, String hash) {
     return pictureRepo.findFiles(hash)
       .map(resolved -> new TrackedFileInformationImpl(resolved, fileRecord))
       .collect(Collectors.toList());    

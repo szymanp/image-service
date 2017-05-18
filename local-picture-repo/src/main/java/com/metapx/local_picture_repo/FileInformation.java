@@ -1,4 +1,4 @@
-package com.metapx.local_picture_repo.picture_repo;
+package com.metapx.local_picture_repo;
 
 import java.io.File;
 
