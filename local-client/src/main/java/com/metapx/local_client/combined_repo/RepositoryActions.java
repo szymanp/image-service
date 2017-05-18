@@ -13,11 +13,11 @@ import com.metapx.git_metadata.pictures.PictureReference;
 import com.metapx.local_client.cli.Configuration;
 import com.metapx.local_client.cli.DeviceFolders;
 import com.metapx.local_client.cli.GroupPath;
-import com.metapx.local_client.picture_repo.FileInformation;
-import com.metapx.local_client.picture_repo.ObjectWithState;
-import com.metapx.local_client.picture_repo.Repository;
-import com.metapx.local_client.picture_repo.Repository.ResolvedFileRecord;
-import com.metapx.local_client.picture_repo.ObjectWithState.State;
+import com.metapx.local_picture_repo.picture_repo.FileInformation;
+import com.metapx.local_picture_repo.picture_repo.ObjectWithState;
+import com.metapx.local_picture_repo.picture_repo.Repository;
+import com.metapx.local_picture_repo.picture_repo.ObjectWithState.State;
+import com.metapx.local_picture_repo.picture_repo.Repository.ResolvedFileRecord;
 
 public class RepositoryActions {
   final private Repository pictures;

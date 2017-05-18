@@ -4,8 +4,8 @@ import java.io.File;
 import java.util.Optional;
 
 import com.metapx.git_metadata.files.FileRecord;
-import com.metapx.local_client.picture_repo.FileInformation;
-import com.metapx.local_client.picture_repo.Repository.ResolvedFileRecord;
+import com.metapx.local_picture_repo.picture_repo.FileInformation;
+import com.metapx.local_picture_repo.picture_repo.Repository.ResolvedFileRecord;
 
 public class RepositoryStatusFileInformationImpl implements RepositoryStatusFileInformation {
   private final FileInformation fileInfo;

@@ -6,9 +6,9 @@ import java.util.Optional;
 
 import com.metapx.git_metadata.core.MetadataRepository;
 import com.metapx.local_client.combined_repo.CombinedRepository;
-import com.metapx.local_client.database.ConnectionFactory;
-import com.metapx.local_client.database.DatabaseBuilder;
-import com.metapx.local_client.picture_repo.Repository;
+import com.metapx.local_picture_repo.database.ConnectionFactory;
+import com.metapx.local_picture_repo.database.DatabaseBuilder;
+import com.metapx.local_picture_repo.picture_repo.Repository;
 
 public class ClientEnvironment {
   public final Configuration configuration;

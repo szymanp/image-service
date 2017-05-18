@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.metapx.git_metadata.files.FileRecord;
-import com.metapx.local_client.picture_repo.Repository;
+import com.metapx.local_picture_repo.picture_repo.Repository;
 
 public class TrackedFileGroupImpl implements TrackedFileGroup {
   private final String hash;

@@ -22,9 +22,9 @@ import com.metapx.local_client.combined_repo.CombinedRepository;
 import com.metapx.local_client.combined_repo.RepositoryActions;
 import com.metapx.local_client.combined_repo.RepositoryStatusFileInformation;
 import com.metapx.local_client.combined_repo.TrackedFileInformation;
-import com.metapx.local_client.picture_repo.DiskFileInformation;
-import com.metapx.local_client.picture_repo.FileInformation;
-import com.metapx.local_client.picture_repo.Repository;
+import com.metapx.local_picture_repo.picture_repo.DiskFileInformation;
+import com.metapx.local_picture_repo.picture_repo.FileInformation;
+import com.metapx.local_picture_repo.picture_repo.Repository;
 
 public class FilesGroup {
 

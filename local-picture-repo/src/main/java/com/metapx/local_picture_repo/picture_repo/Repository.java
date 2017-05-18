@@ -1,6 +1,6 @@
-package com.metapx.local_client.picture_repo;
+package com.metapx.local_picture_repo.picture_repo;
 
-import static com.metapx.local_client.database.jooq.Tables.*;
+import static com.metapx.local_picture_repo.database.jooq.Tables.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,8 +16,8 @@ import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 
-import com.metapx.local_client.database.jooq.tables.records.FileRecord;
-import com.metapx.local_client.database.jooq.tables.records.FolderRecord;
+import com.metapx.local_picture_repo.database.jooq.tables.records.FileRecord;
+import com.metapx.local_picture_repo.database.jooq.tables.records.FolderRecord;
 
 public final class Repository {
   private final FolderRecord rootFolder;

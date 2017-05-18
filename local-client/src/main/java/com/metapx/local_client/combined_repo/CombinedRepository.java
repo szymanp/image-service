@@ -3,8 +3,8 @@ package com.metapx.local_client.combined_repo;
 import java.io.File;
 
 import com.metapx.git_metadata.core.MetadataRepository;
-import com.metapx.local_client.picture_repo.DiskFileInformation;
-import com.metapx.local_client.picture_repo.Repository;
+import com.metapx.local_picture_repo.picture_repo.DiskFileInformation;
+import com.metapx.local_picture_repo.picture_repo.Repository;
 
 /**
  * A container for picture and metadata repository instances. 

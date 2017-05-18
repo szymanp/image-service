@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.metapx.git_metadata.groups.Group;
-import com.metapx.local_client.picture_repo.FileInformation;
 import com.metapx.local_client.combined_repo.RepositoryStatusFileInformation;
+import com.metapx.local_picture_repo.picture_repo.FileInformation;
 
 public interface Console {
   public enum LineFormat { SHORT, LONG };

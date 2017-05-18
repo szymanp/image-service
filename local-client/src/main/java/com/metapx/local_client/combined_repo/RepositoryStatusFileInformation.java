@@ -2,7 +2,7 @@ package com.metapx.local_client.combined_repo;
 
 import java.util.Optional;
 
-import com.metapx.local_client.picture_repo.FileInformation;
+import com.metapx.local_picture_repo.picture_repo.FileInformation;
 
 /**
  * Provides information on a file in conjunction with its status in the repository.

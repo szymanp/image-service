@@ -1,4 +1,4 @@
-package com.metapx.local_client.picture_repo;
+package com.metapx.local_picture_repo.picture_repo;
 
 public class ObjectWithState<T> {
   public enum State { NEW, EXISTING, DELETED };

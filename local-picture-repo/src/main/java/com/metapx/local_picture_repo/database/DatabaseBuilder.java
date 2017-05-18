@@ -1,4 +1,4 @@
-package com.metapx.local_client.database;
+package com.metapx.local_picture_repo.database;
 
 import java.sql.Connection;
 import java.sql.Statement;
