@@ -12,12 +12,10 @@ import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.metapx.git_metadata.core.MetadataRepository;
 import com.metapx.git_metadata.groups.Group;
 import com.metapx.git_metadata.groups.GroupCollection;
-import com.metapx.git_metadata.groups.Tag;
 import com.metapx.local_client.cli.ClientEnvironment;
 import com.metapx.local_client.cli.Console;
 import com.metapx.local_client.cli.GroupPath;
 import com.metapx.local_client.cli.GroupType;
-import com.metapx.local_picture_repo.impl.RepositoryImpl;
 
 public class GroupGroup {
 
