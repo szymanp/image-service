@@ -32,7 +32,11 @@ public final class RepositoryImpl implements PictureRepository {
   private final Map<Integer, File> paths = new HashMap<Integer, File>();
 
   public RepositoryImpl(Connection databaseConnection) {
-    db = DSL.using(databaseConnection, SQLDialect.H2);
+    this(DSL.using(databaseConnection, SQLDialect.H2));
+  }
+  
+  public RepositoryImpl(DSLContext db) {
+    this.db = db;
     rootFolder = new FolderRecord();
   }
 
