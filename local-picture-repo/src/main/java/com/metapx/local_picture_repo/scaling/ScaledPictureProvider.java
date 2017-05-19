@@ -3,6 +3,11 @@ package com.metapx.local_picture_repo.scaling;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.util.Optional;
 import java.util.concurrent.Future;
 
@@ -27,11 +32,23 @@ public class ScaledPictureProvider {
    * @param dim
    * @return a scaled image file if it already exists, otherwise an empty optional.
    */
-  public Optional<File> getScaledImage(ResolvedFile original, Dimension dim) {
+  public Optional<File> getScaledImageIfExists(ResolvedFile original, Dimension dim) {
     return getTargetFile(original, dim);
   }
   
-  public File getScaledImageSync(ResolvedFile original, Dimension dim) throws IOException {
+  /**
+   * Returns a scaled image file, creating it if necessary.
+   * 
+   * If another process or thread is already creating the same scaled file, then this method
+   * will put the thread to sleep until the file is created.
+   * 
+   * @param original
+   * @param dim
+   * @return the scaled file.
+   * @throws IOException
+   * @throws InterruptedException
+   */
+  public File getScaledImage(ResolvedFile original, Dimension dim) throws IOException, InterruptedException {
     final Target target = hashPath.getTarget(original.getHash());
     final File targetFile = getDimensionFile(target.getFile(), dim);
 
@@ -73,14 +90,23 @@ public class ScaledPictureProvider {
       }
     } else {
       // The semaphore file already exists.
-      throw new IOException("Another process is already creating the image file.");
+      final WatchService watcher = FileSystems.getDefault().newWatchService();
+      try {
+        final WatchKey key = targetFile.getParentFile().toPath().register(watcher, StandardWatchEventKinds.ENTRY_CREATE);
+        for(;;) {
+          watcher.take();
+          
+          key.pollEvents();
+          
+          if (targetFile.exists()) {
+            break;
+          }
+        }
+      } finally {
+        watcher.close();
+      }
     }
-    
     return targetFile;
-  }
-  
-  public Future<File> getScaledImageAsync(ResolvedFile original, Dimension dim) {
-    return null;
   }
 
   private Optional<File> getTargetFile(ResolvedFile original, Dimension dim) {
