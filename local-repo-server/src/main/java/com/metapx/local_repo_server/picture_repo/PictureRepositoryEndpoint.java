@@ -46,7 +46,7 @@ public class PictureRepositoryEndpoint extends Endpoint {
           result.put("self", routingContext.request().uri());
           result.put("images", images);
           
-          images.put("orignal", getImageOriginal(resolvedFile.get()));
+          images.put("original", getImageOriginal(resolvedFile.get()));
 
           routingContext.response()
             .putHeader("content-type", "application/json")
