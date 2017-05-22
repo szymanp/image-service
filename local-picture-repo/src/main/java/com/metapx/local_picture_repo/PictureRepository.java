@@ -21,6 +21,16 @@ public interface PictureRepository {
   
   /**
    * Finds all files in the repository matching the given hash.
+   * 
+   * Note that this method might return files that are registered in the repository,
+   * but no longer exist in the registered location. 
    */
   public Stream<ResolvedFile> findFiles(String hash);
+  
+  /**
+   * Finds a file corresponding to the given hash.
+   * 
+   * This method will only return a file if it exists.
+   */
+  public Optional<ResolvedFile> findExistingFile(String hash);
 }

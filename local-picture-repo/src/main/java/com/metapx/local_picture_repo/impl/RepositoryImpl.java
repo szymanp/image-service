@@ -40,6 +40,7 @@ public final class RepositoryImpl implements PictureRepository {
     rootFolder = new FolderRecord();
   }
 
+  @Override
   public ObjectWithState<ResolvedFile> addFile(FileInformation fileToAdd) throws PictureRepositoryException {
     if (!fileToAdd.getFile().exists()) {
       throw new PictureRepositoryException("File does not exist on disk");
@@ -86,6 +87,7 @@ public final class RepositoryImpl implements PictureRepository {
   /**
    * Finds a file in the repository corresponding to a disk file.
    */
+  @Override
   public Optional<ResolvedFile> findFile(File file) {
     if (!file.isFile()) {
       return Optional.empty();
@@ -106,11 +108,19 @@ public final class RepositoryImpl implements PictureRepository {
   /**
    * Finds all files in the repository matching the given hash.
    */
+  @Override
   public Stream<ResolvedFile> findFiles(String hash) {
     return db.selectFrom(FILE)
       .where(FILE.HASH.eq(hash))
       .fetchStream()
       .map(fileRecord -> new ResolvedFileRecord(fileRecord));
+  }
+  
+  @Override
+  public Optional<ResolvedFile> findExistingFile(String hash) {
+    return findFiles(hash)
+      .filter(fileRecord -> fileRecord.exists())
+      .findAny();
   }
 
   /**
