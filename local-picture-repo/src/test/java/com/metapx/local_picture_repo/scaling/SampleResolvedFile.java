@@ -39,4 +39,24 @@ public class SampleResolvedFile implements ResolvedFile {
     throw new RuntimeException("Not implemented.");
   }
 
+  @Override
+  public boolean isValid() {
+    return true;
+  }
+
+  @Override
+  public int getWidth() {
+    return target.getWidth();
+  }
+
+  @Override
+  public int getHeight() {
+    return target.getHeight();
+  }
+
+  @Override
+  public String getImageType() {
+    return target.getImageType();
+  }
+
 }

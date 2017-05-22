@@ -68,6 +68,10 @@ public final class RepositoryImpl implements PictureRepository {
       file.setFolderId(folder.getId());
       file.setName(fileToAdd.getFile().getName());
       file.setSize(new Long(fileToAdd.getFile().length()).intValue());
+      file.setWidth(fileToAdd.getWidth());
+      file.setHeight(fileToAdd.getHeight());
+      file.setMtime(fileToAdd.getFile().lastModified());
+      file.setFiletype(fileToAdd.getImageType());
       file.setHash(hash);
       file.insert();
 
@@ -117,9 +121,9 @@ public final class RepositoryImpl implements PictureRepository {
   }
   
   @Override
-  public Optional<ResolvedFile> findExistingFile(String hash) {
+  public Optional<ResolvedFile> findValidFile(String hash) {
     return findFiles(hash)
-      .filter(fileRecord -> fileRecord.exists())
+      .filter(fileRecord -> fileRecord.isValid())
       .findAny();
   }
 
@@ -245,28 +249,53 @@ public final class RepositoryImpl implements PictureRepository {
       target = new File(containingFolder, record.getName());
     }
     
+    @Override
     public File getFile() {
       return target;
     }
     
+    @Override
     public File getContainingFolder() {
       return containingFolder;
     }
     
+    @Override
     public boolean exists() {
       return target.exists() && target.isFile();
+    }
+    
+    @Override
+    public boolean isValid() {
+      return exists() && target.lastModified() == fileRecord.getMtime();
+    }
+    
+    @Override
+    public int getWidth() {
+      return fileRecord.getWidth();
+    }
+    
+    @Override
+    public int getHeight() {
+      return fileRecord.getHeight();
     }
     
     /**
      * @return the hash of the referenced file.
      */
+    @Override
     public String getHash() {
       return fileRecord.getHash();
+    }
+    
+    @Override
+    public String getImageType() {
+      return fileRecord.getFiletype();
     }
     
     /**
      * @return the repository that this file was obtained from.
      */
+    @Override
     public PictureRepository getRepository() {
       return RepositoryImpl.this;
     }

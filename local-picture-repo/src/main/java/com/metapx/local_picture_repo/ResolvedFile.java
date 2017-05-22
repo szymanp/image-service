@@ -17,11 +17,31 @@ public interface ResolvedFile {
    * Tests if the file exists.
    */
   public boolean exists();
+
+  /**
+   * Tests if the disk file's hash matches the registered hash in the repository. 
+   */
+  public boolean isValid();
   
   /**
    * @return the hash of the referenced file.
    */
   public String getHash();  
+  
+  /**
+   * @return the image widht in pixels.
+   */
+  public int getWidth();
+  
+  /**
+   * @return the image height in pixels.
+   */
+  public int getHeight();
+  
+  /**
+   * @return the internal file type of the image, such as "JPEG"
+   */
+  public String getImageType();
 
   /**
    * @return the repository that this file was obtained from.

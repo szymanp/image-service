@@ -40,9 +40,14 @@ public final class DatabaseBuilder {
       + "folder_id int,"
       + "name varchar(255),"
       + "size int,"
-      + "file_id varchar(64),"  // git-metadata ID of the file
+      + "width int,"
+      + "height int,"
+      + "mtime bigint,"
+      + "filetype VARCHAR(100),"
       + "hash varchar(250))");
+    stmt.execute("CREATE UNIQUE INDEX FOLDER_01 ON FOLDER (parent_id, name)");
     stmt.execute("CREATE UNIQUE INDEX FILE_01 ON FILE (folder_id, name)");
+    stmt.execute("CREATE INDEX FILE_02 ON FILE (hash)");
     stmt.execute("INSERT INTO SYSTEM(id, schema_version) VALUES(1, 1)");
 
     connection.commit();

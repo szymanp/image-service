@@ -25,6 +25,7 @@ public class PictureRepositoryEndpoint extends Endpoint {
   public void register(Router router) {
     router.route(HttpMethod.GET, "/image/:id").blockingHandler(this::readImage);
     router.route(HttpMethod.GET, "/file/:id").blockingHandler(this::readFile);
+    router.route(HttpMethod.HEAD, "/file/:id").blockingHandler(this::headFile);
   }
 
   @Override
@@ -37,7 +38,7 @@ public class PictureRepositoryEndpoint extends Endpoint {
     .subscribe(
       (repo) -> {
         final String hash = routingContext.request().getParam("id");
-        final Optional<ResolvedFile> resolvedFile = repo.findExistingFile(hash);
+        final Optional<ResolvedFile> resolvedFile = repo.findValidFile(hash);
         
         if (resolvedFile.isPresent()) {
           final JsonObject result = new JsonObject();
@@ -61,24 +62,51 @@ public class PictureRepositoryEndpoint extends Endpoint {
     .subscribe(
       (repo) -> {
         final String hash = routingContext.request().getParam("id");
-        final Optional<ResolvedFile> resolvedFile = repo.findExistingFile(hash);
+        final Optional<ResolvedFile> resolvedFileOpt = repo.findValidFile(hash);
         
-        if (resolvedFile.isPresent()) {
+        if (resolvedFileOpt.isPresent()) {
+          final ResolvedFile resolvedFile = resolvedFileOpt.get();
 
           routingContext.response()
-            .putHeader("content-type", "image/jpeg")
-            .sendFile(resolvedFile.get().getFile().getAbsolutePath())
+            .putHeader("content-type", getMimeType(resolvedFile.getImageType()))
+            .putHeader("cache-control", "max-age=31556926") // Expires in 1 year
+            .sendFile(resolvedFile.getFile().getAbsolutePath())
             .end();
         } else {
           routingContext.response().setStatusCode(404).end();
         }
       });
   }
+
+  protected void headFile(RoutingContext routingContext) {
+    repoContext.getPictureRepository()
+    .subscribe(
+      (repo) -> {
+        final String hash = routingContext.request().getParam("id");
+        final Optional<ResolvedFile> resolvedFileOpt = repo.findValidFile(hash);
+        
+        if (resolvedFileOpt.isPresent()) {
+          final ResolvedFile resolvedFile = resolvedFileOpt.get();
+
+          routingContext.response()
+            .putHeader("content-type", getMimeType(resolvedFile.getImageType()))
+            .putHeader("cache-control", "max-age=31556926") // Expires in 1 year
+            .end();
+        } else {
+          routingContext.response().setStatusCode(404).end();
+        }
+      });
+  }
+
   
   private JsonObject getImageOriginal(ResolvedFile file) {
     final JsonObject result = new JsonObject();
     
     result.put("link", "/file/" + file.getHash());
+    result.put("width", file.getWidth());
+    result.put("height", file.getHeight());
+    result.put("size", file.getFile().length());
+    result.put("type", getMimeType(file.getImageType()));
     
     return result;
   }
@@ -86,5 +114,14 @@ public class PictureRepositoryEndpoint extends Endpoint {
   private JsonObject getImageScaled(ResolvedFile file, Dimension dim) {
     // TODO
     return null;
+  }
+  
+  private String getMimeType(String filetype) {
+    switch (filetype) {
+    case "JPEG":
+      return "image/jpeg";
+    default:
+      return "application/octet-stream";
+    }
   }
 }

@@ -14,5 +14,6 @@ image-service/.settings
 data-model/.settings
 local-client/*.bat
 local-picture-repo/*.bat
+local-picture-repo/*.db
 local-picture-repo/src/main/java/com/metapx/local_picture_repo/database/jooq
 sample-images/

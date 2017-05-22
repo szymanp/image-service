@@ -30,7 +30,7 @@ public interface PictureRepository {
   /**
    * Finds a file corresponding to the given hash.
    * 
-   * This method will only return a file if it exists.
+   * This method will only return a file if it exists and the hash matches.
    */
-  public Optional<ResolvedFile> findExistingFile(String hash);
+  public Optional<ResolvedFile> findValidFile(String hash);
 }
