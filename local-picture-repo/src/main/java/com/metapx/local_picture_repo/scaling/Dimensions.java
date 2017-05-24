@@ -1,6 +1,6 @@
 package com.metapx.local_picture_repo.scaling;
 
-public enum Dimensions implements Dimension {
+public enum Dimensions implements Dimension.NamedDimension {
   THUMBNAIL(160, 120),
   SMALL(320, 240),
   MEDIUM(640, 480),
@@ -23,6 +23,11 @@ public enum Dimensions implements Dimension {
   @Override
   public int getHeight() {
     return height;
+  }
+  
+  @Override
+  public String getName() {
+    return this.name().toLowerCase();
   }
   
   @Override

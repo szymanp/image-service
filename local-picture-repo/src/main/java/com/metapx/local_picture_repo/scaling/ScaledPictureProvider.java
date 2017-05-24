@@ -19,6 +19,7 @@ import com.metapx.git_metadata.core.HashPath.Target;
 import com.metapx.local_picture_repo.ResolvedFile;
 
 public class ScaledPictureProvider {
+  public enum Status { MISSING, IN_PROGRESS, EXISTS };
   final private HashPath hashPath;
   
   public ScaledPictureProvider(File storageDir) {
@@ -32,6 +33,25 @@ public class ScaledPictureProvider {
    */
   public Optional<File> getScaledImageIfExists(ResolvedFile original, Dimension dim) {
     return getTargetFile(original, dim);
+  }
+  
+  /**
+   * @return the status of the particular scaled image.
+   */
+  public Status getScaledImageStatus(ResolvedFile original, Dimension dim) {
+    final Target target = hashPath.getTarget(original.getHash());
+    final File targetFile = getDimensionFile(target.getFile(), dim);
+
+    if (targetFile.exists()) {
+      return Status.EXISTS;
+    }
+
+    final File semaphoreFile = getDimensionFile(target.getFile(), dim, "-lock");
+    if (semaphoreFile.exists()) {
+      return Status.IN_PROGRESS;
+    }
+    
+    return Status.MISSING;
   }
   
   /**
@@ -109,7 +129,8 @@ public class ScaledPictureProvider {
 
   private Optional<File> getTargetFile(ResolvedFile original, Dimension dim) {
     return hashPath.getTargetIfExists(original.getHash())
-      .map(target -> getDimensionFile(target.getFile(), dim));
+      .map(target -> getDimensionFile(target.getFile(), dim))
+      .flatMap(target -> target.exists() ? Optional.of(target) : Optional.empty());
   }
 
   private File getDimensionFile(File hashDir, Dimension dim, String suffix) {

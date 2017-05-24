@@ -6,6 +6,10 @@ public interface Dimension {
   public int getHeight();
   
   public boolean isApproximate();
+  
+  public interface NamedDimension extends Dimension {
+    public String getName();
+  }
 
   public static class Default implements Dimension {
     final int width;

@@ -71,7 +71,7 @@ public class TrackedFileInformationImpl implements TrackedFileInformation {
   
   @Override
   public boolean isValid() {
-    return exists();  // FIXME
+    return resolved.isValid();
   }
   
   @Override
