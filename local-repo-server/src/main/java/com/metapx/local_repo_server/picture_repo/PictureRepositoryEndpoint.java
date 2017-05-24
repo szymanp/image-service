@@ -49,7 +49,7 @@ public class PictureRepositoryEndpoint extends Endpoint {
 
   protected void readImage(RoutingContext routingContext) {
     repoContext.getPictureRepository()
-    .subscribe(
+    .doOnSuccess(
       (repo) -> {
         final String hash = routingContext.request().getParam("id");
         final Optional<ResolvedFile> resolvedFileOpt = repo.findValidFile(hash);
@@ -75,12 +75,14 @@ public class PictureRepositoryEndpoint extends Endpoint {
         } else {
           routingContext.response().setStatusCode(404).end();
         }
-      });
+      })
+    .doOnError(error -> sendError(routingContext, error))
+    .subscribe();
   }
   
   protected void readScaledImageStatus(RoutingContext routingContext) {
     repoContext.getPictureRepository()
-    .subscribe(
+    .doOnSuccess(
       (repo) -> {
         final String hash = routingContext.request().getParam("id");
         final Optional<Dimension> dim = getDimension(routingContext.request().getParam("dim"));
@@ -113,12 +115,14 @@ public class PictureRepositoryEndpoint extends Endpoint {
         } else {
           routingContext.response().setStatusCode(404).end();
         }
-      });
+      })
+    .doOnError(error -> sendError(routingContext, error))
+    .subscribe();
   }
   
   protected void createScaledImage(RoutingContext routingContext) {
     repoContext.getPictureRepository()
-    .subscribe(
+    .doOnSuccess(
       (repo) -> {
         final String hash = routingContext.request().getParam("id");
         final Optional<Dimension> dim = getDimension(routingContext.request().getParam("dim"));
@@ -138,12 +142,14 @@ public class PictureRepositoryEndpoint extends Endpoint {
         } else {
           routingContext.response().setStatusCode(404).end();
         }
-      });
+      })
+    .doOnError(error -> sendError(routingContext, error))
+    .subscribe();
   }
   
   protected void readFile(RoutingContext routingContext) {
     repoContext.getPictureRepository()
-    .subscribe(
+    .doOnSuccess(
       (repo) -> {
         final String hash    = routingContext.request().getParam("id");
         final String dimName = routingContext.request().getParam("dim");
@@ -174,21 +180,17 @@ public class PictureRepositoryEndpoint extends Endpoint {
         } else {
           routingContext.response().setStatusCode(404).end();
         }
-      });
+      })
+    .doOnError(error -> sendError(routingContext, error))
+    .subscribe();
   }
   
-  private Handler<RoutingContext> wrap(Handler<RoutingContext> handler) {
-    return (routingContext) -> {
-      try {
-        handler.handle(routingContext);
-      } catch (Exception e) {
-        e.printStackTrace();
+  private void sendError(RoutingContext routingContext, Throwable error) {
+    error.printStackTrace();
 
-        routingContext.response()
-          .setStatusCode(500)
-          .end();
-      }
-    };
+    routingContext.response()
+      .setStatusCode(500)
+      .end();
   }
   
   private JsonObject getImageOriginal(ResolvedFile file) {
