@@ -1,4 +1,4 @@
-package com.metapx.local_repo_server.errors;
+package com.metapx.local_repo_server.util;
 
 import io.vertx.rxjava.core.http.HttpServerResponse;
 

@@ -1,7 +1,7 @@
 package com.metapx.local_repo_server;
 
-import com.metapx.local_repo_server.errors.HttpStatusError;
 import com.metapx.local_repo_server.metadata_repo.MetadataRepositoryEndpoint;
+import com.metapx.local_repo_server.util.HttpStatusError;
 
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.rxjava.core.AbstractVerticle;
