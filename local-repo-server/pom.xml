@@ -43,6 +43,11 @@
       <version>3.4.1</version>
     </dependency>
     <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-hazelcast</artifactId>
+      <version>3.4.1</version>
+    </dependency>
+    <dependency>
       <groupId>com.metapx</groupId>
       <artifactId>local-picture-repo</artifactId>
       <version>0.0.1-SNAPSHOT</version>
