@@ -1,5 +1,6 @@
 package com.metapx.git_metadata.groups;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import com.metapx.git_metadata.core.collections.Collection;
@@ -82,6 +83,22 @@ public abstract class Group {
 	public void clearParent() {
 		this.parent = null;
 		this.parentId = "";
+	}
+
+	/**
+	 * @return the full path of this group.
+	 */
+	public String[] getPath() {
+	  final Optional<Group> parent = getParent();
+	  if (parent.isPresent()) {
+	    final String[] parentPath = parent.get().getPath();
+	    final String[] path = new String[parentPath.length + 1];
+	    System.arraycopy(parentPath, 0, path, 0, parentPath.length);
+	    path[parentPath.length] = name;
+	    return path;
+	  } else {
+	    return new String[] { name };
+	  }
 	}
 
 	/**
