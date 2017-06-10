@@ -15,6 +15,7 @@ import com.metapx.local_client.cli.commands.*;
        GroupGroup.CreateCommand.class,
        GroupGroup.ListCommand.class,
        ListCommand.class,
+       DaemonCommand.class,
        Help.class },
      groups = {
        @Group(name = "files", description = "Track image files in this repository"),
