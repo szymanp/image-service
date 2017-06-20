@@ -24,27 +24,39 @@ import com.metapx.local_client.cli.commands.*;
 public class Client {
   public static void main(String args[]) {
     disableJooqLogo();
-    ClientEnvironment env = null;
+
+    final com.github.rvesse.airline.Cli<Object> cli = new com.github.rvesse.airline.Cli<Object>(Client.class);
+    final Object cmd = cli.parse(args);
+    
+    if (cmd instanceof CommandRunnable) {
+      run((CommandRunnable) cmd);
+    } else if (cmd instanceof Runnable) {
+      run((Runnable) cmd);
+    } else {
+      throw new RuntimeException("Unsupported command type");
+    }
+  }
+  
+  private static void run(CommandRunnable cmd) {
+    final ClientEnvironment env = new ClientEnvironment();
 
     try {
-      final com.github.rvesse.airline.Cli<CommandRunnable> cli = new com.github.rvesse.airline.Cli<CommandRunnable>(Client.class);
-      final CommandRunnable cmd = cli.parse(args);
-      env = new ClientEnvironment();
-      
       cmd.run(env);
       env.commit();
 
     } catch (Exception e) {
       e.printStackTrace();
     } finally {
-      if (env != null) {
-        try {
-          env.closeConnection();
-        } catch (SQLException e) {
-          // suppress
-        }
+      try {
+        env.closeConnection();
+      } catch (SQLException e) {
+        // suppress
       }
     }
+  }
+  
+  private static void run(Runnable cmd) {
+    cmd.run();
   }
   
   private static void disableJooqLogo() {
