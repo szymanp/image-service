@@ -88,7 +88,8 @@ public class FilesGroup {
       final Stream<RepositoryStatusFileInformation> files =
         matcher.files.stream().map(file -> repo.getFile(file));
       
-      env.console.printFileStatusLines(files, longFormat ? Console.LineFormat.LONG : Console.LineFormat.SHORT);
+      env.console.setListingFormat(longFormat ? Console.ListingFormat.LONG : Console.ListingFormat.SHORT);
+      env.console.printFileStatusLines(files);
     }
   }
 }

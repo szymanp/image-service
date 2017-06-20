@@ -14,14 +14,15 @@ import com.metapx.local_client.combined_repo.RepositoryStatusFileInformation;
 import com.metapx.local_picture_repo.FileInformation;
 
 public interface Console {
-  public enum LineFormat { SHORT, LONG };
-  public enum HashFormat { SHORT, LONG };
+  public enum ListingFormat { SHORT, LONG };
 
+  void setListingFormat(ListingFormat format);
+  
   ProcessedFileStatus startProcessingFile(File file);
   
-  void printGroupLines(Stream<Group> groups, LineFormat format);
-  void printFileStatusLines(Stream<RepositoryStatusFileInformation> files, LineFormat format);
-
+  void printGroupLines(Stream<Group> groups);
+  void printFileStatusLines(Stream<RepositoryStatusFileInformation> files);
+  
   public interface ProcessedFileStatus {
     void success(FileInformation file);
     void fail(String message);
@@ -31,12 +32,24 @@ public interface Console {
    * A default implementation of the Console interface.
    */
   public class DefaultConsole implements Console {
+    public enum HashFormat { SHORT, LONG };
+    
     final Configuration conf;
+    private HashFormat hashFormat = HashFormat.SHORT;
+    private ListingFormat listingFormat = ListingFormat.SHORT;
 
     DefaultConsole(Configuration conf) {
       this.conf = conf;
     }
 
+    public void setHashFormat(HashFormat format) {
+      hashFormat = format;
+    }
+    
+    public void setListingFormat(ListingFormat format) {
+      listingFormat = format;
+    }
+    
     public ProcessedFileStatus startProcessingFile(File file) {
       System.out.print(relativize(file.getAbsoluteFile()));
 
@@ -55,8 +68,8 @@ public interface Console {
       };
     }
     
-    public void printGroupLines(Stream<Group> groups, LineFormat format) {
-      switch (format) {
+    public void printGroupLines(Stream<Group> groups) {
+      switch (listingFormat) {
       case SHORT:
         groups.forEach(group -> System.out.print(group.getName() + "  "));
         System.out.println();
@@ -69,8 +82,8 @@ public interface Console {
       }
     }
 
-    public void printFileStatusLines(Stream<RepositoryStatusFileInformation> files, LineFormat format) {
-      switch (format) {
+    public void printFileStatusLines(Stream<RepositoryStatusFileInformation> files) {
+      switch (listingFormat) {
       case SHORT:
         printGroupedByDir(
           files, 
@@ -136,7 +149,7 @@ public interface Console {
     }
 
     private String hash(String hash) {
-      return hash(hash, HashFormat.SHORT);
+      return hash(hash, hashFormat);
     }
     
     private String hash(String hash, HashFormat format) {
