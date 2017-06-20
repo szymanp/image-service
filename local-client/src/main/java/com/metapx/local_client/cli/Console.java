@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.metapx.git_metadata.groups.Group;
+import com.metapx.local_client.cli.commands.ItemException;
 import com.metapx.local_client.combined_repo.RepositoryStatusFileInformation;
 import com.metapx.local_picture_repo.FileInformation;
 
@@ -18,15 +19,9 @@ public interface Console {
 
   void setListingFormat(ListingFormat format);
   
-  ProcessedFileStatus startProcessingFile(File file);
-  
-  void printGroupLines(Stream<Group> groups);
-  void printFileStatusLines(Stream<RepositoryStatusFileInformation> files);
-  
-  public interface ProcessedFileStatus {
-    void success(FileInformation file);
-    void fail(String message);
-  }
+  void reportFiles(Stream<File> files, Function<File, FileInformation> processor);
+  void reportFiles(Stream<RepositoryStatusFileInformation> files);
+  void reportGroups(Stream<Group> groups);
 
   /**
    * A default implementation of the Console interface.
@@ -49,26 +44,21 @@ public interface Console {
     public void setListingFormat(ListingFormat format) {
       listingFormat = format;
     }
-    
-    public ProcessedFileStatus startProcessingFile(File file) {
-      System.out.print(relativize(file.getAbsoluteFile()));
 
-      return new ProcessedFileStatus() {
-        public void success(FileInformation file) {
-          try {
-            System.out.println(" " + hash(file.getHash()));
-          } catch (Exception e) {
-            System.out.println(" " + e.getMessage());
-          }
-        }
+    public void reportFiles(Stream<File> files, Function<File, FileInformation> processor) {
+      files.forEach(file -> {
+        System.out.print(relativize(file.getAbsoluteFile()));
 
-        public void fail(String message) {
-          System.out.println(": " + message);
+        try {
+          final FileInformation fileInformation = processor.apply(file);
+          System.out.println(" " + hash(fileInformation.getHash()));
+        } catch (ItemException e) {
+          System.out.println(": " + e.getMessage());
         }
-      };
+      });
     }
     
-    public void printGroupLines(Stream<Group> groups) {
+    public void reportGroups(Stream<Group> groups) {
       switch (listingFormat) {
       case SHORT:
         groups.forEach(group -> System.out.print(group.getName() + "  "));
@@ -82,7 +72,7 @@ public interface Console {
       }
     }
 
-    public void printFileStatusLines(Stream<RepositoryStatusFileInformation> files) {
+    public void reportFiles(Stream<RepositoryStatusFileInformation> files) {
       switch (listingFormat) {
       case SHORT:
         printGroupedByDir(

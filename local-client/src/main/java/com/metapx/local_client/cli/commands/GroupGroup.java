@@ -95,7 +95,7 @@ public class GroupGroup {
 
       final Stream<Group> sorted = groups.sorted((x, y) -> x.getName().compareTo(y.getName()));
       console.setListingFormat(longFormat ? Console.ListingFormat.LONG : Console.ListingFormat.SHORT);
-      console.printGroupLines(sorted);
+      console.reportGroups(sorted);
     }
   }
 }

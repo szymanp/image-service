@@ -44,25 +44,21 @@ public class FilesGroup {
   
   		WildcardMatcher matcher = new WildcardMatcher(patterns);
   
-  		matcher.files.stream()
-  			.forEach(targetFile -> {
-  				Console.ProcessedFileStatus status = env.console.startProcessingFile(targetFile);
-  				FileInformation targetFileInformation = new DiskFileInformation(targetFile);
-  
-  				if (targetFileInformation.isImage()) {
-  					try {
-  						final TrackedFileInformation trackedFile = repoActions.addFileAsPicture(targetFileInformation);
-  						groups.forEach(group -> repoActions.addFileToGroup(trackedFile, GroupPath.split(group)));
-  						status.success(targetFileInformation);
-  					} catch (PictureRepositoryException e) {
-  						status.fail(e.getMessage());
-  					} catch (IOException e) {
-  						e.printStackTrace();
-  					}
-  				} else {
-  					status.fail("Skipping - not an image");
-  				}
-  			});
+  		env.console.reportFiles(matcher.files.stream(), targetFile -> {
+        FileInformation targetFileInformation = new DiskFileInformation(targetFile);
+
+        if (targetFileInformation.isImage()) {
+          try {
+            final TrackedFileInformation trackedFile = repoActions.addFileAsPicture(targetFileInformation);
+            groups.forEach(group -> repoActions.addFileToGroup(trackedFile, GroupPath.split(group)));
+            return trackedFile;
+          } catch (PictureRepositoryException | IOException e) {
+            throw new ItemException(e);
+          }
+        } else {
+          throw new ItemException("Skipping - not an image");
+        }
+  		});
   	}
   }
   
@@ -89,7 +85,7 @@ public class FilesGroup {
         matcher.files.stream().map(file -> repo.getFile(file));
       
       env.console.setListingFormat(longFormat ? Console.ListingFormat.LONG : Console.ListingFormat.SHORT);
-      env.console.printFileStatusLines(files);
+      env.console.reportFiles(files);
     }
   }
 }
