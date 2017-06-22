@@ -22,6 +22,13 @@ public interface GroupCollection<T extends Group> extends KeyedCollection<String
    */
   public Optional<T> findByName(String name);
   
+  /**
+   * Finds a group by an id prefix.
+   * @param idPrefix
+   * @return a group if it was uniquely identified by this prefix, otherwise an empty optional.
+   */
+  public Optional<T> findByIdPrefix(String idPrefix);
+  
   static class Base {
     final KeyedCollection<String, GroupTreeRecord> tree;
     
@@ -103,6 +110,21 @@ public interface GroupCollection<T extends Group> extends KeyedCollection<String
         .filter(record -> record.getName().equals(name))
         .map(record -> providers.get(record).readInstance(record))
         .findFirst();
+    }
+    public Optional<Group> findByIdPrefix(String idPrefix) {
+      final String prefix = idPrefix.toLowerCase();
+      final List<GroupTreeRecord> elements = inner.tree.stream()
+        .filter(record -> filter.test(record))
+        .filter(record -> record.getGroupHash().startsWith(prefix))
+        .limit(2)
+        .collect(Collectors.toList());
+      if (elements.size() == 1) {
+        return elements.stream()
+          .map(record -> providers.get(record).readInstance(record))
+          .findFirst();
+      } else {
+        return Optional.empty();
+      }
     }
   }
 
@@ -198,6 +220,21 @@ public interface GroupCollection<T extends Group> extends KeyedCollection<String
         .filter(record -> record.getName().equals(name))
         .map(record -> provider.readInstance(record))
         .findFirst();
+    }
+    public Optional<T> findByIdPrefix(String idPrefix) {
+      final String prefix = idPrefix.toLowerCase();
+      final List<GroupTreeRecord> elements = inner.tree.stream()
+        .filter(record -> provider.matches(record))
+        .filter(record -> record.getGroupHash().startsWith(prefix))
+        .limit(2)
+        .collect(Collectors.toList());
+      if (elements.size() == 1) {
+        return elements.stream()
+          .map(record -> provider.readInstance(record))
+          .findFirst();
+      } else {
+        return Optional.empty();
+      }
     }
   }
 }

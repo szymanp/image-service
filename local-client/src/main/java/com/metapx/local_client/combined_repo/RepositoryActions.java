@@ -12,7 +12,8 @@ import com.metapx.git_metadata.pictures.Picture;
 import com.metapx.git_metadata.pictures.PictureReference;
 import com.metapx.local_client.cli.Configuration;
 import com.metapx.local_client.cli.DeviceFolders;
-import com.metapx.local_client.commands.parsers.GroupPath;
+import com.metapx.local_client.commands.parsers.GroupOrRoot;
+import com.metapx.local_client.commands.parsers.GroupReference;
 import com.metapx.local_picture_repo.FileInformation;
 import com.metapx.local_picture_repo.ObjectWithState;
 import com.metapx.local_picture_repo.ObjectWithState.State;
@@ -57,13 +58,19 @@ public class RepositoryActions {
     return new TrackedFileInformationImpl(resolved.get(), latestFileRecord);
   }
   
-  public void addFileToGroup(TrackedFileInformation file, GroupPath path) {
-    final Optional<Group> group = metadata.groupApi().findGroupByPath(path.getParts());
+  public void addFileToGroup(TrackedFileInformation file, String groupReference) {
+    final Optional<GroupOrRoot> groupOrRoot = GroupReference.resolve(groupReference, metadata.groupApi());
+    if (!groupOrRoot.isPresent()) {
+      throw new ParameterException("Group \"" + groupReference + "\" does not exist.");
+    }
+    if (groupOrRoot.get().isRoot()) {
+      throw new ParameterException("Files cannot be added to the root of the group hierarchy.");
+    }
+    final Group group = groupOrRoot.get().get();
+    
     final Optional<PictureReference> picture = PictureReference.create(file.getFileRecord().getPictureId());
-    if (group.isPresent() && picture.isPresent()) {
-      group.get().pictures().append(picture.get());
-    } else if (!group.isPresent()) {
-      throw new ParameterException("Group \"" + path.getPath() + "\" does not exist.");
+    if (picture.isPresent()) {
+      group.pictures().append(picture.get());
     } else if (!picture.isPresent()) {
       throw new IntegrityException("The file is not associated with any picture.");
     }

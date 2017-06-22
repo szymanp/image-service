@@ -16,7 +16,6 @@ import com.metapx.local_client.combined_repo.CombinedRepository;
 import com.metapx.local_client.combined_repo.RepositoryActions;
 import com.metapx.local_client.combined_repo.RepositoryStatusFileInformation;
 import com.metapx.local_client.combined_repo.TrackedFileInformation;
-import com.metapx.local_client.commands.parsers.GroupPath;
 import com.metapx.local_picture_repo.FileInformation;
 import com.metapx.local_picture_repo.PictureRepositoryException;
 import com.metapx.local_picture_repo.impl.DiskFileInformation;
@@ -50,7 +49,7 @@ public class FilesGroup {
         if (targetFileInformation.isImage()) {
           try {
             final TrackedFileInformation trackedFile = repoActions.addFileAsPicture(targetFileInformation);
-            groups.forEach(group -> repoActions.addFileToGroup(trackedFile, GroupPath.split(group)));
+            groups.forEach(group -> repoActions.addFileToGroup(trackedFile, group));
             return trackedFile;
           } catch (PictureRepositoryException | IOException e) {
             throw new ItemException(e);

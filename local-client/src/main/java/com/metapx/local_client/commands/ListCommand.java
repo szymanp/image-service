@@ -16,7 +16,8 @@ import com.metapx.local_client.cli.Console;
 import com.metapx.local_client.combined_repo.CombinedRepository;
 import com.metapx.local_client.combined_repo.TrackedFileGroup;
 import com.metapx.local_client.combined_repo.TrackedFileGroupImpl;
-import com.metapx.local_client.commands.parsers.GroupPath;
+import com.metapx.local_client.commands.parsers.GroupOrRoot;
+import com.metapx.local_client.commands.parsers.GroupReference;
 
 @Command(
   name = "ls",
@@ -46,15 +47,14 @@ public class ListCommand implements CommandRunnable {
   }
   
   private void listFilesInGroup(CombinedRepository repo, Console console, String path) {
-    final GroupPath groupPath = GroupPath.split(path);
     final KeyedCollection<String, Picture> pictures = repo.getMetadataRepository().pictures();
+    final GroupOrRoot groupRef = GroupReference.resolveOrThrow(path, repo.getMetadataRepository().groupApi());
     
-    if (groupPath.isRootPath()) {
+    if (groupRef.isRoot()) {
       return; // Nothing to list as no files are members of the root of the group hierarchy.
     }
     
-    final Group group = repo.getMetadataRepository().groupApi().findGroupByPath(groupPath.getParts())
-      .orElseThrow(() -> new ItemException("Group \"" + path + "\" does not exist."));
+    final Group group = groupRef.get();
 
     Stream<TrackedFileGroup> fileGroups =
       group.pictures().stream()
