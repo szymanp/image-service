@@ -39,11 +39,11 @@ public class FilesGroup {
     private List<String> groups = new ArrayList<String>();
   
     public void run(ClientEnvironment env) throws Exception {
-  		RepositoryActions repoActions = new RepositoryActions(env.getCombinedRepository(), env.configuration);
+  		RepositoryActions repoActions = new RepositoryActions(env.getCombinedRepository(), env.getConfiguration());
   
   		WildcardMatcher matcher = new WildcardMatcher(patterns);
   
-  		env.console.reportFiles(matcher.files.stream(), targetFile -> {
+  		env.getConsole().reportFiles(matcher.files.stream(), targetFile -> {
         FileInformation targetFileInformation = new DiskFileInformation(targetFile);
 
         if (targetFileInformation.isImage()) {
@@ -83,8 +83,8 @@ public class FilesGroup {
       final Stream<RepositoryStatusFileInformation> files =
         matcher.files.stream().map(file -> repo.getFile(file));
       
-      env.console.setListingFormat(longFormat ? Console.ListingFormat.LONG : Console.ListingFormat.SHORT);
-      env.console.reportFiles(files);
+      env.getConsole().setListingFormat(longFormat ? Console.ListingFormat.LONG : Console.ListingFormat.SHORT);
+      env.getConsole().reportFiles(files);
     }
   }
 }

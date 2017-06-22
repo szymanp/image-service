@@ -8,10 +8,31 @@ import com.metapx.local_client.commands.CommandRunnable;
 import io.vertx.core.json.JsonObject;
 
 public class JsonCommandRunner {
+  private final ClientEnvironment baseEnv;
+  private final boolean disconnect;
+
+  /**
+   * Creates a new JsonCommandRunner.
+   * The Runner will handle its own environment, including connecting and disconnecting from the repository.
+   */
+  public JsonCommandRunner() {
+    baseEnv = new ClientEnvironment();
+    disconnect = true;
+  }
+  
+  /**
+   * Creates a new JsonCommandRunner.
+   * The Runner will use the supplied environment. The repository connection must be handled externally.
+   * @param env
+   */
+  public JsonCommandRunner(ClientEnvironment env) {
+    baseEnv = env;
+    disconnect = false;
+  }
   
   public JsonObject run(CommandRunnable cmd) {
     final ResourceConsole console = new ResourceConsole();
-    final ClientEnvironment env = new ClientEnvironment(console);
+    final ClientEnvironment env = baseEnv.setConsole(console);
 
     try {
       cmd.run(env);
@@ -25,10 +46,12 @@ public class JsonCommandRunner {
       return exceptionResponse;
 
     } finally {
-      try {
-        env.closeConnection();
-      } catch (SQLException e) {
-        // suppress
+      if (disconnect) {
+        try {
+          env.closeConnection();
+        } catch (SQLException e) {
+          // suppress
+        }
       }
     }
   }

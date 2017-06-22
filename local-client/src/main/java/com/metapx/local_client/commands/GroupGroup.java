@@ -39,10 +39,10 @@ public class GroupGroup {
       final MetadataRepository repo = env.getMetadataRepositoryOrThrow();
       final Class<? extends Group> groupType = new GroupType(repo).get(type);
       
-      env.console.setListingFormat(ListingFormat.LONG);
-      env.console.reportGroups(
+      env.getConsole().setListingFormat(ListingFormat.LONG);
+      env.getConsole().reportGroups(
         groups.stream()
-          .map(path -> createGroup(repo, env.console, path, groupType))
+          .map(path -> createGroup(repo, env.getConsole(), path, groupType))
       );
     }
 
@@ -92,9 +92,9 @@ public class GroupGroup {
     public void run(ClientEnvironment env) throws Exception {
       final MetadataRepository repo = env.getMetadataRepositoryOrThrow();
       if (groups != null && groups.size() > 0) {
-        groups.forEach(path -> listGroup(repo, env.console, path));
+        groups.forEach(path -> listGroup(repo, env.getConsole(), path));
       } else {
-        listGroup(repo, env.console, "/");
+        listGroup(repo, env.getConsole(), "/");
       }
     }
     

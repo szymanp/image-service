@@ -42,7 +42,7 @@ public class ListCommand extends CommonCommand {
     final CombinedRepository repo = env.getCombinedRepository();
 
     if (group) {
-      targets.forEach((path) -> listFilesInGroup(repo, env.console, path));
+      targets.forEach((path) -> listFilesInGroup(repo, env.getConsole(), path));
     }
   }
   

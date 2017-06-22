@@ -12,8 +12,8 @@ import com.metapx.local_picture_repo.database.DatabaseBuilder;
 import com.metapx.local_picture_repo.impl.RepositoryImpl;
 
 public class ClientEnvironment {
-  public final Configuration configuration;
-  public final Console console;
+  private final Configuration configuration;
+  private final Console console;
 
   private Connection connection;
 
@@ -29,6 +29,22 @@ public class ClientEnvironment {
   public ClientEnvironment(Console console) {
     this.configuration = Configuration.getDefaultConfiguration();
     this.console = console;
+  }
+  
+  /**
+   * @param console
+   * @return a new client environment with a different console, but sharing all other properties with the original.
+   */
+  public ClientEnvironment setConsole(Console console) {
+    return new CustomConsoleClientEnvironment(console);
+  }
+  
+  public Console getConsole() {
+    return console;
+  }
+
+  public Configuration getConfiguration() {
+    return configuration;
   }
   
   public PictureRepository getPictureRepository() {
@@ -89,5 +105,45 @@ public class ClientEnvironment {
       }
     }
     return connection;
+  }
+  
+  class CustomConsoleClientEnvironment extends ClientEnvironment {
+    private final Console console;
+
+    CustomConsoleClientEnvironment(Console console) {
+      this.console = console;
+    }
+    
+    public Console getConsole() {
+      return console;
+    }
+
+    public Configuration getConfiguration() {
+      return ClientEnvironment.this.getConfiguration();
+    }
+    
+    public PictureRepository getPictureRepository() {
+      return ClientEnvironment.this.getPictureRepository();
+    }
+
+    public Optional<MetadataRepository> getMetadataRepository() {
+      return ClientEnvironment.this.getMetadataRepository();
+    }
+
+    public MetadataRepository getMetadataRepositoryOrThrow() throws Exception {
+      return ClientEnvironment.this.getMetadataRepositoryOrThrow();
+    }
+    
+    public CombinedRepository getCombinedRepository() throws Exception {
+      return ClientEnvironment.this.getCombinedRepository();
+    }
+
+    public void commit() throws Exception {
+      ClientEnvironment.this.commit();
+    }
+    
+    public void closeConnection() throws SQLException {
+      ClientEnvironment.this.closeConnection();
+    }
   }
 }

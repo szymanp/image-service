@@ -25,7 +25,7 @@ import io.vertx.core.streams.ReadStream;
  */
 public class AsyncInputStream implements ReadStream<Buffer> {
 
-  public static final int           DEFAULT_READ_BUFFER_SIZE = 8;
+  public static final int           DEFAULT_READ_BUFFER_SIZE = 1;
   private static final Logger       log                      = LoggerFactory.getLogger(AsyncInputStream.class);
 
   // Based on the inputStream with the real data
