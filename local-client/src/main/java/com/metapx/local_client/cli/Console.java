@@ -4,6 +4,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -12,6 +13,8 @@ import java.util.stream.Stream;
 import com.metapx.git_metadata.groups.Group;
 import com.metapx.local_client.cli.commands.ItemException;
 import com.metapx.local_client.combined_repo.RepositoryStatusFileInformation;
+import com.metapx.local_client.combined_repo.TrackedFileGroup;
+import com.metapx.local_client.combined_repo.TrackedFileInformation;
 import com.metapx.local_picture_repo.FileInformation;
 
 public interface Console {
@@ -19,8 +22,10 @@ public interface Console {
 
   void setListingFormat(ListingFormat format);
   
+  void info(String message);
   void reportFiles(Stream<File> files, Function<File, FileInformation> processor);
   void reportFiles(Stream<RepositoryStatusFileInformation> files);
+  void reportFileGroups(Stream<TrackedFileGroup> fileGroups);
   void reportGroups(Stream<Group> groups);
 
   /**
@@ -44,6 +49,10 @@ public interface Console {
     public void setListingFormat(ListingFormat format) {
       listingFormat = format;
     }
+    
+    public void info(String message) {
+      System.out.println(message);
+    }
 
     public void reportFiles(Stream<File> files, Function<File, FileInformation> processor) {
       files.forEach(file -> {
@@ -66,7 +75,12 @@ public interface Console {
         break;
       case LONG:
         groups.forEach(group ->
-          System.out.println(String.format("%1$-10s %2$s", group.getType(), group.getName()))
+          System.out.println(String.format(
+              "%1$-30s %2$-15s %3$s", 
+              group.getName(),
+              "(" + group.getType() + ")",
+              hash(group.getId())
+            ))
         );
         break;
       }
@@ -104,6 +118,18 @@ public interface Console {
         );
         break;
       }
+    }
+    
+    public void reportFileGroups(Stream<TrackedFileGroup> fileGroups) {
+      fileGroups.forEach(fileGroup -> {
+        final Optional<TrackedFileInformation> trackedFile = fileGroup.getValidFile();
+        
+        if (trackedFile.isPresent()) {
+          System.out.println(trackedFile.get().getFile());
+        } else {
+          System.out.println(fileGroup.getHash());
+        }
+      });
     }
     
     private <T> void printGroupedByDir(Stream<T> stream, Function<T, File> classifier, Function<T, String> printer, boolean longFormat) {

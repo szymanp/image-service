@@ -14,6 +14,7 @@ import com.metapx.git_metadata.groups.Group;
 import com.metapx.git_metadata.groups.GroupCollection;
 import com.metapx.local_client.cli.ClientEnvironment;
 import com.metapx.local_client.cli.Console;
+import com.metapx.local_client.cli.Console.ListingFormat;
 import com.metapx.local_client.cli.GroupPath;
 import com.metapx.local_client.cli.GroupType;
 
@@ -35,10 +36,15 @@ public class GroupGroup {
     public void run(ClientEnvironment env) throws Exception {
       final MetadataRepository repo = env.getMetadataRepositoryOrThrow();
       final Class<? extends Group> groupType = new GroupType(repo).get(type);
-      groups.forEach(path -> createGroup(repo, path, groupType));
+      
+      env.console.setListingFormat(ListingFormat.LONG);
+      env.console.reportGroups(
+        groups.stream()
+          .map(path -> createGroup(repo, env.console, path, groupType))
+      );
     }
 
-    private void createGroup(MetadataRepository repo, String groupPath, Class<? extends Group> type) {
+    private Group createGroup(MetadataRepository repo, Console console, String groupPath, Class<? extends Group> type) {
       final String[] parts = groupPath.split("/");
       final String[] path = Arrays.copyOf(parts, Math.max(0, parts.length - 1));
       final String name = parts[parts.length - 1];
@@ -51,9 +57,10 @@ public class GroupGroup {
         final Group group = repo.groupApi().create(type, name);
         parent.get().append(group);
         
-        System.out.println("Created \"" + String.join("/", parts) + "\" (" + group.getType() + ")");
+        console.info("Created \"" + String.join("/", parts) + "\" (" + group.getType() + ").");
+        return group;
       } else {
-        System.out.println("Parent group not found.");
+        throw new ItemException("Parent group not found.");
       }
     }
   }
