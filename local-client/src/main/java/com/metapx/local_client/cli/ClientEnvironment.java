@@ -69,8 +69,17 @@ public class ClientEnvironment {
     return repo.get();
   }
   
-  public CombinedRepository getCombinedRepository() throws Exception {
-    return new CombinedRepository(getPictureRepository(), getMetadataRepositoryOrThrow());
+  public CombinedRepository getCombinedRepository() {
+    return new CombinedRepository(
+      () -> getPictureRepository(), 
+      () -> {
+        try {
+          return getMetadataRepositoryOrThrow();
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+    );
   }
 
   public void commit() throws Exception {
@@ -134,7 +143,7 @@ public class ClientEnvironment {
       return ClientEnvironment.this.getMetadataRepositoryOrThrow();
     }
     
-    public CombinedRepository getCombinedRepository() throws Exception {
+    public CombinedRepository getCombinedRepository() {
       return ClientEnvironment.this.getCombinedRepository();
     }
 
