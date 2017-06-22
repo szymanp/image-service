@@ -1,15 +1,14 @@
 package com.metapx.local_client.commands.parsers;
 
-import java.util.Optional;
-
 import com.metapx.git_metadata.groups.GroupService;
 import com.metapx.local_client.commands.ItemException;
+import com.metapx.local_client.util.ValueOrError;
 
 public class GroupReference {
   private final String ref;
   private GroupOrRoot resolved;
   
-  public static Optional<GroupOrRoot> resolve(String ref, GroupService groupService) {
+  public static ValueOrError<GroupOrRoot> resolve(String ref, GroupService groupService) {
     return new GroupReference(ref).resolve(groupService);
   }
 
@@ -21,18 +20,14 @@ public class GroupReference {
     this.ref = ref.trim();
   }
 
-  public Optional<GroupOrRoot> resolve(GroupService groupService) {
-    try {
-      return Optional.of(resolveOrThrow(groupService));
-    } catch (Exception e) {
-      return Optional.empty();
-    }
+  public ValueOrError<GroupOrRoot> resolve(GroupService groupService) {
+    return ValueOrError.resolve(() -> resolveOrThrow(groupService));
   }
   
   public GroupOrRoot resolveOrThrow(GroupService groupService) {
     if (resolved == null) {
       if (ref.startsWith("[") && ref.endsWith("]")) {
-        resolved = resolveId(groupService, ref.substring(1, ref.length() - 2));
+        resolved = resolveId(groupService, ref.substring(1, ref.length() - 1));
       } else if (ref.length() > 6 && isHex(ref)) {
         resolved = resolveId(groupService, ref);
       } else {

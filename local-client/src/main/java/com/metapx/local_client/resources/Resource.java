@@ -15,7 +15,9 @@ public abstract class Resource {
   public JsonObject build() {
     final JsonObject result = new JsonObject();
     result.put("type", type);
-    result.put("links", links);
+    if (!links.isEmpty()) {
+      result.put("links", links);
+    }
     if (!data.isEmpty()) {
       result.put("data", data);
     }

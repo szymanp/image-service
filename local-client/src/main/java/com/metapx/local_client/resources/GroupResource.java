@@ -18,5 +18,9 @@ public class GroupResource extends Resource {
     data.put("name", group.getName());
     data.put("type", group.getType());
     data.put("path", new JsonArray(Arrays.asList(group.getPath())));
+    
+    if (group.getParent().isPresent()) {
+      links.put(Rels.Link.PARENT.toString(), "group ls -d [" + group.getParent().get().getId() + "]");
+    }
   }
 }

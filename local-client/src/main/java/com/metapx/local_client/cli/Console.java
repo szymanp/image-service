@@ -23,6 +23,8 @@ public interface Console {
   void setListingFormat(ListingFormat format);
   
   void info(String message);
+  void error(String message);
+  void error(Throwable error);
   void reportFiles(Stream<File> files, Function<File, FileInformation> processor);
   void reportFiles(Stream<RepositoryStatusFileInformation> files);
   void reportFileGroups(Stream<TrackedFileGroup> fileGroups);
@@ -52,6 +54,14 @@ public interface Console {
     
     public void info(String message) {
       System.out.println(message);
+    }
+    
+    public void error(String message) {
+      System.err.println(message);
+    }
+
+    public void error(Throwable error) {
+      System.err.println(error.getMessage());
     }
 
     public void reportFiles(Stream<File> files, Function<File, FileInformation> processor) {

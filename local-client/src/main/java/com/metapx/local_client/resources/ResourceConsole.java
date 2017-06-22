@@ -11,6 +11,7 @@ import com.metapx.git_metadata.groups.Group;
 import com.metapx.local_client.cli.Console;
 import com.metapx.local_client.combined_repo.RepositoryStatusFileInformation;
 import com.metapx.local_client.combined_repo.TrackedFileGroup;
+import com.metapx.local_client.commands.ItemException;
 import com.metapx.local_picture_repo.FileInformation;
 
 import io.vertx.core.json.JsonArray;
@@ -20,7 +21,7 @@ public class ResourceConsole implements Console {
   private Stream<TrackedFileGroup> fileGroups;
   private Stream<Group> groups;
   
-  private List<RuntimeException> errors = new ArrayList<RuntimeException>();
+  private List<Throwable> errors = new ArrayList<Throwable>();
 
   @Override
   public void setListingFormat(ListingFormat format) {
@@ -30,6 +31,16 @@ public class ResourceConsole implements Console {
   @Override
   public void info(String message) {
     // intentionally empty
+  }
+  
+  @Override
+  public void error(String message) {
+    errors.add(new ItemException(message));
+  }
+
+  @Override
+  public void error(Throwable error) {
+    errors.add(error);
   }
 
   @Override

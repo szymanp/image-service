@@ -14,6 +14,7 @@ import com.metapx.local_client.cli.Configuration;
 import com.metapx.local_client.cli.DeviceFolders;
 import com.metapx.local_client.commands.parsers.GroupOrRoot;
 import com.metapx.local_client.commands.parsers.GroupReference;
+import com.metapx.local_client.util.ValueOrError;
 import com.metapx.local_picture_repo.FileInformation;
 import com.metapx.local_picture_repo.ObjectWithState;
 import com.metapx.local_picture_repo.ObjectWithState.State;
@@ -59,9 +60,9 @@ public class RepositoryActions {
   }
   
   public void addFileToGroup(TrackedFileInformation file, String groupReference) {
-    final Optional<GroupOrRoot> groupOrRoot = GroupReference.resolve(groupReference, metadata.groupApi());
-    if (!groupOrRoot.isPresent()) {
-      throw new ParameterException("Group \"" + groupReference + "\" does not exist.");
+    final ValueOrError<GroupOrRoot> groupOrRoot = GroupReference.resolve(groupReference, metadata.groupApi());
+    if (groupOrRoot.hasError()) {
+      throw new ParameterException(groupOrRoot.error().getMessage());
     }
     if (groupOrRoot.get().isRoot()) {
       throw new ParameterException("Files cannot be added to the root of the group hierarchy.");

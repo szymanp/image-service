@@ -15,8 +15,10 @@ import com.metapx.git_metadata.groups.GroupCollection;
 import com.metapx.local_client.cli.ClientEnvironment;
 import com.metapx.local_client.cli.Console;
 import com.metapx.local_client.cli.Console.ListingFormat;
-import com.metapx.local_client.commands.parsers.GroupPath;
+import com.metapx.local_client.commands.parsers.GroupOrRoot;
+import com.metapx.local_client.commands.parsers.GroupReference;
 import com.metapx.local_client.commands.parsers.GroupType;
+import com.metapx.local_client.util.ValueOrError;
 
 public class GroupGroup {
 
@@ -82,6 +84,10 @@ public class GroupGroup {
       description = "Use long format for listing groups")
     private boolean longFormat;
 
+    @Option(name = "-d",
+      description = "Show details for specified groups, not their contents")
+    private boolean details;
+
     @Override
     public void run(ClientEnvironment env) throws Exception {
       final MetadataRepository repo = env.getMetadataRepositoryOrThrow();
@@ -93,16 +99,32 @@ public class GroupGroup {
     }
     
     private void listGroup(MetadataRepository repo, Console console, String path) {
-      final GroupPath groupPath = GroupPath.split(path);
-
-      final Stream<Group> groups =
-        groupPath.isRootPath() ?
-        repo.groupApi().groups().stream().filter(group -> !group.hasParent())
-        : repo.groupApi().findGroupByPath(groupPath.getParts()).map(group -> group.subgroups().stream()).orElse(Stream.empty());
+      final Stream<Group> groups = getGroupsFromPath(repo, console, path);
 
       final Stream<Group> sorted = groups.sorted((x, y) -> x.getName().compareTo(y.getName()));
       console.setListingFormat(longFormat ? Console.ListingFormat.LONG : Console.ListingFormat.SHORT);
       console.reportGroups(sorted);
+    }
+    
+    private Stream<Group> getGroupsFromPath(MetadataRepository repo, Console console, String path) {
+      final ValueOrError<GroupOrRoot> resolvedPath = GroupReference.resolve(path, repo.groupApi());
+      
+      if (resolvedPath.hasError()) {
+        console.error(resolvedPath.error().getMessage());
+        return Stream.empty();
+
+      } else if (details) {
+        final GroupOrRoot groupOrRoot = resolvedPath.get();
+        return 
+          groupOrRoot.isRoot() ? Stream.empty() : Stream.of(groupOrRoot.get());
+
+      } else {
+        final GroupOrRoot groupOrRoot = resolvedPath.get();
+        return
+          groupOrRoot.isRoot() ?
+            repo.groupApi().groups().stream().filter(group -> !group.hasParent())
+            : groupOrRoot.get().subgroups().stream();
+      }
     }
   }
 }
