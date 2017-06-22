@@ -20,16 +20,16 @@ public class GroupResource extends Resource {
     data.put("path", new JsonArray(Arrays.asList(group.getPath())));
 
     // Self-link
-    links.put(Rels.Link.SELF.toString(), "group ls -d [" + group.getId() + "]");
+    addCommandLink(Rels.Link.SELF, "group ls -d [" + group.getId() + "]");
 
     // Parent link
     if (group.getParent().isPresent()) {
-      links.put(Rels.Link.PARENT.toString(), "group ls -d [" + group.getParent().get().getId() + "]");
+      addCommandLink(Rels.Link.PARENT, "group ls -d [" + group.getParent().get().getId() + "]");
     }
     
     // Children link
     if (group.subgroups().stream().findAny().isPresent()) {
-      links.put(Rels.Link.CHILDREN.toString(), "group ls [" + group.getId() + "]");
+      addCommandLink(Rels.Link.CHILDREN, "group ls [" + group.getId() + "]");
     }
   }
 }
