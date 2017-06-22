@@ -26,6 +26,11 @@ public class ClientEnvironment {
     console = new Console.DefaultConsole(configuration);
   }
 
+  public ClientEnvironment(Console console) {
+    this.configuration = Configuration.getDefaultConfiguration();
+    this.console = console;
+  }
+  
   public PictureRepository getPictureRepository() {
     if (pictureRepository == null) {
       pictureRepository = new RepositoryImpl(getConnection());

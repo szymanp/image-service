@@ -27,7 +27,7 @@ public class FilesGroup {
     description = "Add image files to the repository",
     groupNames = "files"
   )
-  public static class AddCommand implements CommandRunnable {
+  public static class AddCommand extends CommonCommand {
   
     @Arguments(title = "files", description = "File patterns to add to repository")
     @Required
@@ -66,7 +66,7 @@ public class FilesGroup {
     description = "List tracked and untracked image files in a directory",
     groupNames = "files"
   )
-  public static class ListCommand implements CommandRunnable {
+  public static class ListCommand extends CommonCommand {
   
     @Arguments(title = "files", description = "File patterns to list")
     @Required

@@ -23,7 +23,7 @@ public class GroupGroup {
   @Command(name = "create",
            description = "Create new groups",
            groupNames = "group")
-  public static class CreateCommand implements CommandRunnable {
+  public static class CreateCommand extends CommonCommand {
     @Arguments(title = "group-path")
     @Required
     private List<String> groups;
@@ -68,7 +68,7 @@ public class GroupGroup {
   @Command(name = "ls",
     description = "List group hierarchy",
     groupNames = "group")
-  public static class ListCommand implements CommandRunnable {
+  public static class ListCommand extends CommonCommand {
     @Arguments(title = "group-path")
     private List<String> groups;
 

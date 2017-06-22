@@ -5,6 +5,9 @@ import java.sql.SQLException;
 import com.github.rvesse.airline.annotations.Cli;
 import com.github.rvesse.airline.annotations.Group;
 import com.metapx.local_client.commands.*;
+import com.metapx.local_client.resources.JsonCommandRunner;
+
+import io.vertx.core.json.JsonObject;
 
 @Cli(name = "metapx-cli",
      description = "Metapixels client",
@@ -28,13 +31,20 @@ public class Client {
     final com.github.rvesse.airline.Cli<Object> cli = new com.github.rvesse.airline.Cli<Object>(Client.class);
     final Object cmd = cli.parse(args);
     
-    if (cmd instanceof CommandRunnable) {
+    if (cmd instanceof CommonCommand && ((CommonCommand) cmd).jsonOutput) {
+      runWithJson((CommandRunnable) cmd);
+    } else if (cmd instanceof CommandRunnable) {
       run((CommandRunnable) cmd);
     } else if (cmd instanceof Runnable) {
       run((Runnable) cmd);
     } else {
       throw new RuntimeException("Unsupported command type");
     }
+  }
+  
+  private static void runWithJson(CommandRunnable cmd) {
+    final JsonObject result = new JsonCommandRunner().run((CommandRunnable) cmd);
+    System.out.println(result.encodePrettily());
   }
   
   private static void run(CommandRunnable cmd) {

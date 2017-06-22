@@ -23,7 +23,7 @@ import com.metapx.local_client.commands.parsers.GroupReference;
   name = "ls",
   description = "List files"
 )
-public class ListCommand implements CommandRunnable {
+public class ListCommand extends CommonCommand {
 
   @Arguments(title = "target")
   @Required
@@ -51,9 +51,11 @@ public class ListCommand implements CommandRunnable {
     final GroupOrRoot groupRef = GroupReference.resolveOrThrow(path, repo.getMetadataRepository().groupApi());
     
     if (groupRef.isRoot()) {
-      return; // Nothing to list as no files are members of the root of the group hierarchy.
+      // Nothing to list as no files are members of the root of the group hierarchy.
+      console.reportFileGroups(Stream.empty());
+      return; 
     }
-    
+  
     final Group group = groupRef.get();
 
     Stream<TrackedFileGroup> fileGroups =
