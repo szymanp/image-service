@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.util.Objects;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -13,19 +12,21 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.impl.Arguments;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.streams.ReadStream;
 
 /**
- * Taken from:
- * https://gist.github.com/Stwissel/a7f8ce79785afd49eb2ced69b56335de#file-asyncinputstream-java
+ * Wraps a regular InputStream into an AsyncInput Stream that can be used with
+ * the Vert.X Pump mechanism
+ * 
  * @author stw
+ *
  */
 public class AsyncInputStream implements ReadStream<Buffer> {
 
-  public static final int           DEFAULT_READ_BUFFER_SIZE = 1;
+  // TODO: fix this to be in line with best performance
+  public static final int           DEFAULT_READ_BUFFER_SIZE = 8192;
   private static final Logger       log                      = LoggerFactory.getLogger(AsyncInputStream.class);
 
   // Based on the inputStream with the real data
@@ -41,26 +42,23 @@ public class AsyncInputStream implements ReadStream<Buffer> {
   private Handler<Void>             endHandler;
   private Handler<Throwable>        exceptionHandler;
 
-  private int                       readBufferSize           = DEFAULT_READ_BUFFER_SIZE;
-  private long                      readPos;
-
   /**
    * Create a new Async InputStream that can we used with a Pump
-   * 
+   *
    * @param in
    */
-  public AsyncInputStream(Vertx vertx, Context context, InputStream in) {
+  public AsyncInputStream(final Vertx vertx, final InputStream in) {
     this.vertx = vertx;
-    this.context = context;
+    this.context = vertx.getOrCreateContext();
     this.ch = Channels.newChannel(in);
   }
 
   public void close() {
-    closeInternal(null);
+    this.closeInternal(null);
   }
 
-  public void close(Handler<AsyncResult<Void>> handler) {
-    closeInternal(handler);
+  public void close(final Handler<AsyncResult<Void>> handler) {
+    this.closeInternal(handler);
   }
 
   /*
@@ -68,8 +66,8 @@ public class AsyncInputStream implements ReadStream<Buffer> {
    * @see io.vertx.core.streams.ReadStream#endHandler(io.vertx.core.Handler)
    */
   @Override
-  public synchronized AsyncInputStream endHandler(Handler<Void> endHandler) {
-    check();
+  public synchronized AsyncInputStream endHandler(final Handler<Void> endHandler) {
+    this.check();
     this.endHandler = endHandler;
     return this;
   }
@@ -80,8 +78,8 @@ public class AsyncInputStream implements ReadStream<Buffer> {
    * io.vertx.core.streams.ReadStream#exceptionHandler(io.vertx.core.Handler)
    */
   @Override
-  public synchronized AsyncInputStream exceptionHandler(Handler<Throwable> exceptionHandler) {
-    check();
+  public synchronized AsyncInputStream exceptionHandler(final Handler<Throwable> exceptionHandler) {
+    this.check();
     this.exceptionHandler = exceptionHandler;
     return this;
   }
@@ -91,10 +89,10 @@ public class AsyncInputStream implements ReadStream<Buffer> {
    * @see io.vertx.core.streams.ReadStream#handler(io.vertx.core.Handler)
    */
   @Override
-  public synchronized AsyncInputStream handler(Handler<Buffer> handler) {
-    check();
+  public synchronized AsyncInputStream handler(final Handler<Buffer> handler) {
+    this.check();
     this.dataHandler = handler;
-    if (this.dataHandler != null && !this.paused && !this.closed) {
+    if ((this.dataHandler != null) && !this.paused && !this.closed) {
       this.doRead();
     }
     return this;
@@ -106,21 +104,8 @@ public class AsyncInputStream implements ReadStream<Buffer> {
    */
   @Override
   public synchronized AsyncInputStream pause() {
-    check();
+    this.check();
     this.paused = true;
-    return this;
-  }
-
-  public synchronized AsyncInputStream read(Buffer buffer, int offset, long position, int length,
-      Handler<AsyncResult<Buffer>> handler) {
-    Objects.requireNonNull(buffer, "buffer");
-    Objects.requireNonNull(handler, "handler");
-    Arguments.require(offset >= 0, "offset must be >= 0");
-    Arguments.require(position >= 0, "position must be >= 0");
-    Arguments.require(length >= 0, "length must be >= 0");
-    check();
-    ByteBuffer bb = ByteBuffer.allocate(length);
-    doRead(buffer, offset, bb, position, handler);
     return this;
   }
 
@@ -130,7 +115,7 @@ public class AsyncInputStream implements ReadStream<Buffer> {
    */
   @Override
   public synchronized AsyncInputStream resume() {
-    check();
+    this.check();
     if (this.paused && !this.closed) {
       this.paused = false;
       if (this.dataHandler != null) {
@@ -147,24 +132,24 @@ public class AsyncInputStream implements ReadStream<Buffer> {
   }
 
   private void checkContext() {
-    if (!vertx.getOrCreateContext().equals(context)) {
+    if (!this.vertx.getOrCreateContext().equals(this.context)) {
       throw new IllegalStateException("AsyncInputStream must only be used in the context that created it, expected: " + this.context
-          + " actual " + vertx.getOrCreateContext());
+          + " actual " + this.vertx.getOrCreateContext());
     }
   }
 
-  private synchronized void closeInternal(Handler<AsyncResult<Void>> handler) {
-    check();
-    closed = true;
-    doClose(handler);
+  private synchronized void closeInternal(final Handler<AsyncResult<Void>> handler) {
+    this.check();
+    this.closed = true;
+    this.doClose(handler);
   }
 
-  private void doClose(Handler<AsyncResult<Void>> handler) {
-    Future<Void> res = Future.future();
+  private void doClose(final Handler<AsyncResult<Void>> handler) {
+    final Future<Void> res = Future.future();
     try {
-      ch.close();
+      this.ch.close();
       res.complete(null);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       res.fail(e);
     }
     if (handler != null) {
@@ -173,86 +158,72 @@ public class AsyncInputStream implements ReadStream<Buffer> {
   }
 
   private synchronized void doRead() {
-    if (!readInProgress) {
-      readInProgress = true;
-      Buffer buff = Buffer.buffer(readBufferSize);
-      read(buff, 0, readPos, readBufferSize, ar -> {
-        if (ar.succeeded()) {
-          readInProgress = false;
-          Buffer buffer = ar.result();
-          if (buffer.length() == 0) {
-            // Empty buffer represents end of file
-            handleEnd();
-          } else {
-            readPos += buffer.length();
-            handleData(buffer);
-            if (!paused && dataHandler != null) {
-              doRead();
-            }
-          }
-        } else {
-          handleException(ar.cause());
-        }
-      });
-    }
-  }
-
-  private void doRead(Buffer writeBuff, int offset, ByteBuffer buff, long position, Handler<AsyncResult<Buffer>> handler) {
-
     // ReadableByteChannel doesn't have a completion handler, so we wrap it into
     // an executeBlocking and use the future there
-    vertx.executeBlocking(future -> {
-      try {
-        Integer bytesRead = ch.read(buff);
-        future.complete(bytesRead);
-      } catch (Exception e) {
-       log.error(e);
-       future.fail(e);
-      }
-      
-    } , res -> {
-      if (res.failed()) {
-        context.runOnContext((v) -> handler.handle(Future.failedFuture(res.cause())));
-      } else {
-        // Do the completed check
-        Integer bytesRead = (Integer) res.result();
-        if (buff.hasRemaining()) {
-          long pos = position;
-          pos += bytesRead;
-          // resubmit
-          doRead(writeBuff, offset, buff, pos, handler);
-        } else {
-          // We are done
+    if (!this.readInProgress) {
+      this.readInProgress = true;
+      final ByteBuffer buff = ByteBuffer.allocate(AsyncInputStream.DEFAULT_READ_BUFFER_SIZE);
 
-          context.runOnContext((v) -> {
-            buff.flip();
-            writeBuff.setBytes(offset, buff);
-            handler.handle(Future.succeededFuture(writeBuff));
-          });
+      this.vertx.executeBlocking(future -> {
+        try {
+          final Integer bytesRead = this.ch.read(buff);
+          future.complete(bytesRead);
+        } catch (final Exception e) {
+          AsyncInputStream.log.error(e);
+          future.fail(e);
         }
+      } , res -> {
+        if (res.failed()) {
+          this.context.runOnContext((v) -> this.handleException(res.cause()));
+        } else {
+          // Buffer might be done
+          final Integer bytesRead = (Integer) res.result();
+          if (bytesRead < 0) {
+            // We are done, no more data to be expected
+            this.handleEnd();
+          } else {
+            buff.flip();
+            final Buffer vBuffer = Buffer.buffer(buff.limit());
+            vBuffer.setBytes(0, buff);
+            this.handleData(vBuffer);
+            this.context.runOnContext(v -> {
+              this.doRead();
+            });
+          }
+        }
+      });
+    } else {
+      // Reschedule the read
+      if (!paused && !closed) {
+        this.context.runOnContext(v -> {
+          this.doRead();
+        });
       }
-    });
+    }
   }
 
-  private synchronized void handleData(Buffer buffer) {
-    if (dataHandler != null) {
-      checkContext();
-      dataHandler.handle(buffer);
+  private synchronized void handleData(final Buffer buffer) {
+    if (this.dataHandler != null) {
+      this.checkContext();
+      this.dataHandler.handle(buffer);
     }
+    // Processing complete
+    this.readInProgress = false;
   }
 
   private synchronized void handleEnd() {
-    if (endHandler != null) {
-      checkContext();
-      endHandler.handle(null);
+    this.paused = true;
+    if (this.endHandler != null) {
+      this.checkContext();
+      this.endHandler.handle(null);
     }
   }
 
-  private void handleException(Throwable t) {
-    if (exceptionHandler != null && t instanceof Exception) {
-      exceptionHandler.handle(t);
+  private void handleException(final Throwable t) {
+    if ((this.exceptionHandler != null) && (t instanceof Exception)) {
+      this.exceptionHandler.handle(t);
     } else {
-      log.error("Unhandled exception", t);
+      AsyncInputStream.log.error("Unhandled exception", t);
 
     }
   }

@@ -1,5 +1,6 @@
 package com.metapx.local_client.daemon;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +33,7 @@ public class DaemonVerticle extends AbstractVerticle {
   public void start() throws Exception {
     super.start();
     
-    input = new AsyncInputStream(vertx, context, System.in);
+    input = new AsyncInputStream(vertx, System.in);
     
     System.out.println("START");
     System.out.flush();
