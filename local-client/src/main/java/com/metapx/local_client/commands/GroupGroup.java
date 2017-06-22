@@ -15,8 +15,8 @@ import com.metapx.git_metadata.groups.GroupCollection;
 import com.metapx.local_client.cli.ClientEnvironment;
 import com.metapx.local_client.cli.Console;
 import com.metapx.local_client.cli.Console.ListingFormat;
-import com.metapx.local_client.cli.GroupPath;
-import com.metapx.local_client.cli.GroupType;
+import com.metapx.local_client.commands.parsers.GroupPath;
+import com.metapx.local_client.commands.parsers.GroupType;
 
 public class GroupGroup {
 

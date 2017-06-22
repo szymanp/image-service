@@ -13,10 +13,10 @@ import com.metapx.git_metadata.groups.Group;
 import com.metapx.git_metadata.pictures.Picture;
 import com.metapx.local_client.cli.ClientEnvironment;
 import com.metapx.local_client.cli.Console;
-import com.metapx.local_client.cli.GroupPath;
 import com.metapx.local_client.combined_repo.CombinedRepository;
 import com.metapx.local_client.combined_repo.TrackedFileGroup;
 import com.metapx.local_client.combined_repo.TrackedFileGroupImpl;
+import com.metapx.local_client.commands.parsers.GroupPath;
 
 @Command(
   name = "ls",

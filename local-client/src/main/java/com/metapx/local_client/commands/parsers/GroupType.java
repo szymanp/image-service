@@ -1,4 +1,4 @@
-package com.metapx.local_client.cli;
+package com.metapx.local_client.commands.parsers;
 
 import java.util.Map;
 

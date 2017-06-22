@@ -12,7 +12,7 @@ import com.metapx.git_metadata.pictures.Picture;
 import com.metapx.git_metadata.pictures.PictureReference;
 import com.metapx.local_client.cli.Configuration;
 import com.metapx.local_client.cli.DeviceFolders;
-import com.metapx.local_client.cli.GroupPath;
+import com.metapx.local_client.commands.parsers.GroupPath;
 import com.metapx.local_picture_repo.FileInformation;
 import com.metapx.local_picture_repo.ObjectWithState;
 import com.metapx.local_picture_repo.ObjectWithState.State;
