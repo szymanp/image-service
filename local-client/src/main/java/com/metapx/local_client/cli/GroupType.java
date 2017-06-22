@@ -5,7 +5,7 @@ import java.util.Map;
 import com.metapx.git_metadata.core.MetadataRepository;
 import com.metapx.git_metadata.groups.Group;
 import com.metapx.git_metadata.groups.Tag;
-import com.metapx.local_client.cli.commands.CommandException;
+import com.metapx.local_client.commands.CommandException;
 
 public class GroupType {
   private final Map<String, Class<? extends Group>> groupTypes;

@@ -1,4 +1,4 @@
-package com.metapx.local_client.cli.commands;
+package com.metapx.local_client.commands;
 
 import java.io.IOException;
 import java.util.ArrayList;

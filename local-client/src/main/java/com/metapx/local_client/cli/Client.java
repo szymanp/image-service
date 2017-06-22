@@ -4,7 +4,7 @@ import java.sql.SQLException;
 
 import com.github.rvesse.airline.annotations.Cli;
 import com.github.rvesse.airline.annotations.Group;
-import com.metapx.local_client.cli.commands.*;
+import com.metapx.local_client.commands.*;
 
 @Cli(name = "metapx-cli",
      description = "Metapixels client",

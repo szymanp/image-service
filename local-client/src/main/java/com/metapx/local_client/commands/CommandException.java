@@ -1,4 +1,4 @@
-package com.metapx.local_client.cli.commands;
+package com.metapx.local_client.commands;
 
 public class CommandException extends RuntimeException {
   private static final long serialVersionUID = 1L;

@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import com.metapx.local_client.cli.Client;
 import com.metapx.local_client.cli.ClientEnvironment;
-import com.metapx.local_client.cli.commands.CommandRunnable;
+import com.metapx.local_client.commands.CommandRunnable;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;

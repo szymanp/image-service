@@ -11,10 +11,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.metapx.git_metadata.groups.Group;
-import com.metapx.local_client.cli.commands.ItemException;
 import com.metapx.local_client.combined_repo.RepositoryStatusFileInformation;
 import com.metapx.local_client.combined_repo.TrackedFileGroup;
 import com.metapx.local_client.combined_repo.TrackedFileInformation;
+import com.metapx.local_client.commands.ItemException;
 import com.metapx.local_picture_repo.FileInformation;
 
 public interface Console {

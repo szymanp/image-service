@@ -1,4 +1,4 @@
-package com.metapx.local_client.cli.commands;
+package com.metapx.local_client.commands;
 
 /**
  * Indicates an error with processing a single item that does not affects other items.

@@ -1,4 +1,4 @@
-package com.metapx.local_client.cli.commands;
+package com.metapx.local_client.commands;
 
 import com.github.rvesse.airline.annotations.Command;
 import com.metapx.local_client.daemon.DaemonVerticle;
