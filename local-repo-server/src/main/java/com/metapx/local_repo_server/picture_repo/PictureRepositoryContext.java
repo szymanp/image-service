@@ -1,6 +1,5 @@
 package com.metapx.local_repo_server.picture_repo;
 
-import java.io.File;
 import java.sql.Connection;
 
 import org.h2.jdbcx.JdbcConnectionPool;
@@ -18,13 +17,13 @@ public class PictureRepositoryContext {
   final Vertx vertx;
   final JdbcConnectionPool pool;
   
-  public PictureRepositoryContext(Vertx vertx, File databaseRoot) {
+  public PictureRepositoryContext(Vertx vertx) {
     this.vertx = vertx;
-    pool = ConnectionFactory.newConnectionPool(new File(databaseRoot, "metapx").getAbsolutePath());
+    pool = ConnectionFactory.SharedConnectionPool.getConnectionPool();
   }
   
   public void close() {
-    pool.dispose();
+    // do nothing
   }
   
   public Single<PictureRepository> getPictureRepository() {

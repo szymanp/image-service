@@ -21,7 +21,7 @@ public class ScaledPictureProviderTest {
   
   @Before
   public void setUp() {
-    provider = new ScaledPictureProvider(folder.getRoot());
+    provider = new ScaledPictureProviderImpl(folder.getRoot());
   }
 
   @Test

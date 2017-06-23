@@ -71,7 +71,7 @@ public class GroupGroup {
     description = "List group hierarchy",
     groupNames = "group")
   public static class ListCommand extends CommonCommand {
-    @Arguments(title = "group-path")
+    @Arguments(title = "group", description = "Path or identifier of a group")
     private List<String> groups;
 
     @Option(name = { "-t", "--type" },

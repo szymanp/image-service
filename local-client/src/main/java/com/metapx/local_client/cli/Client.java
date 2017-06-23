@@ -6,6 +6,8 @@ import com.github.rvesse.airline.annotations.Cli;
 import com.github.rvesse.airline.annotations.Group;
 import com.metapx.local_client.commands.*;
 import com.metapx.local_client.resources.JsonCommandRunner;
+import com.metapx.local_picture_repo.database.ConnectionFactory;
+import com.metapx.local_picture_repo.database.DatabaseBuilder;
 
 import io.vertx.core.json.JsonObject;
 
@@ -43,11 +45,19 @@ public class Client {
   }
   
   private static void runWithJson(CommandRunnable cmd) {
-    final JsonObject result = new JsonCommandRunner().run((CommandRunnable) cmd);
-    System.out.println(result.encodePrettily());
+    try {
+      configure();
+
+      final JsonObject result = new JsonCommandRunner().run((CommandRunnable) cmd);
+      System.out.println(result.encodePrettily());
+    } finally {
+      ConnectionFactory.SharedConnectionPool.close();
+    }
   }
   
   private static void run(CommandRunnable cmd) {
+    configure();
+
     final ClientEnvironment env = new ClientEnvironment();
 
     try {
@@ -62,11 +72,28 @@ public class Client {
       } catch (SQLException e) {
         // suppress
       }
+      
+      ConnectionFactory.SharedConnectionPool.close();
     }
   }
   
   private static void run(Runnable cmd) {
     cmd.run();
+  }
+  
+  public static void configure() {
+    final Configuration conf = Configuration.getDefaultConfiguration();
+    
+    ConnectionFactory.SharedConnectionPool.create(() -> {
+      if (!conf.getDatabasePath().exists()) {
+        try {
+          DatabaseBuilder.buildFile(conf.getJdbcDatabaseName());
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+      return ConnectionFactory.newConnectionPool(conf.getJdbcDatabaseName());
+    });
   }
   
   private static void disableJooqLogo() {

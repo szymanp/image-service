@@ -1,6 +1,5 @@
 package com.metapx.local_client.daemon;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +11,7 @@ import com.metapx.local_client.cli.Client;
 import com.metapx.local_client.cli.ClientEnvironment;
 import com.metapx.local_client.commands.CommandRunnable;
 import com.metapx.local_client.resources.JsonCommandRunner;
+import com.metapx.local_picture_repo.database.ConnectionFactory;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
@@ -32,6 +32,9 @@ public class DaemonVerticle extends AbstractVerticle {
   @Override
   public void start() throws Exception {
     super.start();
+    
+    // Setup repository database connection.
+    Client.configure();
     
     input = new AsyncInputStream(vertx, System.in);
     
@@ -79,6 +82,7 @@ public class DaemonVerticle extends AbstractVerticle {
 
     input.close();
     env.closeConnection();
+    ConnectionFactory.SharedConnectionPool.close();
   }
   
   private void dispatch(JsonObject request, Handler<AsyncResult<JsonObject>> resultHandler) {

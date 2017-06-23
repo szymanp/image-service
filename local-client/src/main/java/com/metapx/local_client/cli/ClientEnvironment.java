@@ -8,7 +8,6 @@ import com.metapx.git_metadata.core.MetadataRepository;
 import com.metapx.local_client.combined_repo.CombinedRepository;
 import com.metapx.local_picture_repo.PictureRepository;
 import com.metapx.local_picture_repo.database.ConnectionFactory;
-import com.metapx.local_picture_repo.database.DatabaseBuilder;
 import com.metapx.local_picture_repo.impl.RepositoryImpl;
 
 public class ClientEnvironment {
@@ -97,19 +96,15 @@ public class ClientEnvironment {
       connection = null;
     }
   }
-
-  private Connection configureDatabaseConnection(Configuration conf) throws Exception {
-    if (!conf.getDatabasePath().exists()) {
-      DatabaseBuilder.buildFile(conf.getJdbcDatabaseName());
-    }
-    return ConnectionFactory.newConnection(conf.getJdbcDatabaseName());
-  }
   
+  /**
+   * Uses the shared connection pool to obtain a single connection to the repository database.
+   */
   private Connection getConnection() {
     if (connection == null) {
       try {
-        connection = configureDatabaseConnection(configuration);
-      } catch (Exception e) {
+        connection = ConnectionFactory.SharedConnectionPool.getConnectionPool().getConnection();
+      } catch (SQLException e) {
         throw new RuntimeException(e);
       }
     }

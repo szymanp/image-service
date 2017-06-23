@@ -11,9 +11,9 @@ import com.metapx.local_picture_repo.scaling.Dimension;
 import com.metapx.local_picture_repo.scaling.Dimensions;
 import com.metapx.local_picture_repo.scaling.ScaledPictureProvider;
 import com.metapx.local_picture_repo.scaling.ScaledPictureProvider.Status;
+import com.metapx.local_picture_repo.scaling.ScaledPictureProviderImpl;
 import com.metapx.local_repo_server.Endpoint;
 
-import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.rxjava.core.Vertx;
@@ -25,10 +25,10 @@ public class PictureRepositoryEndpoint extends Endpoint {
   final PictureRepositoryContext repoContext;
   final ScaledPictureProvider scaling;
   
-  public PictureRepositoryEndpoint(Vertx vertx) {
+  public PictureRepositoryEndpoint(Vertx vertx, File scaledPictureCache) {
     super(vertx);
-    repoContext = new PictureRepositoryContext(vertx, new File("C:/Users/Piotrek/.metapx"));
-    scaling = new ScaledPictureProvider(new File("C:/Users/Piotrek/.metapx/scaled-cache"));
+    repoContext = new PictureRepositoryContext(vertx);
+    scaling = new ScaledPictureProviderImpl(scaledPictureCache);
   }
 
   @Override

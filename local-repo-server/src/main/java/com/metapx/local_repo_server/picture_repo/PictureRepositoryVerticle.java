@@ -1,13 +1,15 @@
-package com.metapx.local_repo_server;
+package com.metapx.local_repo_server.picture_repo;
 
-import com.metapx.local_repo_server.picture_repo.PictureRepositoryEndpoint;
+import java.io.File;
+
+import com.metapx.local_repo_server.Endpoint;
 
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.rxjava.core.AbstractVerticle;
 import io.vertx.rxjava.core.http.HttpServer;
 import io.vertx.rxjava.ext.web.Router;
 
-public class ServerVerticle extends AbstractVerticle {
+public class PictureRepositoryVerticle extends AbstractVerticle {
   
   private Endpoint[] endpoints;
   
@@ -19,16 +21,17 @@ public class ServerVerticle extends AbstractVerticle {
     final HttpServer httpServer = vertx.createHttpServer(options);
     final Router router = Router.router(vertx);
     
-    router.route("/hello").handler(routingContext -> {
-      routingContext.response().end("Hello world");
-    });
+    final File scaledCache = new File(config().getString("path.scaled-cache"));
     
-    endpoints = new Endpoint[] { new PictureRepositoryEndpoint(vertx) };
+    endpoints = new Endpoint[] { new PictureRepositoryEndpoint(vertx, scaledCache) };
     for(Endpoint endpoint : endpoints) {
       endpoint.register(router);
     }
     
-    httpServer.requestHandler(router::accept).listen(config().getInteger("http.port", 8080));
+    httpServer.requestHandler(router::accept).listen(
+      config().getInteger("http.port", 8080),
+      config().getString("http.host", "0.0.0.0")
+    );
   }
   
   @Override
