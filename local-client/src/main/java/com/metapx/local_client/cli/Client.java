@@ -58,7 +58,7 @@ public class Client {
   private static void run(CommandRunnable cmd) {
     configure();
 
-    final ClientEnvironment env = new ClientEnvironment();
+    final ClientEnvironment env = ClientEnvironment.newInstance();
 
     try {
       cmd.run(env);

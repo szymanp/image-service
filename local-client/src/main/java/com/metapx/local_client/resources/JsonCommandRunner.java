@@ -3,6 +3,8 @@ package com.metapx.local_client.resources;
 import java.sql.SQLException;
 
 import com.metapx.local_client.cli.ClientEnvironment;
+import com.metapx.local_client.cli.DerivedEnvironment;
+import com.metapx.local_client.cli.DerivedEnvironment.DerivedEnvironmentConfiguration;
 import com.metapx.local_client.commands.CommandRunnable;
 
 import io.vertx.core.json.JsonObject;
@@ -16,7 +18,7 @@ public class JsonCommandRunner {
    * The Runner will handle its own environment, including connecting and disconnecting from the repository.
    */
   public JsonCommandRunner() {
-    baseEnv = new ClientEnvironment();
+    baseEnv = ClientEnvironment.newInstance();
     disconnect = true;
   }
   
@@ -32,7 +34,7 @@ public class JsonCommandRunner {
   
   public JsonObject run(CommandRunnable cmd) {
     final ResourceConsole console = new ResourceConsole();
-    final ClientEnvironment env = baseEnv.setConsole(console);
+    final ClientEnvironment env = new DerivedEnvironment(baseEnv, DerivedEnvironmentConfiguration.create().setConsole(console));
 
     try {
       cmd.run(env);

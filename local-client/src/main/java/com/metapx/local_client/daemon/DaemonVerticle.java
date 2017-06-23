@@ -23,7 +23,7 @@ import io.vertx.core.Future;
 
 public class DaemonVerticle extends AbstractVerticle {
   
-  private final ClientEnvironment env = new ClientEnvironment();
+  private final ClientEnvironment env = ClientEnvironment.newInstance();
   private final com.github.rvesse.airline.Cli<CommandRunnable> cli = new com.github.rvesse.airline.Cli<CommandRunnable>(Client.class);
   private final String delimeter = "\n";
   private int counter = 0;
