@@ -116,7 +116,7 @@ public interface Console {
           files, 
           (f) -> f.getFile().getParentFile(),
           (f) -> String.format(
-            "%1$-7s %2$-7s %3$4sx%4$-4s %5$s %6$s",
+            "%1$-7s %2$-7s %3$-4s %4$-4s %5$s %6$s",
             f.isKnown() ? hash(f.getHash()) : "-",
             hash(f.getFileGroup().map((fg) -> fg.getFileRecord().getPictureId()).orElse("")),
             f.getWidth(),
