@@ -21,17 +21,17 @@ public interface FileWithHash {
    * @return a <code>FileWithHash</code> corresponding to the given <code>ResolvedFile</code>
    */
   public static FileWithHash fromResolvedFile(ResolvedFile rf) {
-    return new FileWithHashImpl(rf.getFile(), rf.getHash());
+    return new Impl(rf.getFile(), rf.getHash());
   }
 
   /**
    * Default implementation of the FileWithHash interface.
    */
-  public static class FileWithHashImpl implements FileWithHash {
+  public static class Impl implements FileWithHash {
     private File file;
     private String hash;
     
-    FileWithHashImpl(File file, String hash) {
+    Impl(File file, String hash) {
       this.file = file;
       this.hash = hash;
     }
@@ -54,7 +54,7 @@ public interface FileWithHash {
   }
   
   public static FileWithHash fromJson(JsonObject json) {
-    return new FileWithHashImpl(
+    return new Impl(
       new File(json.getString("file")),
       json.getString("hash")
       );
