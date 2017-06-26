@@ -16,7 +16,6 @@ import org.imgscalr.Scalr;
 
 import com.metapx.git_metadata.core.HashPath;
 import com.metapx.git_metadata.core.HashPath.Target;
-import com.metapx.local_picture_repo.ResolvedFile;
 
 public class ScaledPictureProviderImpl implements ScaledPictureProvider {
   final private HashPath hashPath;
@@ -30,14 +29,14 @@ public class ScaledPictureProviderImpl implements ScaledPictureProvider {
    * @param dim
    * @return a scaled image file if it already exists, otherwise an empty optional.
    */
-  public Optional<File> getScaledImageIfExists(ResolvedFile original, Dimension dim) {
+  public Optional<File> getScaledImageIfExists(FileWithHash original, Dimension dim) {
     return getTargetFile(original, dim);
   }
   
   /**
    * @return the status of the particular scaled image.
    */
-  public Status getScaledImageStatus(ResolvedFile original, Dimension dim) {
+  public Status getScaledImageStatus(FileWithHash original, Dimension dim) {
     final Target target = hashPath.getTarget(original.getHash());
     final File targetFile = getDimensionFile(target.getFile(), dim);
 
@@ -65,7 +64,7 @@ public class ScaledPictureProviderImpl implements ScaledPictureProvider {
    * @throws IOException
    * @throws InterruptedException
    */
-  public File getScaledImage(ResolvedFile original, Dimension dim) throws IOException, InterruptedException {
+  public File getScaledImage(FileWithHash original, Dimension dim) throws IOException, InterruptedException {
     final Target target = hashPath.getTarget(original.getHash());
     final File targetFile = getDimensionFile(target.getFile(), dim);
 
@@ -126,7 +125,7 @@ public class ScaledPictureProviderImpl implements ScaledPictureProvider {
     return targetFile;
   }
 
-  private Optional<File> getTargetFile(ResolvedFile original, Dimension dim) {
+  private Optional<File> getTargetFile(FileWithHash original, Dimension dim) {
     return hashPath.getTargetIfExists(original.getHash())
       .map(target -> getDimensionFile(target.getFile(), dim))
       .flatMap(target -> target.exists() ? Optional.of(target) : Optional.empty());

@@ -2,7 +2,9 @@ package com.metapx.local_picture_repo;
 
 import java.io.File;
 
-public interface ResolvedFile {
+import com.metapx.local_picture_repo.scaling.FileWithHash;
+
+public interface ResolvedFile extends FileWithHash {
   /**
    * @return the file being the target of this object.
    */
@@ -29,7 +31,7 @@ public interface ResolvedFile {
   public String getHash();  
   
   /**
-   * @return the image widht in pixels.
+   * @return the image width in pixels.
    */
   public int getWidth();
   

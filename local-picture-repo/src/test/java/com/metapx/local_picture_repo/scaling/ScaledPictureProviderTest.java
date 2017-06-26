@@ -26,14 +26,14 @@ public class ScaledPictureProviderTest {
 
   @Test
   public void testGetScaledImageWhenMissing() {
-    final SampleResolvedFile input = new SampleResolvedFile("IMG_4395.JPG");
+    final FileWithHash input = FileWithHash.fromResolvedFile(new SampleResolvedFile("IMG_4395.JPG"));
     final Optional<File> result = provider.getScaledImageIfExists(input, Dimensions.MEDIUM);
     Assert.assertFalse(result.isPresent());
   }
 
   @Test
   public void testScaleSync() throws Exception {
-    final SampleResolvedFile input = new SampleResolvedFile("IMG_4395.JPG");
+    final FileWithHash input = FileWithHash.fromResolvedFile(new SampleResolvedFile("IMG_4395.JPG"));
     final File result = provider.getScaledImage(input, Dimensions.MEDIUM);
     
     Assert.assertTrue(result.exists());
@@ -70,7 +70,7 @@ public class ScaledPictureProviderTest {
     });
     t.start();
     
-    final SampleResolvedFile input = new SampleResolvedFile("IMG_4395.JPG");
+    final FileWithHash input = FileWithHash.fromResolvedFile(new SampleResolvedFile("IMG_4395.JPG"));
     final File result = provider.getScaledImage(input, Dimensions.MEDIUM);
     
     Assert.assertTrue(result.exists());

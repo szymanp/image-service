@@ -81,6 +81,11 @@
       <artifactId>git-metadata</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-rx-java</artifactId>
+      <version>3.4.1</version>
+    </dependency>
   </dependencies>
 
   <build>
