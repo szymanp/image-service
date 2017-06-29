@@ -1,4 +1,4 @@
-package com.metapx.local_repo_server.picture_repo;
+package com.metapx.local_picture_repo.verticles;
 
 import java.sql.Connection;
 

@@ -11,6 +11,7 @@ import com.metapx.local_picture_repo.scaling.Dimension;
 import com.metapx.local_picture_repo.scaling.Dimensions;
 import com.metapx.local_picture_repo.scaling.ScaledPictureProvider;
 import com.metapx.local_picture_repo.scaling.ScaledPictureProvider.Status;
+import com.metapx.local_picture_repo.verticles.PictureRepositoryContext;
 import com.metapx.local_picture_repo.scaling.ScaledPictureProviderImpl;
 import com.metapx.local_repo_server.Endpoint;
 

@@ -1,11 +1,7 @@
 package com.metapx.local_picture_repo.scaling;
 
 import java.io.File;
-import java.util.Optional;
-import java.util.concurrent.Future;
 
-import org.apache.commons.imaging.formats.tiff.TiffField;
-import org.apache.commons.imaging.formats.tiff.constants.ExifTagConstants;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
