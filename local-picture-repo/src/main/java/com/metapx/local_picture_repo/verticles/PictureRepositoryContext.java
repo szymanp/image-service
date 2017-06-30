@@ -27,7 +27,12 @@ public class PictureRepositoryContext {
   }
   
   public Single<PictureRepository> getPictureRepository() {
-    return Single.<PictureRepository, Connection>using(
+    return getPictureRepository(true);
+  }
+  
+  public Single<PictureRepository> getPictureRepository(boolean blocking) {
+    final Single<PictureRepository> result =
+      Single.<PictureRepository, Connection>using(
       () -> {
         try {
           return pool.getConnection();
@@ -51,7 +56,12 @@ public class PictureRepositoryContext {
             Exceptions.propagate(e);
           }
         }
-      })
-      .subscribeOn(RxHelper.blockingScheduler(vertx));
+      });
+    if (blocking) {
+      return result
+        .subscribeOn(RxHelper.blockingScheduler(vertx));
+    } else {
+      return result;
+    }
   }
 }

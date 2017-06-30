@@ -43,6 +43,18 @@ public final class ConnectionFactory {
 	  return JdbcConnectionPool.create(DB_CONNECTION_PREFIX + filename, DB_USER, DB_PASSWORD);
 	}
 	
+	public static JdbcConnectionPool newInMemoryConnectionPool() {
+	  final JdbcConnectionPool pool = JdbcConnectionPool.create("jdbc:h2:mem:", DB_USER, DB_PASSWORD);
+	  
+	  try (final Connection conn = pool.getConnection()) {
+  	  new DatabaseBuilder(conn).build();
+	  } catch (Exception e) {
+	    throw new RuntimeException(e);
+	  }
+	  
+	  return pool;
+	}
+	
 	/**
 	 * A single application usually uses only a single picture repository.
 	 * 
