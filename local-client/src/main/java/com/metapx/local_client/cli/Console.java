@@ -52,10 +52,17 @@ public interface Console {
       listingFormat = format;
     }
     
+    /**
+     * Print an informational message on the console.
+     * This message is not necessary to properly interpret the console output.
+     */
     public void info(String message) {
       System.out.println(message);
     }
     
+    /**
+     * Sends a processing error to the console.
+     */
     public void error(String message) {
       System.err.println(message);
     }

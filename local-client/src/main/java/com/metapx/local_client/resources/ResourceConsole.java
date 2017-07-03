@@ -1,10 +1,7 @@
 package com.metapx.local_client.resources;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.metapx.git_metadata.groups.Group;
@@ -14,15 +11,16 @@ import com.metapx.local_client.combined_repo.TrackedFileGroup;
 import com.metapx.local_client.commands.ItemException;
 import com.metapx.local_picture_repo.FileInformation;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import rx.subjects.Subject;
 
 public class ResourceConsole implements Console {
-  private Stream<TrackedFileGroup> fileGroups;
-  private Stream<Group> groups;
-  
-  private List<Throwable> errors = new ArrayList<Throwable>();
+  private final Subject<Resource, Resource> output;
 
+  public ResourceConsole(Subject<Resource, Resource> output) {
+    this.output = output;
+  }
+  
+  
   @Override
   public void setListingFormat(ListingFormat format) {
     // todo
@@ -35,12 +33,12 @@ public class ResourceConsole implements Console {
   
   @Override
   public void error(String message) {
-    errors.add(new ItemException(message));
+    error(new ItemException(message));
   }
 
   @Override
   public void error(Throwable error) {
-    errors.add(error);
+    output.onNext(new ExceptionResource(error));
   }
 
   @Override
@@ -56,44 +54,13 @@ public class ResourceConsole implements Console {
 
   @Override
   public void reportFileGroups(Stream<TrackedFileGroup> fileGroups) {
-    this.fileGroups = fileGroups;
+    // TODO
   }
 
   @Override
   public void reportGroups(Stream<Group> groups) {
-    this.groups = groups;
-  }
-  
-  public JsonObject getResult() {
-    final JsonObject result = new JsonObject();
-    result.put("type", "result");
-    result.put("resources", getResources());
-    result.put("errors", getErrors());
-    
-    return result;
-  }
-  
-  private JsonArray getResources() {
-    return new JsonArray(resourceStream().collect(Collectors.toList()));
-  }
-  
-  private JsonArray getErrors() {
-    final JsonArray result = new JsonArray();
-    
-    errors.forEach(error -> result.add(new ExceptionResource(error).build()));
-    
-    return result;
-  }
-  
-  private Stream<JsonObject> resourceStream() {
-    return groupStream();
-  }
-  
-  private Stream<JsonObject> groupStream() {
-    if (groups == null) {
-      return Stream.empty();
-    } else {
-      return groups.map(group -> new GroupResource(group).build());
-    }
+    groups
+    .map(group -> new GroupResource(group))
+    .forEach(resource -> output.onNext(resource));
   }
 }

@@ -8,6 +8,8 @@ import com.metapx.local_client.cli.DerivedEnvironment.DerivedEnvironmentConfigur
 import com.metapx.local_client.commands.CommandRunnable;
 
 import io.vertx.core.json.JsonObject;
+import rx.Observable;
+import rx.subjects.UnicastSubject;
 
 public class JsonCommandRunner {
   private final ClientEnvironment baseEnv;
@@ -32,29 +34,31 @@ public class JsonCommandRunner {
     disconnect = false;
   }
   
-  public JsonObject run(CommandRunnable cmd) {
-    final ResourceConsole console = new ResourceConsole();
+  public Observable<JsonObject> run(CommandRunnable cmd) {
+    final UnicastSubject<Resource> resources = UnicastSubject.create();
+    final ResourceConsole console = new ResourceConsole(resources);
     final ClientEnvironment env = new DerivedEnvironment(baseEnv, DerivedEnvironmentConfiguration.create().setConsole(console));
-
-    try {
-      cmd.run(env);
-      env.commit();
-      return console.getResult();
-
-    } catch (Exception e) {
-      final JsonObject exceptionResponse = new JsonObject();
-      exceptionResponse.put("type", "exception");
-      exceptionResponse.put("resource", new ExceptionResource(e).build());
-      return exceptionResponse;
-
-    } finally {
-      if (disconnect) {
+    
+    return resources.doOnSubscribe(() -> {
         try {
-          env.closeConnection();
-        } catch (SQLException e) {
-          // suppress
+          cmd.run(env);
+          env.commit();
+          resources.onCompleted();
+  
+        } catch (Exception e) {
+          resources.onError(e);
+  
+        } finally {
+          if (disconnect) {
+            try {
+              env.closeConnection();
+            } catch (SQLException e) {
+              // suppress
+            }
+          }
         }
-      }
-    }
+      })
+      .map(resource -> resource.build())
+      .share();
   }
 }

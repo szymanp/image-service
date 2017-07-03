@@ -2,7 +2,7 @@ package com.metapx.local_client.daemon;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,109 +13,73 @@ import com.metapx.local_client.commands.CommandRunnable;
 import com.metapx.local_client.resources.JsonCommandRunner;
 import com.metapx.local_picture_repo.database.ConnectionFactory;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.core.buffer.Buffer;
+import io.vertx.rxjava.core.AbstractVerticle;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.parsetools.RecordParser;
-import io.vertx.core.Future;
+import io.vertx.rxjava.core.RxHelper;
+import rx.Observable;
 
 public class DaemonVerticle extends AbstractVerticle {
   
   private final ClientEnvironment env = ClientEnvironment.newInstance();
   private final com.github.rvesse.airline.Cli<CommandRunnable> cli = new com.github.rvesse.airline.Cli<CommandRunnable>(Client.class);
-  private final String delimeter = "\n";
-  private int counter = 0;
-  private AsyncInputStream input;
+  private StreamVerticle stream;
   
   @Override
   public void start() throws Exception {
-    super.start();
-    
     // Setup repository database connection.
     Client.configure();
     
-    input = new AsyncInputStream(vertx, System.in);
-    
-    System.out.println("START");
-    System.out.flush();
-    
-    final RecordParser parser = RecordParser.newDelimited(delimeter, buffer -> {
-      final Optional<JsonObject> inputJson = parse(buffer);
-      
-      if (!inputJson.isPresent()) {
-        System.out.println("IGNORED" + delimeter);
-        System.out.flush();
-        return;
-      }
-
-      final int id = ++counter;
-      final Handler<AsyncResult<JsonObject>> resultHandler = (result) -> {
-        if (result.succeeded()) {
-          System.out.println("OK " + id + " " + result.result().toString() + delimeter);
-        } else {
-          final JsonObject exception = new JsonObject();
-          exception.put("message", result.cause().getMessage());
-          exception.put("class", result.cause().getClass().getName());
-          System.out.println("FAILED " + id + " " + exception.toString() + delimeter);
+    stream = new StreamVerticle(System.in, System.out);
+    vertx.getDelegate().deployVerticle(stream);
+    stream.messages()
+      .subscribeOn(RxHelper.scheduler(vertx))
+      .subscribe((message) -> {
+        try {
+          dispatch(message);
+        } catch (Exception e) {
+          message.reply().onError(e);
         }
-        System.out.flush();
-      };
-
-      System.out.println("QUEUED " + counter + delimeter);
-      System.out.flush();
-
-      try {
-        dispatch(inputJson.get(), resultHandler);
-      } catch (Exception e) {
-        resultHandler.handle(Future.<JsonObject>failedFuture(e));
-      }
-    });
-    
-    input.handler(buffer -> parser.handle(buffer));
+      });
   }
   
   @Override
   public void stop() throws Exception {
-    super.stop();
-
-    input.close();
+    vertx.undeploy(stream.deploymentID());
     env.closeConnection();
     ConnectionFactory.SharedConnectionPool.close();
   }
   
-  private void dispatch(JsonObject request, Handler<AsyncResult<JsonObject>> resultHandler) {
-    final String command = request.getString("command");
+  private void dispatch(Message message) {
+    final String command = message.getBody().getString("command");
     
     if (command.equals("exit")) {
-      resultHandler.handle(Future.succeededFuture(new JsonObject()));
+      message.reply().onCompleted();
       vertx.close();
     } else if (command.equals("echo")) {
-      final JsonObject result = new JsonObject();
-      result.put("value", request);
-      resultHandler.handle(Future.succeededFuture(result));
+      Observable
+        .interval(1, TimeUnit.SECONDS)
+        .take(10)
+        .subscribe(
+          (index) -> message.reply().onNext(new JsonObject().put("value", index)),
+          (error) -> message.reply().onError(error),
+          () -> message.reply().onCompleted()
+        );
     } else {
       final ParseResult<CommandRunnable> parseResult = cli.parseWithResult(splitArgs(command));
       final JsonCommandRunner runner = new JsonCommandRunner(env);
       
       if (parseResult.wasSuccessful()) {
         final CommandRunnable cmd = parseResult.getCommand();
-        vertx.<JsonObject>executeBlocking(
-          future -> future.complete(runner.run(cmd)),
-          result -> resultHandler.handle(result)
-        );
+        runner.run(cmd)
+          .subscribeOn(RxHelper.blockingScheduler(vertx))
+          .subscribe(
+            (json) -> message.reply().onNext(json),
+            (error) -> message.reply().onError(error),
+            () -> message.reply().onCompleted()
+          );
       } else {
         throw new RuntimeException("Invalid command.");
       }
-    }
-  }
-  
-  private Optional<JsonObject> parse(Buffer buffer) {
-    try {
-      return Optional.of(buffer.toJsonObject());
-    } catch (Exception e) {
-      return Optional.empty();
     }
   }
   

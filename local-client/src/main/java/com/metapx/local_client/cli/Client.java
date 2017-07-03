@@ -5,11 +5,13 @@ import java.sql.SQLException;
 import com.github.rvesse.airline.annotations.Cli;
 import com.github.rvesse.airline.annotations.Group;
 import com.metapx.local_client.commands.*;
+import com.metapx.local_client.resources.ExceptionResource;
 import com.metapx.local_client.resources.JsonCommandRunner;
 import com.metapx.local_picture_repo.database.ConnectionFactory;
 import com.metapx.local_picture_repo.database.DatabaseBuilder;
 
 import io.vertx.core.json.JsonObject;
+import rx.Observable;
 
 @Cli(name = "metapx-cli",
      description = "Metapixels client",
@@ -48,8 +50,14 @@ public class Client {
     try {
       configure();
 
-      final JsonObject result = new JsonCommandRunner().run((CommandRunnable) cmd);
-      System.out.println(result.encodePrettily());
+      final Observable<JsonObject> result = new JsonCommandRunner().run((CommandRunnable) cmd);
+      final JsonPrinter printer = new JsonPrinter();
+      result
+        .subscribe(
+          (json) -> printer.print(json),
+          (error) -> printer.print(new ExceptionResource(error).build()),
+          () -> printer.close()
+        );
     } finally {
       ConnectionFactory.SharedConnectionPool.close();
     }
@@ -98,5 +106,24 @@ public class Client {
   
   private static void disableJooqLogo() {
     System.setProperty("org.jooq.no-logo", "true");
+  }
+  
+  private static class JsonPrinter {
+    boolean opened = false;
+    
+    void print(JsonObject json) {
+      if (opened) {
+        System.out.println(",");
+      } else {
+        System.out.print("[");
+        opened = true;
+      }
+      
+      System.out.print(json.encodePrettily());
+    }
+    
+    void close() {
+      System.out.println("]");
+    }
   }
 }
