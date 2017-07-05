@@ -21,12 +21,14 @@ import rx.Observable;
        FilesGroup.ListCommand.class,
        GroupGroup.CreateCommand.class,
        GroupGroup.ListCommand.class,
+       PictureGroup.ShowCommand.class,
        ListCommand.class,
        DaemonCommand.class,
        Help.class },
      groups = {
        @Group(name = "files", description = "Track image files in this repository"),
-       @Group(name = "group", description = "Manage picture groups") 
+       @Group(name = "group", description = "Manage picture groups"),
+       @Group(name = "picture", description = "Manage picture objects")
      })
 public class Client {
   public static void main(String args[]) {

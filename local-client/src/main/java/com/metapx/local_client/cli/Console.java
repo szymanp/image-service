@@ -48,6 +48,7 @@ public interface Console {
       hashFormat = format;
     }
     
+    @Override
     public void setListingFormat(ListingFormat format) {
       listingFormat = format;
     }
@@ -56,6 +57,7 @@ public interface Console {
      * Print an informational message on the console.
      * This message is not necessary to properly interpret the console output.
      */
+    @Override
     public void info(String message) {
       System.out.println(message);
     }
@@ -63,14 +65,17 @@ public interface Console {
     /**
      * Sends a processing error to the console.
      */
+    @Override
     public void error(String message) {
       System.err.println(message);
     }
 
+    @Override
     public void error(Throwable error) {
       System.err.println(error.getMessage());
     }
 
+    @Override
     public void reportFiles(Stream<File> files, Function<File, FileInformation> processor) {
       files.forEach(file -> {
         System.out.print(relativize(file.getAbsoluteFile()));
@@ -78,12 +83,13 @@ public interface Console {
         try {
           final FileInformation fileInformation = processor.apply(file);
           System.out.println(" " + hash(fileInformation.getHash()));
-        } catch (ItemException e) {
+        } catch (final ItemException e) {
           System.out.println(": " + e.getMessage());
         }
       });
     }
     
+    @Override
     public void reportGroups(Stream<Group> groups) {
       switch (listingFormat) {
       case SHORT:
@@ -103,6 +109,7 @@ public interface Console {
       }
     }
 
+    @Override
     public void reportFiles(Stream<RepositoryStatusFileInformation> files) {
       switch (listingFormat) {
       case SHORT:
@@ -137,6 +144,7 @@ public interface Console {
       }
     }
     
+    @Override
     public void reportFileGroups(Stream<TrackedFileGroup> fileGroups) {
       fileGroups.forEach(fileGroup -> {
         final Optional<TrackedFileInformation> trackedFile = fileGroup.getValidFile();
@@ -154,8 +162,8 @@ public interface Console {
       final Consumer<T> valuePrinter = longFormat ?
         (value) -> { System.out.println(printer.apply(value)); }
         : (value) -> { System.out.print(printer.apply((value)) + "  "); };
-      boolean first = true;
-      for(File dir : dirs.keySet()) {
+      final boolean first = true;
+      for(final File dir : dirs.keySet()) {
         if (!first) {
           System.out.println("");
         }

@@ -8,10 +8,10 @@ import com.metapx.local_picture_repo.PictureRepository;
 import com.metapx.local_picture_repo.database.ConnectionFactory;
 import com.metapx.local_picture_repo.impl.RepositoryImpl;
 
-import rx.Single;
-import rx.exceptions.Exceptions;
 import io.vertx.rxjava.core.RxHelper;
 import io.vertx.rxjava.core.Vertx;
+import rx.Single;
+import rx.exceptions.Exceptions;
 
 public class PictureRepositoryContext {
   final Vertx vertx;
@@ -36,7 +36,7 @@ public class PictureRepositoryContext {
       () -> {
         try {
           return pool.getConnection();
-        } catch (Exception e) {
+        } catch (final Exception e) {
           Exceptions.propagate(e);
           return null;
         }
@@ -52,7 +52,7 @@ public class PictureRepositoryContext {
         if (connection != null) {
           try {
             connection.close();
-          } catch (Exception e) {
+          } catch (final Exception e) {
             Exceptions.propagate(e);
           }
         }

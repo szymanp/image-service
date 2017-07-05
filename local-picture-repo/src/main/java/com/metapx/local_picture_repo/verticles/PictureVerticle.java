@@ -15,6 +15,8 @@ import rx.Single;
  *
  */
 public class PictureVerticle extends AbstractVerticle {
+  public static final String FILEHASH_TO_PATH = "picture-verticle.filehash-to-path";
+
   private PictureRepositoryContext context;
   
   @Override
@@ -24,7 +26,7 @@ public class PictureVerticle extends AbstractVerticle {
     /**
      * Given a file hash, returns a path to the file with that hash or to a scaled version of it.
      */
-    vertx.eventBus().<JsonObject>localConsumer("picture-verticle.filehash-to-path", message -> {
+    vertx.eventBus().<JsonObject>localConsumer(FILEHASH_TO_PATH, message -> {
       final JsonObject body = message.body();
       final String fileHash = body.getString("hash");
       final Optional<Dimension> dim = body.containsKey("dimension") ?
