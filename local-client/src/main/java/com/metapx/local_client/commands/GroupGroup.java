@@ -20,6 +20,8 @@ import com.metapx.local_client.commands.parsers.GroupReference;
 import com.metapx.local_client.commands.parsers.GroupType;
 import com.metapx.local_client.util.ValueOrError;
 
+import rx.Observable;
+
 public class GroupGroup {
 
   @Command(name = "create",
@@ -35,15 +37,14 @@ public class GroupGroup {
             description = "Specifies the type of the group to be created")
     private String type;
 
+    @Override
     public void run(ClientEnvironment env) throws Exception {
       final MetadataRepository repo = env.getMetadataRepositoryOrThrow();
       final Class<? extends Group> groupType = new GroupType(repo).get(type);
       
       env.getConsole().setListingFormat(ListingFormat.LONG);
-      env.getConsole().reportGroups(
-        groups.stream()
-          .map(path -> createGroup(repo, env.getConsole(), path, groupType))
-      );
+      final Stream<Group> stream = groups.stream().map(path -> createGroup(repo, env.getConsole(), path, groupType));
+      env.getConsole().reportGroups(Observable.from(stream::iterator));
     }
 
     private Group createGroup(MetadataRepository repo, Console console, String groupPath, Class<? extends Group> type) {
@@ -103,7 +104,7 @@ public class GroupGroup {
 
       final Stream<Group> sorted = groups.sorted((x, y) -> x.getName().compareTo(y.getName()));
       console.setListingFormat(longFormat ? Console.ListingFormat.LONG : Console.ListingFormat.SHORT);
-      console.reportGroups(sorted);
+      console.reportGroups(Observable.from(sorted::iterator));
     }
     
     private Stream<Group> getGroupsFromPath(MetadataRepository repo, Console console, String path) {

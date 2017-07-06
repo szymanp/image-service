@@ -19,6 +19,8 @@ import com.metapx.local_client.combined_repo.TrackedFileGroupImpl;
 import com.metapx.local_client.commands.parsers.GroupOrRoot;
 import com.metapx.local_client.commands.parsers.GroupReference;
 
+import rx.Observable;
+
 @Command(
   name = "ls",
   description = "List files"
@@ -38,6 +40,7 @@ public class ListCommand extends CommonCommand {
     description = "Use long format for listing files")
   private boolean longFormat = false;
   
+  @Override
   public void run(ClientEnvironment env) throws Exception {
     final CombinedRepository repo = env.getCombinedRepository();
 
@@ -52,13 +55,13 @@ public class ListCommand extends CommonCommand {
     
     if (groupRef.isRoot()) {
       // Nothing to list as no files are members of the root of the group hierarchy.
-      console.reportFileGroups(Stream.empty());
+      console.reportFileGroups(Observable.empty());
       return; 
     }
   
     final Group group = groupRef.get();
 
-    Stream<TrackedFileGroup> fileGroups =
+    final Stream<TrackedFileGroup> fileGroups =
       group.pictures().stream()
       .map((ref) ->
         pictures.findWithKey(ref.getObjectId())
@@ -70,6 +73,6 @@ public class ListCommand extends CommonCommand {
       )
       .map((file) -> new TrackedFileGroupImpl(repo, file.getFileHash()));
     
-    console.reportFileGroups(fileGroups);
+    console.reportFileGroups(Observable.from(fileGroups::iterator));
   }
 }

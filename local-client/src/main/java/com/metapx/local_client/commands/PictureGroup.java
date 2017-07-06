@@ -47,12 +47,18 @@ public class PictureGroup {
         final MetadataRepository repo = env.getMetadataRepositoryOrThrow();
         final Console console = env.getConsole();
         
-        Observable.from(pictures)
+        final Observable<MaterializedPicture> result = Observable.from(pictures)
           .flatMap(pictureHash -> getFile(pictureHash, dimension, vertxHelper.vertx(), repo)
-            .observeOn(RxHelper.scheduler(vertxHelper.vertx())))
-          .map(path -> new File(path))
-          .toBlocking()
-          .subscribe(file -> System.out.println(file));
+            .observeOn(RxHelper.scheduler(vertxHelper.vertx()))
+            .map(path -> new MaterializedPicture(pictureHash, new File(path)))
+          )
+          .share();
+        
+        // Emit results immediately when they arrive.
+        console.reportMaterializedPictures(result);
+        
+        // Wait for the observable to complete.
+        result.toBlocking().subscribe();
       } finally {
         vertxHelper.vertx().close();
       }
@@ -103,4 +109,31 @@ public class PictureGroup {
       }
     }
   }
+  
+  /**
+   * Represents a picture that was resolved to an image file representing the original image or a scaled version. 
+   */
+  public static class MaterializedPicture {
+    private final String pictureHash;
+    private final File file;
+
+    public MaterializedPicture(String pictureHash, File file) {
+      super();
+      this.pictureHash = pictureHash;
+      this.file = file;
+    }
+
+    public String getPictureHash() {
+      return pictureHash;
+    }
+
+    public File getFile() {
+      return file;
+    }
+    
+    @Override
+    public String toString() {
+      return pictureHash + " -> " + file.getAbsolutePath();
+    }
+  } 
 }

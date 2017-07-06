@@ -20,6 +20,8 @@ import com.metapx.local_picture_repo.FileInformation;
 import com.metapx.local_picture_repo.PictureRepositoryException;
 import com.metapx.local_picture_repo.impl.DiskFileInformation;
 
+import rx.Observable;
+
 public class FilesGroup {
 
   @Command(
@@ -38,13 +40,14 @@ public class FilesGroup {
       description = "Groups to be associated with the added pictures")
     private List<String> groups = new ArrayList<String>();
   
+    @Override
     public void run(ClientEnvironment env) throws Exception {
-  		RepositoryActions repoActions = new RepositoryActions(env.getCombinedRepository(), env.getConfiguration());
+  		final RepositoryActions repoActions = new RepositoryActions(env.getCombinedRepository(), env.getConfiguration());
   
-  		WildcardMatcher matcher = new WildcardMatcher(patterns);
-  
-  		env.getConsole().reportFiles(matcher.files.stream(), targetFile -> {
-        FileInformation targetFileInformation = new DiskFileInformation(targetFile);
+  		final WildcardMatcher matcher = new WildcardMatcher(patterns);
+
+  		env.getConsole().reportFiles(Observable.from(matcher.files.stream()::iterator), targetFile -> {
+        final FileInformation targetFileInformation = new DiskFileInformation(targetFile);
 
         if (targetFileInformation.isImage()) {
           try {
@@ -77,6 +80,7 @@ public class FilesGroup {
       description = "Use long format for listing files")
     private boolean longFormat = false;
     
+    @Override
     public void run(ClientEnvironment env) throws Exception {
       final WildcardMatcher matcher = new WildcardMatcher(patterns);
       final CombinedRepository repo = env.getCombinedRepository();
@@ -84,7 +88,7 @@ public class FilesGroup {
         matcher.files.stream().map(file -> repo.getFile(file));
       
       env.getConsole().setListingFormat(longFormat ? Console.ListingFormat.LONG : Console.ListingFormat.SHORT);
-      env.getConsole().reportFiles(files);
+      env.getConsole().reportFiles(Observable.from(files::iterator));
     }
   }
 }

@@ -8,14 +8,17 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.metapx.git_metadata.groups.Group;
 import com.metapx.local_client.combined_repo.RepositoryStatusFileInformation;
 import com.metapx.local_client.combined_repo.TrackedFileGroup;
 import com.metapx.local_client.combined_repo.TrackedFileInformation;
 import com.metapx.local_client.commands.ItemException;
+import com.metapx.local_client.commands.PictureGroup;
+import com.metapx.local_client.commands.PictureGroup.MaterializedPicture;
 import com.metapx.local_picture_repo.FileInformation;
+
+import rx.Observable;
 
 public interface Console {
   public enum ListingFormat { SHORT, LONG };
@@ -25,11 +28,13 @@ public interface Console {
   void info(String message);
   void error(String message);
   void error(Throwable error);
-  void reportFiles(Stream<File> files, Function<File, FileInformation> processor);
-  void reportFiles(Stream<RepositoryStatusFileInformation> files);
-  void reportFileGroups(Stream<TrackedFileGroup> fileGroups);
-  void reportGroups(Stream<Group> groups);
-
+  void reportFiles(Observable<File> files, Function<File, FileInformation> processor);
+  void reportFiles(Observable<RepositoryStatusFileInformation> files);
+  void reportFileGroups(Observable<TrackedFileGroup> fileGroups);
+  void reportGroups(Observable<Group> groups);
+  
+  void reportMaterializedPictures(Observable<PictureGroup.MaterializedPicture> files);
+  
   /**
    * A default implementation of the Console interface.
    */
@@ -76,7 +81,7 @@ public interface Console {
     }
 
     @Override
-    public void reportFiles(Stream<File> files, Function<File, FileInformation> processor) {
+    public void reportFiles(Observable<File> files, Function<File, FileInformation> processor) {
       files.forEach(file -> {
         System.out.print(relativize(file.getAbsoluteFile()));
 
@@ -90,7 +95,7 @@ public interface Console {
     }
     
     @Override
-    public void reportGroups(Stream<Group> groups) {
+    public void reportGroups(Observable<Group> groups) {
       switch (listingFormat) {
       case SHORT:
         groups.forEach(group -> System.out.print(group.getName() + "  "));
@@ -110,7 +115,7 @@ public interface Console {
     }
 
     @Override
-    public void reportFiles(Stream<RepositoryStatusFileInformation> files) {
+    public void reportFiles(Observable<RepositoryStatusFileInformation> files) {
       switch (listingFormat) {
       case SHORT:
         printGroupedByDir(
@@ -145,7 +150,7 @@ public interface Console {
     }
     
     @Override
-    public void reportFileGroups(Stream<TrackedFileGroup> fileGroups) {
+    public void reportFileGroups(Observable<TrackedFileGroup> fileGroups) {
       fileGroups.forEach(fileGroup -> {
         final Optional<TrackedFileInformation> trackedFile = fileGroup.getValidFile();
         
@@ -157,8 +162,15 @@ public interface Console {
       });
     }
     
-    private <T> void printGroupedByDir(Stream<T> stream, Function<T, File> classifier, Function<T, String> printer, boolean longFormat) {
-      final Map<File, List<T>> dirs = stream.collect(Collectors.groupingBy(classifier, Collectors.toList()));
+    @Override
+    public void reportMaterializedPictures(Observable<MaterializedPicture> files) {
+      files.subscribe(file -> {
+        System.out.println(hash(file.getPictureHash(), HashFormat.LONG) + " " + relativize(file.getFile().getAbsoluteFile()));
+      });
+    }
+    
+    private <T> void printGroupedByDir(Observable<T> stream, Function<T, File> classifier, Function<T, String> printer, boolean longFormat) {
+      final Map<File, List<T>> dirs = stream.toList().toBlocking().first().stream().collect(Collectors.groupingBy(classifier, Collectors.toList()));
       final Consumer<T> valuePrinter = longFormat ?
         (value) -> { System.out.println(printer.apply(value)); }
         : (value) -> { System.out.print(printer.apply((value)) + "  "); };

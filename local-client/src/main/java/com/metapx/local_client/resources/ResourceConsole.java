@@ -2,15 +2,16 @@ package com.metapx.local_client.resources;
 
 import java.io.File;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import com.metapx.git_metadata.groups.Group;
 import com.metapx.local_client.cli.Console;
 import com.metapx.local_client.combined_repo.RepositoryStatusFileInformation;
 import com.metapx.local_client.combined_repo.TrackedFileGroup;
 import com.metapx.local_client.commands.ItemException;
+import com.metapx.local_client.commands.PictureGroup.MaterializedPicture;
 import com.metapx.local_picture_repo.FileInformation;
 
+import rx.Observable;
 import rx.subjects.Subject;
 
 public class ResourceConsole implements Console {
@@ -42,25 +43,31 @@ public class ResourceConsole implements Console {
   }
 
   @Override
-  public void reportFiles(Stream<File> files, Function<File, FileInformation> processor) {
+  public void reportFiles(Observable<File> files, Function<File, FileInformation> processor) {
     
   }
 
   @Override
-  public void reportFiles(Stream<RepositoryStatusFileInformation> files) {
+  public void reportFiles(Observable<RepositoryStatusFileInformation> files) {
     // TODO Auto-generated method stub
     
   }
 
   @Override
-  public void reportFileGroups(Stream<TrackedFileGroup> fileGroups) {
+  public void reportFileGroups(Observable<TrackedFileGroup> fileGroups) {
     // TODO
   }
 
   @Override
-  public void reportGroups(Stream<Group> groups) {
+  public void reportGroups(Observable<Group> groups) {
     groups
     .map(group -> new GroupResource(group))
-    .forEach(resource -> output.onNext(resource));
+    .subscribe(resource -> output.onNext(resource));
+  }
+  
+  @Override
+  public void reportMaterializedPictures(Observable<MaterializedPicture> files) {
+    // TODO Auto-generated method stub
+    
   }
 }
