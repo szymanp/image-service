@@ -12,6 +12,7 @@ buildNumber.properties
 .vscode
 image-service/.settings
 data-model/.settings
+common/.settings
 local-client/*.bat
 local-picture-repo/*.bat
 local-picture-repo/*.db
