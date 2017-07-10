@@ -18,7 +18,7 @@ import com.metapx.local_client.cli.Console.ListingFormat;
 import com.metapx.local_client.commands.parsers.GroupOrRoot;
 import com.metapx.local_client.commands.parsers.GroupReference;
 import com.metapx.local_client.commands.parsers.GroupType;
-import com.metapx.local_client.util.ValueOrError;
+import com.metapx.util.ValueOrError;
 
 import rx.Observable;
 

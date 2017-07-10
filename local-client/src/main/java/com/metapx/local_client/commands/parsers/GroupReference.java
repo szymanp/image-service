@@ -2,7 +2,7 @@ package com.metapx.local_client.commands.parsers;
 
 import com.metapx.git_metadata.groups.GroupService;
 import com.metapx.local_client.commands.ItemException;
-import com.metapx.local_client.util.ValueOrError;
+import com.metapx.util.ValueOrError;
 
 public class GroupReference {
   private final String ref;

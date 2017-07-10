@@ -65,6 +65,11 @@
     </dependency>
     <dependency>
       <groupId>com.metapx</groupId>
+      <artifactId>common</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.metapx</groupId>
       <artifactId>git-metadata</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>

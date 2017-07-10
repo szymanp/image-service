@@ -1,4 +1,4 @@
-package com.metapx.local_client.util;
+package com.metapx.util;
 
 import java.util.function.Supplier;
 
